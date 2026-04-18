@@ -6,26 +6,56 @@
 <title>LMTS - 물류출하추적시스템</title>
 <style>
 :root {
-  --dk:#365C89; --mid:#4A7BAE; --lt:#D6E4F0; --pale:#EAF4FB;
-  --border:#B3CDE0; --accent:#5B8DB8; --text:#1A1A1A; --gray:#6B7280;
-  --green:#27AE60; --red:#C0392B; --orange:#D35400; --yellow:#E6A817;
-  --bg:#F0F4F8;
+  --dk:#365C89;--mid:#4A7BAE;--lt:#D6E4F0;--pale:#EAF4FB;
+  --border:#B3CDE0;--accent:#5B8DB8;--text:#1A1A1A;--gray:#6B7280;
+  --green:#27AE60;--red:#C0392B;--orange:#D35400;--yellow:#E6A817;--bg:#F0F4F8;
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Apple SD Gothic Neo','맑은 고딕',sans-serif;}
 body{background:var(--bg);color:var(--text);font-size:13px;}
 
 /* NAV */
-.nav{background:var(--dk);color:#fff;display:flex;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25);flex-wrap:wrap;}
+.nav{background:var(--dk);color:#fff;display:flex;align-items:center;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.25);flex-wrap:wrap;}
 .nav-logo{padding:10px 16px;font-size:15px;font-weight:700;letter-spacing:1px;border-right:1px solid #4A7BAE;white-space:nowrap;}
 .nav-logo span{color:#AACCEE;font-size:11px;display:block;font-weight:400;}
-.nav-tabs{display:flex;overflow-x:auto;}
+.nav-tabs{display:flex;overflow-x:auto;flex:1;}
 .nav-tab{padding:11px 14px;font-size:12px;cursor:pointer;white-space:nowrap;color:#AAC4DE;transition:all .2s;border-bottom:3px solid transparent;}
 .nav-tab:hover{color:#fff;background:rgba(255,255,255,.07);}
 .nav-tab.active{color:#fff;border-bottom-color:#AACCEE;background:rgba(255,255,255,.1);}
+.nav-status{display:flex;align-items:center;gap:6px;padding:0 14px;font-size:11px;white-space:nowrap;cursor:pointer;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#888;flex-shrink:0;}
+.status-dot.ok{background:var(--green);}
+.status-dot.err{background:var(--red);animation:blink 1s infinite;}
+.status-dot.sync{background:var(--yellow);animation:blink .5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* LOADING OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(26,42,68,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.overlay.hidden{display:none;}
+.spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.overlay-text{color:#fff;font-size:14px;font-weight:600;}
+.overlay-sub{color:rgba(255,255,255,.6);font-size:12px;}
+
+/* TOKEN MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.modal-bg.hidden{display:none;}
+.modal{background:#fff;border-radius:12px;padding:28px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-title{font-size:18px;font-weight:800;color:var(--dk);margin-bottom:6px;}
+.modal-desc{font-size:12px;color:var(--gray);margin-bottom:20px;line-height:1.7;}
+.modal-step{background:var(--pale);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.8;}
+.modal-step b{color:var(--dk);}
+.modal-step code{background:#e0e8f0;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:11px;}
+.token-input-wrap{display:flex;gap:8px;margin-bottom:16px;}
+.token-input-wrap input{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:monospace;}
+.token-input-wrap input:focus{outline:none;border-color:var(--accent);}
 
 /* PAGE */
 .page{display:none;padding:16px;max-width:1300px;margin:0 auto;}
 .page.active{display:block;}
+
+/* SYNC BAR */
+.sync-bar{background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:12px;}
+.sync-bar.hidden{display:none;}
 
 /* CARD */
 .card{background:#fff;border-radius:8px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:16px;overflow:hidden;}
@@ -53,9 +83,9 @@ input[readonly]{background:#f7f9fb;color:var(--gray);}
 .btn-success{background:var(--green);color:#fff;} .btn-success:hover{background:#219a52;}
 .btn-danger{background:var(--red);color:#fff;} .btn-danger:hover{background:#a02020;}
 .btn-sm{padding:5px 10px;font-size:11px;} .btn-xs{padding:3px 7px;font-size:10px;border-radius:4px;}
-.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent);} .btn-outline:hover{background:var(--pale);}
+.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent);}
 .btn-ghost{background:#f0f4f8;border:1px solid #ddd;color:var(--gray);} .btn-ghost:hover{background:#e0e8f0;}
-.btn-yellow{background:#FFF3CD;color:#7B4F00;border:1px solid #FFE082;} .btn-yellow:hover{background:#FFE082;}
+.btn-yellow{background:#FFF3CD;color:#7B4F00;border:1px solid #FFE082;}
 
 /* TABLE */
 .tbl-wrap{overflow-x:auto;}
@@ -129,84 +159,104 @@ tr:last-child td{border-bottom:none;}
 .scan-icon{font-size:40px;margin-bottom:8px;}
 .scan-label{font-size:13px;color:var(--accent);font-weight:700;}
 
-/* SECTION TITLE */
+/* SEC TITLE */
 .sec-title{font-size:14px;font-weight:700;color:var(--dk);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .sec-title::before{content:'';width:4px;height:16px;background:var(--dk);border-radius:2px;}
 
 /* MISC */
 .empty{text-align:center;color:var(--gray);padding:32px;font-size:13px;}
-.dot-green{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);}
-.dot-red{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:var(--lt);color:var(--dk);margin-right:3px;}
 
-/* ── ROUTE BUILDER ─────────────────────────────── */
+/* ROUTE BUILDER */
 .route-builder{border:1px solid var(--border);border-radius:8px;background:#FAFCFF;padding:14px 16px;margin-top:10px;}
 .rb-title{font-size:12px;font-weight:700;color:var(--dk);margin-bottom:12px;}
 .rb-row{display:flex;align-items:center;gap:8px;padding:7px 0;}
 .rb-badge{flex-shrink:0;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
-.rb-origin {background:var(--dk);}
-.rb-wp     {background:var(--yellow);}
-.rb-dest   {background:var(--green);}
+.rb-origin{background:var(--dk);} .rb-wp{background:var(--yellow);} .rb-dest{background:var(--green);}
 .rb-vline{width:2px;height:14px;background:var(--border);margin-left:14px;}
-
-/* waypoint item */
 .wp-item{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:7px;padding:6px 10px;margin:3px 0;}
 .wp-seq{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--yellow);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
 .wp-name{flex:1;font-size:12px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .wp-time-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .wp-time-label{font-size:10px;color:var(--gray);white-space:nowrap;}
-.wp-time-input{width:60px;padding:3px 6px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center;}
-.wp-btn{flex-shrink:0;width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.wp-up{background:#EBF5FF;color:var(--accent);} .wp-up:hover{background:var(--lt);}
-.wp-down{background:#EBF5FF;color:var(--accent);} .wp-down:hover{background:var(--lt);}
-.wp-del{background:#FFEBEE;color:var(--red);} .wp-del:hover{background:#FFCDD2;}
-.wp-disabled{opacity:.3;cursor:not-allowed;}
-
-.rb-add-row{display:flex;gap:8px;align-items:center;padding:8px 0;margin-top:4px;border-top:1px dashed var(--border);}
-
-/* route preview */
+.wp-time-input{width:58px;padding:3px 6px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center;}
+.wp-btn{flex-shrink:0;width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}
+.wp-up{background:#EBF5FF;color:var(--accent);} .wp-down{background:#EBF5FF;color:var(--accent);}
+.wp-del{background:#FFEBEE;color:var(--red);} .wp-disabled{opacity:.3;cursor:not-allowed;}
+.rb-add-row{display:flex;gap:8px;align-items:center;padding:8px 0;margin-top:4px;border-top:1px dashed var(--border);flex-wrap:wrap;}
 .route-preview{margin-top:10px;padding:10px 12px;background:var(--pale);border-radius:6px;border:1px solid var(--border);}
 .rp-title{font-size:10px;color:var(--gray);font-weight:700;margin-bottom:6px;}
 .route-chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
 .r-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;}
-.r-chip-origin  {background:var(--lt);color:var(--dk);}
-.r-chip-wp      {background:#FFF3CD;color:#7B4F00;border:1px solid #FFE082;}
-.r-chip-dest    {background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;}
-.r-chip-time    {background:#F3F4F6;color:var(--gray);font-size:10px;border:1px solid #e5e7eb;padding:2px 6px;}
+.r-chip-origin{background:var(--lt);color:var(--dk);}
+.r-chip-wp{background:#FFF3CD;color:#7B4F00;border:1px solid #FFE082;}
+.r-chip-dest{background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;}
+.r-chip-time{background:#F3F4F6;color:var(--gray);font-size:10px;border:1px solid #e5e7eb;padding:2px 6px;}
 .r-arrow{color:var(--border);font-size:12px;margin:0 1px;}
 
-/* ── ROUTE TRACKER (dashboard search) ─────────── */
+/* ROUTE TRACKER */
 .tracker-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
 .tracker-route{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin:10px 0;}
-.tr-node{display:flex;flex-direction:column;align-items:center;min-width:80px;max-width:120px;position:relative;}
+.tr-node{display:flex;flex-direction:column;align-items:center;min-width:80px;max-width:120px;}
 .tr-dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:3px solid #ddd;background:#fff;z-index:1;}
 .tr-dot.done{border-color:var(--green);background:#E8F5E9;}
 .tr-dot.active{border-color:var(--accent);background:var(--pale);box-shadow:0 0 0 4px rgba(91,141,184,.2);}
 .tr-dot.pending{border-color:#ddd;background:#f9f9f9;opacity:.7;}
-.tr-node-label{font-size:10px;font-weight:700;text-align:center;margin-top:5px;color:var(--text);}
+.tr-node-label{font-size:10px;font-weight:700;text-align:center;margin-top:5px;}
 .tr-node-time{font-size:9px;color:var(--gray);text-align:center;margin-top:2px;}
 .tr-conn{flex:1;height:3px;min-width:20px;margin-top:-17px;position:relative;}
 .tr-conn-bg{position:absolute;top:0;left:0;right:0;bottom:0;background:#ddd;border-radius:2px;}
-.tr-conn-fill{position:absolute;top:0;left:0;bottom:0;background:var(--green);border-radius:2px;transition:width .5s;}
+.tr-conn-fill{position:absolute;top:0;left:0;bottom:0;background:var(--green);border-radius:2px;}
 .tr-conn-label{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--gray);white-space:nowrap;background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #eee;}
 
-/* search bar */
+/* SEARCH */
 .search-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
 .search-input{border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:13px;flex:1;min-width:200px;outline:none;}
 .search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(91,141,184,.15);}
-.search-btn{background:var(--dk);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
-.search-btn:hover{background:var(--mid);}
+.search-btn{background:var(--dk);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;}
 .search-clear{background:#f3f4f6;color:var(--gray);border:1px solid #ddd;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;}
 
-/* 비지정거점 알람 강조 */
-.alarm-offroute{background:#FFF0F0;border:2px solid #C0392B;border-radius:8px;padding:12px 14px;margin-bottom:10px;}
-.alarm-offroute-title{font-size:13px;font-weight:800;color:#8B0000;display:flex;align-items:center;gap:6px;}
-.alarm-offroute-body{font-size:12px;color:#C0392B;margin-top:4px;}
+/* TYPE TAGS */
+.type-tag{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;}
 </style>
 </head>
 <body>
 
+<!-- ══ LOADING OVERLAY ══ -->
+<div class="overlay hidden" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-text" id="overlay-text">GitHub에서 데이터 불러오는 중...</div>
+  <div class="overlay-sub" id="overlay-sub">kangsh8880/lmts</div>
+</div>
+
+<!-- ══ TOKEN SETUP MODAL ══ -->
+<div class="modal-bg" id="token-modal">
+  <div class="modal">
+    <div class="modal-title">🔑 GitHub 연결 설정</div>
+    <div class="modal-desc">
+      LMTS 데이터를 GitHub에 저장하려면 Personal Access Token이 필요합니다.<br>
+      토큰은 이 브라우저에만 저장되며, 외부로 전송되지 않습니다.
+    </div>
+    <div class="modal-step">
+      <b>토큰 발급 방법:</b><br>
+      ① GitHub → Settings → Developer settings<br>
+      ② <b>Personal access tokens → Fine-grained tokens → Generate new token</b><br>
+      ③ Repository access: <code>kangsh8880/lmts</code> 선택<br>
+      ④ Permissions → Contents: <code>Read and Write</code> 설정<br>
+      ⑤ Generate token → 복사
+    </div>
+    <div class="token-input-wrap">
+      <input id="token-input" type="password" placeholder="github_pat_xxxxx...">
+      <button class="btn btn-primary" onclick="testAndSaveToken()">연결 테스트</button>
+    </div>
+    <div id="token-status" style="font-size:12px;color:var(--gray);margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeTokenModal()">나중에 설정</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NAV ══ -->
 <nav class="nav">
   <div class="nav-logo">📦 LMTS<span>물류출하추적시스템</span></div>
   <div class="nav-tabs">
@@ -218,54 +268,60 @@ tr:last-child td{border-bottom:none;}
     <div class="nav-tab" onclick="goPage('tracking',this)">📍 거점In/Out</div>
     <div class="nav-tab" onclick="goPage('ceodash',this)">👑 CEO대시보드</div>
   </div>
+  <div class="nav-status" onclick="openTokenModal()" title="GitHub 연결 설정">
+    <div class="status-dot" id="gh-dot"></div>
+    <span id="gh-status-text" style="color:#AACCEE">미연결</span>
+  </div>
 </nav>
 
-<!-- ══════════════ DASHBOARD ══════════════ -->
+<!-- ══ SYNC BAR ══ -->
+<div style="max-width:1300px;margin:0 auto;padding:8px 16px 0">
+  <div class="sync-bar hidden" id="sync-bar">
+    <span id="sync-bar-icon">💾</span>
+    <span id="sync-bar-text"></span>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
 <div id="page-dashboard" class="page active">
   <div class="sec-title">물류 현황 요약 대시보드</div>
-
   <div class="grid4" style="margin-bottom:16px">
     <div class="kpi-card" style="--kpi-color:#365C89"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-label">전체 진행 오더</div></div>
     <div class="kpi-card" style="--kpi-color:#27AE60"><div class="kpi-val" id="kpi-done">0</div><div class="kpi-label">금일 완료 건</div></div>
     <div class="kpi-card" style="--kpi-color:#D35400"><div class="kpi-val" id="kpi-moving">0</div><div class="kpi-label">운송 중</div></div>
     <div class="kpi-card" style="--kpi-color:#C0392B"><div class="kpi-val" id="kpi-delay">0</div><div class="kpi-label" id="kpi-delay-label">지연 발생 건</div></div>
   </div>
-
-  <!-- 오더 조회 (Search) -->
   <div class="card">
     <div class="card-head">🔍 오더 / 제품 조회 &amp; 경로 추적</div>
     <div class="card-body">
       <div class="search-bar">
-        <input id="dash-search" class="search-input" placeholder="오더번호 · 제품코드 · 제품명으로 검색 (예: ORD-260418 / P001 / OLED)">
+        <input id="dash-search" class="search-input" placeholder="오더번호 · 제품코드 · 제품명 · 고객사로 검색">
         <button class="search-btn" onclick="doSearch('dash')">🔍 조회</button>
         <button class="search-clear" onclick="clearSearch('dash')">초기화</button>
       </div>
       <div id="dash-search-result"></div>
     </div>
   </div>
-
   <div class="grid2">
     <div class="card">
       <div class="card-head">📋 최근 출하오더 현황</div>
-      <div class="card-body">
-        <div class="tbl-wrap">
-          <table><thead><tr><th>오더번호</th><th>고객사</th><th>제품</th><th>경로(요약)</th><th>상태</th></tr></thead>
-          <tbody id="dash-order-body"><tr><td colspan="5" class="empty">출하오더 없음</td></tr></tbody></table>
-        </div>
-      </div>
+      <div class="card-body"><div class="tbl-wrap">
+        <table><thead><tr><th>오더번호</th><th>고객사</th><th>제품</th><th>경로(요약)</th><th>상태</th></tr></thead>
+        <tbody id="dash-order-body"><tr><td colspan="5" class="empty">출하오더 없음</td></tr></tbody></table>
+      </div></div>
     </div>
     <div class="card">
       <div class="card-head">📍 거점별 현황</div>
-      <div class="card-body" id="dash-hub-body"><div class="empty">거점 정보를 먼저 등록하세요</div></div>
+      <div class="card-body" id="dash-hub-body"><div class="empty">거점 정보 없음</div></div>
     </div>
   </div>
   <div class="card">
     <div class="card-head">⚠️ 지연·알람 현황 <span class="badge" id="alarm-count-badge">0건</span></div>
-    <div class="card-body" id="alarm-list"><div class="empty">지연 알람 없음 ✅</div></div>
+    <div class="card-body" id="alarm-list"><div class="empty">알람 없음 ✅</div></div>
   </div>
 </div>
 
-<!-- ══════════════ MASTER ══════════════ -->
+<!-- ══ MASTER ══ -->
 <div id="page-master" class="page">
   <div class="sec-title">기준정보 관리</div>
   <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap" id="master-tab-btns">
@@ -274,7 +330,6 @@ tr:last-child td{border-bottom:none;}
     <button class="btn btn-ghost btn-sm"   onclick="showMaster('vehicle',this)">🚛 차량·기사</button>
     <button class="btn btn-ghost btn-sm"   onclick="showMaster('hub',this)">📍 거점(Hub)</button>
   </div>
-
   <div id="master-customer">
     <div class="card"><div class="card-head">👥 고객사 등록</div><div class="card-body">
       <div class="form-row">
@@ -290,7 +345,6 @@ tr:last-child td{border-bottom:none;}
       <tbody id="customer-table-body"></tbody></table></div>
     </div></div>
   </div>
-
   <div id="master-product" style="display:none">
     <div class="card"><div class="card-head">📦 제품 등록</div><div class="card-body">
       <div class="form-row">
@@ -305,7 +359,6 @@ tr:last-child td{border-bottom:none;}
       <tbody id="product-table-body"></tbody></table></div>
     </div></div>
   </div>
-
   <div id="master-vehicle" style="display:none">
     <div class="card"><div class="card-head">🚛 차량·기사 등록</div><div class="card-body">
       <div class="form-row">
@@ -320,150 +373,101 @@ tr:last-child td{border-bottom:none;}
       <tbody id="vehicle-table-body"></tbody></table></div>
     </div></div>
   </div>
-
   <div id="master-hub" style="display:none">
     <div class="card"><div class="card-head">📍 거점(Hub) 등록</div><div class="card-body">
       <div class="form-row">
         <div class="form-group"><label>거점코드</label><input id="h-code" placeholder="HUB001"></div>
         <div class="form-group"><label>거점명</label><input id="h-name"></div>
-        <div class="form-group"><label>유형</label>
-          <select id="h-type"><option>출발(자사창고)</option><option>경유지</option><option>도착(고객사)</option></select>
-        </div>
+        <div class="form-group"><label>유형</label><select id="h-type"><option>출발(자사창고)</option><option>경유지</option><option>도착(고객사)</option></select></div>
         <div class="form-group" style="flex:2"><label>주소</label><input id="h-addr"></div>
         <div class="form-group"><label>담당자</label><input id="h-mgr"></div>
         <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveHub()">+ 등록</button></div>
       </div>
-      <div class="tbl-wrap">
-        <table><thead><tr><th>코드</th><th>거점명</th><th>유형</th><th>주소</th><th>담당자</th><th>삭제</th></tr></thead>
-        <tbody id="hub-table-body"></tbody></table>
-      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>거점명</th><th>유형</th><th>주소</th><th>담당자</th><th>삭제</th></tr></thead>
+      <tbody id="hub-table-body"></tbody></table></div>
       <div style="margin-top:8px;font-size:11px;color:var(--gray)">
-        <span class="tag" style="background:#D6E4F0;color:#365C89">출발(자사창고)</span> 출발 거점 &nbsp;
-        <span class="tag" style="background:#FFF3CD;color:#7B4F00">경유지</span> 중간 경유 허브 &nbsp;
-        <span class="tag" style="background:#E8F5E9;color:#1B5E20">도착(고객사)</span> 최종 목적지
+        <span class="tag" style="background:#D6E4F0;color:#365C89">출발(자사창고)</span>출발&nbsp;
+        <span class="tag" style="background:#FFF3CD;color:#7B4F00">경유지</span>중간경유&nbsp;
+        <span class="tag" style="background:#E8F5E9;color:#1B5E20">도착(고객사)</span>최종목적지
       </div>
     </div></div>
   </div>
 </div>
 
-<!-- ══════════════ ORDER ══════════════ -->
+<!-- ══ ORDER ══ -->
 <div id="page-order" class="page">
   <div class="sec-title">출하오더 관리</div>
-  <div class="card">
-    <div class="card-head">📋 신규 출하오더 생성</div>
-    <div class="card-body">
-      <div class="form-row">
-        <div class="form-group"><label>오더번호</label><input id="o-no" readonly></div>
-        <div class="form-group"><label>출하예정일</label><input id="o-date" type="date"></div>
-        <div class="form-group"><label>고객사</label><select id="o-customer"><option value="">-- 선택 --</option></select></div>
-        <div class="form-group"><label>제품</label><select id="o-product"><option value="">-- 선택 --</option></select></div>
-        <div class="form-group"><label>박스수량</label><input id="o-boxes" type="number" placeholder="1" min="1"></div>
-        <div class="form-group"><label>특이사항</label><input id="o-note"></div>
-      </div>
-
-      <!-- ROUTE BUILDER -->
-      <div class="route-builder">
-        <div class="rb-title">🗺️ 운송 경로 설정
-          <span style="font-size:10px;color:var(--gray);font-weight:400;margin-left:6px">출발지 → 경유지(순서·표준시간 지정) → 도착지</span>
-        </div>
-
-        <!-- 출발지 -->
-        <div class="rb-row">
-          <div class="rb-badge rb-origin">출발</div>
-          <div style="flex:1;min-width:0">
-            <select id="o-origin" onchange="onOriginChange()">
-              <option value="">-- 출발 거점 선택 --</option>
-            </select>
-          </div>
-          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-            <span style="font-size:10px;color:var(--gray);white-space:nowrap">→다음거점<br>표준시간</span>
-            <input id="o-origin-std" type="number" min="0" placeholder="분" style="width:60px;padding:5px 6px;font-size:11px;text-align:center">
-            <span style="font-size:10px;color:var(--gray)">분</span>
-          </div>
-        </div>
-
-        <div class="rb-vline"></div>
-
-        <!-- 경유지 목록 -->
-        <div id="waypoint-list"></div>
-
-        <!-- 경유지 추가 -->
-        <div class="rb-add-row" style="flex-wrap:wrap;gap:8px">
-          <div class="rb-badge rb-wp" style="width:24px;height:24px;font-size:13px;flex-shrink:0">+</div>
-          <select id="o-wp-add" style="flex:2;min-width:140px"><option value="">-- 경유지 선택 --</option></select>
-          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-            <span style="font-size:10px;color:var(--gray);white-space:nowrap">→다음까지<br>표준시간</span>
-            <input id="o-wp-std" type="number" min="0" placeholder="분"
-              style="width:58px;padding:5px 6px;font-size:11px;border:1px solid var(--border);border-radius:5px;text-align:center">
-            <span style="font-size:10px;color:var(--gray)">분</span>
-          </div>
-          <button class="btn btn-yellow btn-sm" onclick="addWaypoint()" style="flex-shrink:0">경유지 추가</button>
-        </div>
-
-        <div class="rb-vline"></div>
-
-        <!-- 도착지 -->
-        <div class="rb-row">
-          <div class="rb-badge rb-dest">도착</div>
-          <div style="flex:1;min-width:0">
-            <select id="o-dest" onchange="updateRoutePreview()">
-              <option value="">-- 도착 거점 선택 --</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- 미리보기 -->
-        <div class="route-preview">
-          <div class="rp-title">📋 설정된 경로 미리보기</div>
-          <div class="route-chips" id="route-chips">
-            <span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span>
-          </div>
+  <div class="card"><div class="card-head">📋 신규 출하오더 생성</div><div class="card-body">
+    <div class="form-row">
+      <div class="form-group"><label>오더번호</label><input id="o-no" readonly></div>
+      <div class="form-group"><label>출하예정일</label><input id="o-date" type="date"></div>
+      <div class="form-group"><label>고객사</label><select id="o-customer"><option value="">-- 선택 --</option></select></div>
+      <div class="form-group"><label>제품</label><select id="o-product"><option value="">-- 선택 --</option></select></div>
+      <div class="form-group"><label>박스수량</label><input id="o-boxes" type="number" placeholder="1" min="1"></div>
+      <div class="form-group"><label>특이사항</label><input id="o-note"></div>
+    </div>
+    <div class="route-builder">
+      <div class="rb-title">🗺️ 운송 경로 설정 <span style="font-size:10px;color:var(--gray);font-weight:400;margin-left:6px">출발지 → 경유지(순서·표준시간 지정) → 도착지</span></div>
+      <div class="rb-row">
+        <div class="rb-badge rb-origin">출발</div>
+        <div style="flex:1"><select id="o-origin" onchange="onOriginChange()"><option value="">-- 출발 거점 선택 --</option></select></div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--gray);white-space:nowrap">→다음거점<br>표준시간</span>
+          <input id="o-origin-std" type="number" min="0" placeholder="분" style="width:60px;padding:5px 6px;font-size:11px;text-align:center">
+          <span style="font-size:10px;color:var(--gray)">분</span>
         </div>
       </div>
-
-      <div style="margin-top:14px;text-align:right">
-        <button class="btn btn-primary" onclick="createOrder()">+ 오더 생성</button>
+      <div class="rb-vline"></div>
+      <div id="waypoint-list"></div>
+      <div class="rb-add-row">
+        <div class="rb-badge rb-wp" style="width:24px;height:24px;font-size:13px;flex-shrink:0">+</div>
+        <select id="o-wp-add" style="flex:2;min-width:140px"><option value="">-- 경유지 선택 --</option></select>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--gray);white-space:nowrap">→다음까지<br>표준시간</span>
+          <input id="o-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:5px 6px;font-size:11px;border:1px solid var(--border);border-radius:5px;text-align:center">
+          <span style="font-size:10px;color:var(--gray)">분</span>
+        </div>
+        <button class="btn btn-yellow btn-sm" onclick="addWaypoint()" style="flex-shrink:0">경유지 추가</button>
+      </div>
+      <div class="rb-vline"></div>
+      <div class="rb-row">
+        <div class="rb-badge rb-dest">도착</div>
+        <div style="flex:1"><select id="o-dest" onchange="updateRoutePreview()"><option value="">-- 도착 거점 선택 --</option></select></div>
+      </div>
+      <div class="route-preview"><div class="rp-title">📋 설정된 경로 미리보기</div>
+        <div class="route-chips" id="route-chips"><span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span></div>
       </div>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="card-head">📋 출하오더 목록</div>
-    <div class="card-body">
-      <div style="margin-bottom:10px">
-        <select id="o-filter-status" onchange="renderOrders()" style="width:130px">
-          <option value="">전체 상태</option>
-          <option value="대기">대기</option><option value="패킹중">패킹중</option>
-          <option value="배차완료">배차완료</option><option value="운송중">운송중</option>
-          <option value="도착완료">도착완료</option><option value="지연">지연</option>
-        </select>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>제품</th><th>박스수</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>삭제</th></tr></thead>
-          <tbody id="order-table-body"></tbody>
-        </table>
-      </div>
+    <div style="margin-top:14px;text-align:right"><button class="btn btn-primary" onclick="createOrder()">+ 오더 생성</button></div>
+  </div></div>
+  <div class="card"><div class="card-head">📋 출하오더 목록</div><div class="card-body">
+    <div style="margin-bottom:10px">
+      <select id="o-filter-status" onchange="renderOrders()" style="width:130px">
+        <option value="">전체 상태</option>
+        <option value="대기">대기</option><option value="패킹중">패킹중</option>
+        <option value="배차완료">배차완료</option><option value="운송중">운송중</option>
+        <option value="도착완료">도착완료</option><option value="지연">지연</option>
+      </select>
     </div>
-  </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>제품</th><th>박스수</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>삭제</th></tr></thead>
+      <tbody id="order-table-body"></tbody>
+    </table></div>
+  </div></div>
 </div>
 
-<!-- ══════════════ PACKING ══════════════ -->
+<!-- ══ PACKING ══ -->
 <div id="page-packing" class="page">
   <div class="sec-title">박스 Packing 관리</div>
   <div class="grid2">
     <div class="card"><div class="card-head">📦 Packing 처리</div><div class="card-body">
-      <div class="form-group" style="margin-bottom:12px">
-        <label>출하오더 선택 (대기)</label>
-        <select id="pk-order" onchange="loadPackingOrder()"><option value="">-- 선택 --</option></select>
-      </div>
+      <div class="form-group" style="margin-bottom:12px"><label>출하오더 선택 (대기)</label>
+        <select id="pk-order" onchange="loadPackingOrder()"><option value="">-- 선택 --</option></select></div>
       <div id="pk-info" style="display:none">
         <div class="alert alert-info" id="pk-detail"></div>
-        <div class="scan-box" onclick="doPacking()">
-          <div class="scan-icon">📦</div>
+        <div class="scan-box" onclick="doPacking()"><div class="scan-icon">📦</div>
           <div class="scan-label">박스 스캔 / Packing 완료 처리</div>
-          <div style="font-size:11px;color:#888;margin-top:6px">클릭하여 완료 처리</div>
-        </div>
+          <div style="font-size:11px;color:#888;margin-top:6px">클릭하여 완료 처리</div></div>
       </div>
       <div id="pk-empty" class="empty">대기 중인 오더를 선택하세요</div>
     </div></div>
@@ -474,20 +478,16 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
-<!-- ══════════════ DISPATCH ══════════════ -->
+<!-- ══ DISPATCH ══ -->
 <div id="page-dispatch" class="page">
   <div class="sec-title">차량 배차 및 출발 관리</div>
   <div class="grid2">
     <div class="card"><div class="card-head">🚛 배차 등록</div><div class="card-body">
-      <div class="form-group" style="margin-bottom:10px">
-        <label>출하오더</label>
-        <select id="dp-order" onchange="loadDispatchOrder()"><option value="">-- 선택 --</option></select>
-      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>출하오더</label>
+        <select id="dp-order" onchange="loadDispatchOrder()"><option value="">-- 선택 --</option></select></div>
       <div id="dp-order-info"></div>
-      <div class="form-group" style="margin-bottom:10px">
-        <label>배차 차량</label>
-        <select id="dp-vehicle"><option value="">-- 차량 선택 --</option></select>
-      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>배차 차량</label>
+        <select id="dp-vehicle"><option value="">-- 차량 선택 --</option></select></div>
       <div class="form-row">
         <div class="form-group"><label>출발 예정시각</label><input id="dp-depart-plan" type="datetime-local"></div>
         <div class="form-group"><label>도착 예정시각(ETA)</label><input id="dp-eta" type="datetime-local"></div>
@@ -502,41 +502,33 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
-<!-- ══════════════ TRACKING ══════════════ -->
+<!-- ══ TRACKING ══ -->
 <div id="page-tracking" class="page">
   <div class="sec-title">거점별 In/Out 이벤트 관리</div>
   <div class="grid2">
     <div class="card"><div class="card-head">📍 In/Out 이벤트 등록</div><div class="card-body">
       <div class="form-row">
-        <div class="form-group">
-          <label>출하오더</label>
-          <select id="tr-order" onchange="loadOrderHubs()"><option value="">-- 선택 --</option></select>
-        </div>
+        <div class="form-group"><label>출하오더</label>
+          <select id="tr-order" onchange="loadOrderHubs()"><option value="">-- 선택 --</option></select></div>
         <div class="form-group">
           <label>거점 <span id="tr-hub-hint" style="font-weight:400;color:var(--accent);font-size:10px"></span></label>
-          <select id="tr-hub"><option value="">-- 거점 선택 --</option></select>
-        </div>
+          <select id="tr-hub"><option value="">-- 거점 선택 --</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>이벤트 유형</label>
-          <select id="tr-event"><option value="IN">IN (도착·입고)</option><option value="OUT">OUT (출발·출고)</option><option value="도착완료">도착완료 (고객 수령)</option></select>
-        </div>
+          <select id="tr-event"><option value="IN">IN (도착·입고)</option><option value="OUT">OUT (출발·출고)</option><option value="도착완료">도착완료 (고객 수령)</option></select></div>
         <div class="form-group"><label>처리일시</label><input id="tr-time" type="datetime-local"></div>
         <div class="form-group"><label>처리자</label><input id="tr-person" placeholder="담당자명"></div>
       </div>
       <div class="form-group" style="margin-bottom:12px"><label>비고</label><input id="tr-note"></div>
       <button class="btn btn-primary" onclick="saveTracking()" style="width:100%">📍 이벤트 등록</button>
     </div></div>
-
     <div class="card"><div class="card-head">🗺️ 오더 추적 현황</div><div class="card-body">
-      <div class="form-group" style="margin-bottom:12px">
-        <label>오더 선택</label>
-        <select id="tr-track-order" onchange="showOrderTrack()"><option value="">-- 선택 --</option></select>
-      </div>
+      <div class="form-group" style="margin-bottom:12px"><label>오더 선택</label>
+        <select id="tr-track-order" onchange="showOrderTrack()"><option value="">-- 선택 --</option></select></div>
       <div id="order-track-display"><div class="empty">오더를 선택하세요</div></div>
     </div></div>
   </div>
-
   <div class="card"><div class="card-head">📋 이벤트 로그 전체</div><div class="card-body">
     <div class="tbl-wrap"><table>
       <thead><tr><th>처리일시</th><th>오더번호</th><th>고객사</th><th>거점</th><th>이벤트</th><th>처리자</th><th>비고</th></tr></thead>
@@ -545,23 +537,17 @@ tr:last-child td{border-bottom:none;}
   </div></div>
 </div>
 
-<!-- ══════════════ CEO DASHBOARD ══════════════ -->
+<!-- ══ CEO ══ -->
 <div id="page-ceodash" class="page">
   <div class="sec-title">👑 CEO 모바일 대시보드 (대표이사용)</div>
-
-  <!-- CEO 전용 오더 조회 -->
-  <div class="card">
-    <div class="card-head">🔍 오더 / 제품 조회 &amp; 실시간 위치 확인</div>
-    <div class="card-body">
-      <div class="search-bar">
-        <input id="ceo-search" class="search-input" placeholder="오더번호 · 제품코드 · 제품명으로 검색">
-        <button class="search-btn" onclick="doSearch('ceo')">🔍 조회</button>
-        <button class="search-clear" onclick="clearSearch('ceo')">초기화</button>
-      </div>
-      <div id="ceo-search-result"></div>
+  <div class="card"><div class="card-head">🔍 오더 / 제품 조회 &amp; 실시간 위치 확인</div><div class="card-body">
+    <div class="search-bar">
+      <input id="ceo-search" class="search-input" placeholder="오더번호 · 제품코드 · 제품명으로 검색">
+      <button class="search-btn" onclick="doSearch('ceo')">🔍 조회</button>
+      <button class="search-clear" onclick="clearSearch('ceo')">초기화</button>
     </div>
-  </div>
-
+    <div id="ceo-search-result"></div>
+  </div></div>
   <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
     <div class="ceo-phone">
       <div class="ceo-title">📊 LMTS · 물류 현황</div>
@@ -570,24 +556,14 @@ tr:last-child td{border-bottom:none;}
         <div class="ceo-kpi"><div class="ceo-kpi-val cv-red" id="ceo-delay2">0</div><div class="ceo-kpi-label">⚠ 지연</div></div>
         <div class="ceo-kpi"><div class="ceo-kpi-val cv-green" id="ceo-done2">0</div><div class="ceo-kpi-label">완료(오늘)</div></div>
       </div>
-      <div class="ceo-section">
-        <div class="ceo-section-title">📈 KPI</div>
+      <div class="ceo-section"><div class="ceo-section-title">📈 KPI</div>
         <div class="ceo-row"><div class="ceo-row-label">정시납품율</div><div class="ceo-row-val cv-green" id="ceo-ontime">--%</div></div>
         <div class="ceo-progress-bar"><div class="ceo-progress-fill" id="ceo-ontime-bar" style="width:0%"></div></div>
         <div class="ceo-row" style="margin-top:8px"><div class="ceo-row-label">평균 경유지 수</div><div class="ceo-row-val cv-yellow" id="ceo-avgwp">--</div></div>
       </div>
-      <div class="ceo-section">
-        <div class="ceo-section-title">📍 거점별 현황</div>
-        <div id="ceo-hub-list"><div style="color:rgba(255,255,255,.5);font-size:11px">거점 없음</div></div>
-      </div>
-      <div class="ceo-section">
-        <div class="ceo-section-title">🚛 진행중 오더</div>
-        <div id="ceo-order-list"><div style="color:rgba(255,255,255,.5);font-size:11px">없음</div></div>
-      </div>
-      <div class="ceo-section">
-        <div class="ceo-section-title">⚠ 알람</div>
-        <div id="ceo-alarm-list"><div style="color:rgba(255,255,255,.5);font-size:11px">✅ 알람 없음</div></div>
-      </div>
+      <div class="ceo-section"><div class="ceo-section-title">📍 거점별 현황</div><div id="ceo-hub-list"><div style="color:rgba(255,255,255,.5);font-size:11px">없음</div></div></div>
+      <div class="ceo-section"><div class="ceo-section-title">🚛 진행중 오더</div><div id="ceo-order-list"><div style="color:rgba(255,255,255,.5);font-size:11px">없음</div></div></div>
+      <div class="ceo-section"><div class="ceo-section-title">⚠ 알람</div><div id="ceo-alarm-list"><div style="color:rgba(255,255,255,.5);font-size:11px">✅ 없음</div></div></div>
     </div>
     <div style="flex:1;min-width:280px">
       <div class="card"><div class="card-head">📊 KPI 상세</div><div class="card-body" id="ceo-kpi-detail"><div class="empty">데이터 없음</div></div></div>
@@ -597,29 +573,242 @@ tr:last-child td{border-bottom:none;}
 </div>
 
 <script>
-// ─── STORE ─────────────────────────────────────────────────────────────────
-const S = {
-  get: k => { try { return JSON.parse(localStorage.getItem('lmts_' + k) || '[]'); } catch(e){ return []; }},
-  set: (k, v) => localStorage.setItem('lmts_' + k, JSON.stringify(v)),
-  customers: () => S.get('customers'),
-  products:  () => S.get('products'),
-  vehicles:  () => S.get('vehicles'),
-  hubs:      () => S.get('hubs'),
-  orders:    () => S.get('orders'),
-  packings:  () => S.get('packings'),
-  dispatches:() => S.get('dispatches'),
-  events:    () => S.get('events'),
-  alarms:    () => S.get('alarms'),
+// ══════════════════════════════════════════════════════════════════
+// ─── GITHUB API 레이어 ─────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+const GH = {
+  REPO: 'kangsh8880/lmts',
+  DATA_PATH: 'data/lmts_data.json',
+  API: 'https://api.github.com',
+  _sha: null,
+  _saveTimer: null,
+  _saving: false,
+  _connected: false,
+
+  token() { return localStorage.getItem('lmts_gh_token') || ''; },
+  saveToken(t) { localStorage.setItem('lmts_gh_token', t); },
+
+  headers() {
+    return {
+      'Authorization': `token ${this.token()}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json'
+    };
+  },
+
+  // 데이터 파일 읽기
+  async load() {
+    const res = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}`, {
+      headers: this.headers()
+    });
+    if (res.status === 404) return null;  // 파일 없음 (최초)
+    if (res.status === 401) throw new Error('TOKEN_INVALID');
+    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+    const file = await res.json();
+    this._sha = file.sha;
+    // base64 → UTF-8 디코딩
+    const binary = atob(file.content.replace(/\n/g, ''));
+    const bytes = new Uint8Array([...binary].map(c => c.charCodeAt(0)));
+    const text = new TextDecoder('utf-8').decode(bytes);
+    return JSON.parse(text);
+  },
+
+  // 데이터 파일 저장 (Create or Update)
+  async save(dataObj) {
+    if (this._saving) return;
+    this._saving = true;
+    setSyncStatus('sync', '저장 중...');
+    try {
+      // UTF-8 → base64 인코딩
+      const json = JSON.stringify(dataObj, null, 2);
+      const bytes = new TextEncoder().encode(json);
+      let binary = '';
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      const content = btoa(binary);
+
+      const body = {
+        message: `LMTS data update ${now()}`,
+        content,
+        ...(this._sha ? { sha: this._sha } : {})
+      };
+      const res = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}`, {
+        method: 'PUT',
+        headers: this.headers(),
+        body: JSON.stringify(body)
+      });
+      if (res.status === 409) {
+        // SHA 충돌 → SHA 다시 받아서 재시도
+        await this._refreshSha();
+        body.sha = this._sha;
+        const res2 = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}`, {
+          method: 'PUT', headers: this.headers(), body: JSON.stringify(body)
+        });
+        if (!res2.ok) throw new Error(`Save failed: ${res2.status}`);
+        const r2 = await res2.json();
+        this._sha = r2.content.sha;
+      } else if (!res.ok) {
+        throw new Error(`Save failed: ${res.status}`);
+      } else {
+        const r = await res.json();
+        this._sha = r.content.sha;
+      }
+      setSyncStatus('ok', `저장완료 ${now().slice(11,16)}`);
+    } catch(e) {
+      setSyncStatus('err', `저장실패: ${e.message}`);
+      console.error('GH save error:', e);
+    } finally {
+      this._saving = false;
+    }
+  },
+
+  async _refreshSha() {
+    const res = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}`, {headers: this.headers()});
+    if (res.ok) { const f = await res.json(); this._sha = f.sha; }
+  },
+
+  // 1초 디바운스 자동저장
+  scheduleSave() {
+    clearTimeout(this._saveTimer);
+    this._saveTimer = setTimeout(() => GH.save(DB), 1000);
+  },
+
+  // 연결 테스트
+  async testConnection(token) {
+    const res = await fetch(`${this.API}/repos/${this.REPO}`, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.status === 401) throw new Error('토큰이 유효하지 않습니다');
+    if (res.status === 404) throw new Error('저장소를 찾을 수 없습니다 (접근 권한 없음)');
+    if (!res.ok) throw new Error(`API 오류: ${res.status}`);
+    return await res.json();
+  }
 };
 
-// waypoint state for route builder
-let wpList = []; // [{name, stdTime}]
+// ══════════════════════════════════════════════════════════════════
+// ─── IN-MEMORY DB (GitHub와 동기화) ───────────────────────────
+// ══════════════════════════════════════════════════════════════════
+const DB = {
+  customers:[], products:[], vehicles:[], hubs:[],
+  orders:[], packings:[], dispatches:[], events:[], alarms:[],
+  lastUpdated: ''
+};
 
-// ─── NAVIGATION ───────────────────────────────────────────────────────────
+const S = {
+  get: k => DB[k] || [],
+  set(k, v) {
+    DB[k] = v;
+    DB.lastUpdated = now();
+    // localStorage에 저장 (아티팩트 로컬 모드)
+    try { localStorage.setItem('lmts_' + k, JSON.stringify(v)); } catch(e) {}
+  },
+  customers:  () => S.get('customers'),
+  products:   () => S.get('products'),
+  vehicles:   () => S.get('vehicles'),
+  hubs:       () => S.get('hubs'),
+  orders:     () => S.get('orders'),
+  packings:   () => S.get('packings'),
+  dispatches: () => S.get('dispatches'),
+  events:     () => S.get('events'),
+  alarms:     () => S.get('alarms'),
+};
+
+// ══════════════════════════════════════════════════════════════════
+// ─── UI 헬퍼 ──────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+function showOverlay(text, sub) {
+  el('overlay-text').textContent = text || 'GitHub에서 데이터 불러오는 중...';
+  el('overlay-sub').textContent = sub || 'kangsh8880/lmts';
+  el('overlay').classList.remove('hidden');
+}
+function hideOverlay() { el('overlay').classList.add('hidden'); }
+
+function setSyncStatus(state, text) {
+  const dot = el('gh-dot');
+  const stText = el('gh-status-text');
+  const bar = el('sync-bar');
+  dot.className = 'status-dot ' + (state === 'ok' ? 'ok' : state === 'err' ? 'err' : 'sync');
+  stText.textContent = state === 'ok' ? 'GitHub 연결됨' : state === 'err' ? '저장 오류' : '동기화 중';
+  if (bar) {
+    bar.classList.remove('hidden');
+    el('sync-bar-icon').textContent = state === 'ok' ? '✅' : state === 'err' ? '❌' : '💾';
+    el('sync-bar-text').textContent = text;
+    if (state === 'ok') setTimeout(() => bar.classList.add('hidden'), 3000);
+  }
+}
+
+function openTokenModal() { el('token-modal').classList.remove('hidden'); }
+function closeTokenModal() { el('token-modal').classList.add('hidden'); }
+
+async function testAndSaveToken() {
+  const token = el('token-input').value.trim();
+  if (!token) return alert('토큰을 입력하세요');
+  el('token-status').textContent = '🔄 연결 테스트 중...';
+  try {
+    await GH.testConnection(token);
+    GH.saveToken(token);
+    el('token-status').innerHTML = '<span style="color:var(--green)">✅ 연결 성공!</span>';
+    closeTokenModal();
+    loadFromLocalStorage();
+    renderDashboard();
+  } catch(e) {
+    el('token-status').innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ─── 앱 초기화 ────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+async function loadFromGitHub() {
+  showOverlay('GitHub에서 데이터 불러오는 중...', `${GH.REPO} / ${GH.DATA_PATH}`);
+  try {
+    const data = await GH.load();
+    if (data) {
+      // GitHub 데이터로 DB 업데이트
+      Object.keys(DB).forEach(k => { if (data[k] !== undefined) DB[k] = data[k]; });
+      setSyncStatus('ok', `데이터 로드 완료 (${now().slice(11,16)})`);
+      GH._connected = true;
+    } else {
+      // 파일 없음 → 초기 샘플 데이터 푸시
+      showOverlay('최초 실행: 초기 데이터를 GitHub에 저장 중...');
+      initSampleData();
+      await GH.save(DB);
+      GH._connected = true;
+    }
+  } catch(e) {
+    if (e.message === 'TOKEN_INVALID' || !GH.token()) {
+      hideOverlay();
+      setSyncStatus('err', '토큰 미설정');
+      openTokenModal();
+      // localStorage 캐시로 폴백
+      loadFromLocalStorage();
+      return;
+    }
+    // 기타 오류 → localStorage 폴백
+    console.error('GitHub load error:', e);
+    setSyncStatus('err', `로드 실패: ${e.message}`);
+    loadFromLocalStorage();
+  }
+  hideOverlay();
+  renderDashboard();
+}
+
+function loadFromLocalStorage() {
+  // localStorage 캐시에서 데이터 로드 (오프라인 모드)
+  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms'];
+  keys.forEach(k => {
+    const raw = localStorage.getItem('lmts_' + k);
+    if (raw) { try { DB[k] = JSON.parse(raw); } catch(e) {} }
+  });
+  if (!DB.hubs.length) initSampleData();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ─── NAVIGATION ───────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function goPage(p, btn) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
-  document.getElementById('page-' + p).classList.add('active');
+  el('page-' + p).classList.add('active');
   if (btn) btn.classList.add('active');
   const fns = {
     dashboard: renderDashboard,
@@ -632,13 +821,14 @@ function goPage(p, btn) {
   if (fns[p]) fns[p]();
 }
 
-// ─── MASTER DATA ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── MASTER DATA ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function showMaster(tab, btn) {
   ['customer','product','vehicle','hub'].forEach(t =>
-    document.getElementById('master-' + t).style.display = t===tab ? '' : 'none');
-  document.querySelectorAll('#master-tab-btns .btn').forEach(b => {
-    b.className = b.className.replace('btn-primary','btn-ghost');
-  });
+    el('master-' + t).style.display = t === tab ? '' : 'none');
+  document.querySelectorAll('#master-tab-btns .btn').forEach(b =>
+    b.className = b.className.replace('btn-primary','btn-ghost'));
   if (btn) btn.className = btn.className.replace('btn-ghost','btn-primary');
   renderMasterTable(tab);
 }
@@ -648,7 +838,7 @@ function saveCustomer() {
   if (!code||!name) return alert('코드와 고객사명 필수');
   const arr = S.customers();
   arr.push({code, name, manager:v('c-manager'), phone:v('c-phone'), addr:v('c-addr'), confirm:v('c-confirm')});
-  S.set('customers',arr);
+  S.set('customers', arr);
   ['c-code','c-name','c-manager','c-phone','c-addr'].forEach(id => el(id).value='');
   renderMasterTable('customer');
 }
@@ -657,7 +847,7 @@ function saveProduct() {
   if (!code||!name) return alert('코드와 제품명 필수');
   const arr = S.products();
   arr.push({code, name, box:v('p-box'), qty:v('p-qty'), weight:v('p-weight')});
-  S.set('products',arr);
+  S.set('products', arr);
   ['p-code','p-name','p-box','p-qty','p-weight'].forEach(id => el(id).value='');
   renderMasterTable('product');
 }
@@ -666,7 +856,7 @@ function saveVehicle() {
   if (!no||!driver) return alert('차량번호와 기사명 필수');
   const arr = S.vehicles();
   arr.push({no, type:v('v-type'), cap:v('v-cap'), driver, dphone:v('v-dphone'), status:'대기'});
-  S.set('vehicles',arr);
+  S.set('vehicles', arr);
   ['v-no','v-type','v-cap','v-driver','v-dphone'].forEach(id => el(id).value='');
   renderMasterTable('vehicle');
 }
@@ -675,87 +865,64 @@ function saveHub() {
   if (!code||!name) return alert('거점코드와 거점명 필수');
   const arr = S.hubs();
   arr.push({code, name, type:v('h-type'), addr:v('h-addr'), mgr:v('h-mgr')});
-  S.set('hubs',arr);
+  S.set('hubs', arr);
   ['h-code','h-name','h-addr','h-mgr'].forEach(id => el(id).value='');
   renderMasterTable('hub');
 }
 
-const TYPE_COL = {'출발(자사창고)':['#D6E4F0','#365C89'], '경유지':['#FFF3CD','#7B4F00'], '도착(고객사)':['#E8F5E9','#1B5E20']};
-function typeTag(t){ const c=TYPE_COL[t]||['#eee','#333']; return `<span style="padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;background:${c[0]};color:${c[1]}">${t}</span>`; }
+const TYPE_COL = {'출발(자사창고)':['#D6E4F0','#365C89'],'경유지':['#FFF3CD','#7B4F00'],'도착(고객사)':['#E8F5E9','#1B5E20']};
+function typeTag(t){ const c=TYPE_COL[t]||['#eee','#333']; return `<span class="type-tag" style="background:${c[0]};color:${c[1]}">${t}</span>`; }
 
 function renderMasterTable(tab) {
-  const empty = (n,c) => `<tr><td colspan="${c}" class="empty">등록된 데이터 없음</td></tr>`;
-  if (tab==='customer') el('customer-table-body').innerHTML = S.customers().map((c,i) =>
+  const empty = c => `<tr><td colspan="${c}" class="empty">등록된 데이터 없음</td></tr>`;
+  if (tab==='customer') el('customer-table-body').innerHTML = S.customers().map((c,i)=>
     `<tr><td>${c.code}</td><td>${c.name}</td><td>${c.manager||'-'}</td><td>${c.phone||'-'}</td><td>${c.addr||'-'}</td><td>${c.confirm}</td>
-    <td><button class="btn btn-danger btn-xs" onclick="delItem('customers',${i})">삭제</button></td></tr>`).join('') || empty('',7);
-
-  if (tab==='product') el('product-table-body').innerHTML = S.products().map((p,i) =>
+    <td><button class="btn btn-danger btn-xs" onclick="delItem('customers',${i})">삭제</button></td></tr>`).join('') || empty(7);
+  if (tab==='product') el('product-table-body').innerHTML = S.products().map((p,i)=>
     `<tr><td>${p.code}</td><td>${p.name}</td><td>${p.box||'-'}</td><td>${p.qty||'-'}</td><td>${p.weight||'-'}kg</td>
-    <td><button class="btn btn-danger btn-xs" onclick="delItem('products',${i})">삭제</button></td></tr>`).join('') || empty('',6);
-
-  if (tab==='vehicle') el('vehicle-table-body').innerHTML = S.vehicles().map((vv,i) =>
+    <td><button class="btn btn-danger btn-xs" onclick="delItem('products',${i})">삭제</button></td></tr>`).join('') || empty(6);
+  if (tab==='vehicle') el('vehicle-table-body').innerHTML = S.vehicles().map((vv,i)=>
     `<tr><td>${vv.no}</td><td>${vv.type||'-'}</td><td>${vv.cap||'-'}kg</td><td>${vv.driver}</td><td>${vv.dphone||'-'}</td>
     <td><span class="status s-ready">${vv.status}</span></td>
-    <td><button class="btn btn-danger btn-xs" onclick="delItem('vehicles',${i})">삭제</button></td></tr>`).join('') || empty('',7);
-
-  if (tab==='hub') el('hub-table-body').innerHTML = S.hubs().map((h,i) =>
+    <td><button class="btn btn-danger btn-xs" onclick="delItem('vehicles',${i})">삭제</button></td></tr>`).join('') || empty(7);
+  if (tab==='hub') el('hub-table-body').innerHTML = S.hubs().map((h,i)=>
     `<tr><td>${h.code}</td><td><b>${h.name}</b></td><td>${typeTag(h.type)}</td><td>${h.addr||'-'}</td><td>${h.mgr||'-'}</td>
-    <td><button class="btn btn-danger btn-xs" onclick="delItem('hubs',${i})">삭제</button></td></tr>`).join('') || empty('',6);
+    <td><button class="btn btn-danger btn-xs" onclick="delItem('hubs',${i})">삭제</button></td></tr>`).join('') || empty(6);
 }
 
 function delItem(key, idx) {
   if (!confirm('삭제하시겠습니까?')) return;
-  const arr = S.get(key); arr.splice(idx,1); S.set(key,arr);
+  const arr = S.get(key); arr.splice(idx,1); S.set(key, arr);
   const m={customers:'customer',products:'product',vehicles:'vehicle',hubs:'hub'};
   if (m[key]) renderMasterTable(m[key]);
 }
 
-// ─── ORDER / ROUTE BUILDER ────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── ORDER / ROUTE BUILDER ────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+let wpList = [];
+
 function fillOrderSelects() {
   const cs=S.customers(), ps=S.products(), hs=S.hubs();
-
-  // customer / product
   fillSel('o-customer', cs.map(c=>({v:c.name, l:c.name})));
-  fillSel('o-product',  ps.map(p=>({v:p.name, l:`${p.name} (${p.code})`})));
-
-  // origin: 출발(자사창고) 타입만
-  const origins = hs.filter(h => h.type==='출발(자사창고)');
+  fillSel('o-product', ps.map(p=>({v:p.name, l:`${p.name} (${p.code})`})));
+  const origins = hs.filter(h=>h.type==='출발(자사창고)');
   fillSel('o-origin', origins.map(h=>({v:h.name, l:h.name})));
-  // 출발지 1개면 자동 선택
-  if (origins.length === 1) {
-    el('o-origin').value = origins[0].name;
-  }
-
-  // waypoint picker: 경유지 타입만
-  const wps = hs.filter(h => h.type==='경유지');
-  fillSel('o-wp-add', wps.map(h=>({v:h.name, l:h.name})));
-
-  // destination: 도착(고객사) 타입만
-  const dests = hs.filter(h => h.type==='도착(고객사)');
-  fillSel('o-dest', dests.map(h=>({v:h.name, l:h.name})));
-
-  // auto order no
+  if (origins.length===1) el('o-origin').value = origins[0].name;
+  fillSel('o-wp-add', hs.filter(h=>h.type==='경유지').map(h=>({v:h.name, l:h.name})));
+  fillSel('o-dest', hs.filter(h=>h.type==='도착(고객사)').map(h=>({v:h.name, l:h.name})));
   const today = new Date().toISOString().slice(2,10).replace(/-/g,'');
   el('o-no').value = `ORD-${today}-${String(S.orders().length+1).padStart(3,'0')}`;
   el('o-date').value = new Date().toISOString().slice(0,10);
-
-  wpList = [];
-  renderWpList();
-  updateRoutePreview();
+  wpList = []; renderWpList(); updateRoutePreview();
 }
 
 function onOriginChange() { updateRoutePreview(); }
-
 function addWaypoint() {
-  const name = v('o-wp-add');
-  if (!name) return alert('경유지를 선택하세요');
-  if (wpList.find(w=>w.name===name)) return alert('이미 추가된 경유지입니다');
-  const stdTime = v('o-wp-std') || '';
-  wpList.push({ name, stdTime });
-  // 입력창 초기화
-  el('o-wp-std').value = '';
-  renderWpList();
-  updateRoutePreview();
+  const name=v('o-wp-add'); if(!name) return alert('경유지를 선택하세요');
+  if (wpList.find(w=>w.name===name)) return alert('이미 추가된 경유지');
+  wpList.push({name, stdTime: v('o-wp-std')||''});
+  el('o-wp-std').value=''; renderWpList(); updateRoutePreview();
 }
 function removeWp(idx) { wpList.splice(idx,1); renderWpList(); updateRoutePreview(); }
 function moveWp(idx, dir) {
@@ -764,22 +931,18 @@ function moveWp(idx, dir) {
   [wpList[idx],wpList[ni]]=[wpList[ni],wpList[idx]];
   renderWpList(); updateRoutePreview();
 }
-function updateWpTime(idx, val) { wpList[idx].stdTime = val; updateRoutePreview(); }
+function updateWpTime(idx, val) { wpList[idx].stdTime=val; updateRoutePreview(); }
 
 function renderWpList() {
-  const c = el('waypoint-list');
-  if (!wpList.length) {
-    c.innerHTML = '<div style="font-size:11px;color:var(--gray);padding:6px 0 4px 38px">경유지 없음 — 직배송으로 진행됩니다</div>';
-    return;
-  }
-  c.innerHTML = wpList.map((w,i) => `
+  const c=el('waypoint-list');
+  if (!wpList.length) { c.innerHTML='<div style="font-size:11px;color:var(--gray);padding:6px 0 4px 38px">경유지 없음 — 직배송</div>'; return; }
+  c.innerHTML = wpList.map((w,i)=>`
     <div class="wp-item">
       <div class="wp-seq">${i+1}</div>
-      <div class="wp-name" title="${w.name}">${w.name}</div>
+      <div class="wp-name">${w.name}</div>
       <div class="wp-time-wrap">
         <span class="wp-time-label">→다음<br>표준</span>
-        <input class="wp-time-input" type="number" min="0" placeholder="분"
-          value="${w.stdTime||''}" oninput="updateWpTime(${i},this.value)">
+        <input class="wp-time-input" type="number" min="0" placeholder="분" value="${w.stdTime||''}" oninput="updateWpTime(${i},this.value)">
         <span style="font-size:10px;color:var(--gray)">분</span>
       </div>
       <button class="wp-btn wp-up ${i===0?'wp-disabled':''}" onclick="moveWp(${i},-1)" ${i===0?'disabled':''}>↑</button>
@@ -789,88 +952,65 @@ function renderWpList() {
 }
 
 function updateRoutePreview() {
-  const origin = v('o-origin');
-  const dest   = v('o-dest');
-  const stdOrigin = v('o-origin-std');
-  const chips  = el('route-chips');
-  const parts  = [];
-
+  const origin=v('o-origin'), dest=v('o-dest'), stdOrigin=v('o-origin-std');
+  const parts=[];
   if (origin) {
     parts.push(`<span class="r-chip r-chip-origin">🏭 ${origin}</span>`);
     if (stdOrigin) parts.push(`<span class="r-chip r-chip-time">⏱ ${stdOrigin}분</span>`);
   }
-  wpList.forEach((w,i) => {
-    parts.push(`<span class="r-arrow">→</span>`);
-    parts.push(`<span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}</span>`);
+  wpList.forEach((w,i)=>{
+    parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}</span>`);
     if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${w.stdTime}분</span>`);
   });
-  if (dest) {
-    parts.push(`<span class="r-arrow">→</span>`);
-    parts.push(`<span class="r-chip r-chip-dest">🏢 ${dest}</span>`);
-  }
-  chips.innerHTML = parts.length
-    ? parts.join('')
-    : '<span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
+  if (dest) parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-dest">🏢 ${dest}</span>`);
+  el('route-chips').innerHTML = parts.length ? parts.join('') : '<span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
 }
 
 function createOrder() {
   const no=v('o-no'), date=v('o-date'), customer=v('o-customer'), product=v('o-product'), boxes=v('o-boxes');
   const origin=v('o-origin'), dest=v('o-dest');
-  if (!customer||!product||!boxes) return alert('고객사/제품/박스수량을 입력하세요');
+  if (!customer||!product||!boxes) return alert('고객사/제품/박스수량 필수');
   if (!origin) return alert('출발 거점을 선택하세요');
   if (!dest)   return alert('도착 거점을 선택하세요');
   const arr = S.orders();
-  arr.push({
-    no, date, customer, product,
-    boxes: parseInt(boxes)||1,
-    note: v('o-note'),
-    status: '대기',
-    created: now(),
-    route: {
-      origin,
-      originStdTime: v('o-origin-std') || '',
-      waypoints: wpList.map(w=>({ name:w.name, stdTime:w.stdTime||'' })),
-      destination: dest
-    }
-  });
+  arr.push({no, date, customer, product, boxes:parseInt(boxes)||1, note:v('o-note'), status:'대기', created:now(),
+    route:{origin, originStdTime:v('o-origin-std')||'', waypoints:wpList.map(w=>({name:w.name, stdTime:w.stdTime||''})), destination:dest}});
   S.set('orders', arr);
   fillOrderSelects(); renderOrders();
   alert(`✅ 오더 [${no}] 생성 완료`);
 }
 
 function renderOrders() {
-  const filter = v('o-filter-status');
-  const rows = S.orders().filter(o => !filter || o.status===filter);
+  const filter=v('o-filter-status');
+  const rows=S.orders().filter(o=>!filter||o.status===filter);
   const stMap={'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
-  el('order-table-body').innerHTML = rows.length ? rows.map(o => {
-    const gi = S.orders().findIndex(x=>x.no===o.no);
-    return `<tr>
-      <td><b>${o.no}</b></td><td>${o.date}</td><td>${o.customer}</td><td>${o.product}</td><td>${o.boxes}박스</td>
-      <td style="min-width:200px">${buildRouteChips(o)}</td>
-      <td><span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span></td>
-      <td>${o.note||'-'}</td>
-      <td><button class="btn btn-danger btn-xs" onclick="delOrder(${gi})">삭제</button></td>
-    </tr>`;
+  el('order-table-body').innerHTML = rows.length ? rows.map(o=>{
+    const gi=S.orders().findIndex(x=>x.no===o.no);
+    return `<tr><td><b>${o.no}</b></td><td>${o.date}</td><td>${o.customer}</td><td>${o.product}</td><td>${o.boxes}박스</td>
+    <td style="min-width:200px">${buildRouteChips(o)}</td>
+    <td><span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span></td>
+    <td>${o.note||'-'}</td>
+    <td><button class="btn btn-danger btn-xs" onclick="delOrder(${gi})">삭제</button></td></tr>`;
   }).join('') : '<tr><td colspan="9" class="empty">출하오더 없음</td></tr>';
 }
 
 function buildRouteChips(o, small=true) {
-  if (!o || !o.route) return '<span style="color:var(--gray);font-size:11px">-</span>';
-  const {origin, waypoints, destination} = o.route;
-  const fs = small ? 'font-size:10px;' : '';
-  let html = `<span class="r-chip r-chip-origin" style="${fs}">${origin||'?'}</span>`;
-  if (waypoints?.length) waypoints.forEach((w,i) => {
-    const wn = typeof w === 'string' ? w : w.name;
-    html += `<span class="r-arrow" style="${fs}">→</span><span class="r-chip r-chip-wp" style="${fs}">${i+1}.${wn}</span>`;
+  if (!o||!o.route) return '<span style="color:var(--gray);font-size:11px">-</span>';
+  const {origin, waypoints, destination}=o.route;
+  const fs=small?'font-size:10px;':'';
+  let html=`<span class="r-chip r-chip-origin" style="${fs}">${origin||'?'}</span>`;
+  if (waypoints?.length) waypoints.forEach((w,i)=>{
+    const wn=typeof w==='string'?w:w.name;
+    html+=`<span class="r-arrow" style="${fs}">→</span><span class="r-chip r-chip-wp" style="${fs}">${i+1}.${wn}</span>`;
   });
-  if (destination) html += `<span class="r-arrow" style="${fs}">→</span><span class="r-chip r-chip-dest" style="${fs}">${destination}</span>`;
+  if (destination) html+=`<span class="r-arrow" style="${fs}">→</span><span class="r-chip r-chip-dest" style="${fs}">${destination}</span>`;
   return `<div class="route-chips">${html}</div>`;
 }
 
 function getRouteShort(o) {
   if (!o||!o.route) return '-';
-  const {origin, waypoints, destination} = o.route;
-  const mid = waypoints?.length ? ` →(${waypoints.length}경유) ` : ' → ';
+  const {origin, waypoints, destination}=o.route;
+  const mid=waypoints?.length?` →(${waypoints.length}경유) `:' → ';
   return `${origin||'?'}${mid}${destination||'?'}`;
 }
 
@@ -883,134 +1023,95 @@ function updateOrderStatus(no, status) {
   if (idx>=0) { arr[idx].status=status; S.set('orders',arr); }
 }
 
-// ─── SEARCH & ROUTE TRACKER ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── SEARCH & TRACKER ─────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function doSearch(prefix) {
-  const q = el(prefix+'-search').value.trim().toLowerCase();
+  const q=el(prefix+'-search').value.trim().toLowerCase();
   if (!q) { el(prefix+'-search-result').innerHTML='<div class="alert alert-warn">검색어를 입력하세요</div>'; return; }
-
-  const ps = S.products();
-  const matched = S.orders().filter(o => {
-    const pcode = ps.find(p=>p.name===o.product)?.code||'';
-    return o.no.toLowerCase().includes(q)
-      || o.product.toLowerCase().includes(q)
-      || pcode.toLowerCase().includes(q)
-      || o.customer.toLowerCase().includes(q);
+  const ps=S.products();
+  const matched=S.orders().filter(o=>{
+    const pcode=ps.find(p=>p.name===o.product)?.code||'';
+    return o.no.toLowerCase().includes(q)||o.product.toLowerCase().includes(q)||pcode.toLowerCase().includes(q)||o.customer.toLowerCase().includes(q);
   });
-
-  if (!matched.length) {
-    el(prefix+'-search-result').innerHTML='<div class="alert alert-warn">검색 결과 없음 — 오더번호 / 제품코드 / 제품명을 확인하세요</div>';
-    return;
-  }
-
-  const html = matched.map(o => buildTrackerCard(o, ps)).join('');
-  el(prefix+'-search-result').innerHTML = html;
+  if (!matched.length) { el(prefix+'-search-result').innerHTML='<div class="alert alert-warn">검색 결과 없음</div>'; return; }
+  el(prefix+'-search-result').innerHTML = matched.map(o=>buildTrackerCard(o,ps)).join('');
 }
-
-function clearSearch(prefix) {
-  el(prefix+'-search').value='';
-  el(prefix+'-search-result').innerHTML='';
-}
+function clearSearch(prefix) { el(prefix+'-search').value=''; el(prefix+'-search-result').innerHTML=''; }
 
 function buildTrackerCard(o, ps) {
-  const pcode = ps.find(p=>p.name===o.product)?.code||'-';
-  const events = S.events().filter(e=>e.orderNo===o.no).sort((a,b)=>a.time.localeCompare(b.time));
+  const pcode=ps.find(p=>p.name===o.product)?.code||'-';
+  const events=S.events().filter(e=>e.orderNo===o.no).sort((a,b)=>a.time.localeCompare(b.time));
   const stMap={'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
-  const statusHtml = `<span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>`;
 
-  let trackerHtml = '';
+  let trackerHtml='';
   if (o.route) {
-    const {origin, waypoints, destination} = o.route;
-    const allHubs = [origin, ...(waypoints||[]).map(w=>typeof w==='string'?w:w.name), destination].filter(Boolean);
-    const passedSet = new Set();
-    events.forEach(e => {
-      if (e.event==='OUT' && e.hub===origin) passedSet.add(origin);
-      if (e.event==='IN' || e.event==='도착완료') passedSet.add(e.hub);
+    const {origin, waypoints, destination}=o.route;
+    const allHubs=[origin,...(waypoints||[]).map(w=>typeof w==='string'?w:w.name),destination].filter(Boolean);
+    const passedSet=new Set();
+    events.forEach(e=>{
+      if (e.event==='OUT'&&e.hub===origin) passedSet.add(origin);
+      if (e.event==='IN'||e.event==='도착완료') passedSet.add(e.hub);
     });
+    let currentIdx=-1;
+    for (let i=allHubs.length-1;i>=0;i--) { if (passedSet.has(allHubs[i])) { currentIdx=i; break; } }
 
-    // Find current position
-    let currentIdx = -1;
-    for (let i=allHubs.length-1; i>=0; i--) {
-      if (passedSet.has(allHubs[i])) { currentIdx=i; break; }
-    }
-
-    // Build visual tracker
-    trackerHtml = `<div style="overflow-x:auto;padding:4px 0"><div class="tracker-route">`;
-    allHubs.forEach((hub, i) => {
-      const passed = passedSet.has(hub);
-      const isActive = i === currentIdx;
-      const isPending = !passed;
-      const cls = passed ? 'done' : (isActive ? 'active' : 'pending');
-      const emoji = i===0 ? '🏭' : i===allHubs.length-1 ? '🏢' : '📍';
-      const stdTime = i===0
-        ? (o.route.originStdTime||'')
-        : (o.route.waypoints?.[i-1]?.stdTime || '');
-      const lastEvt = events.filter(e=>e.hub===hub).slice(-1)[0];
-      const timeStr = lastEvt ? lastEvt.time.slice(11,16) : (stdTime ? `표준${stdTime}분` : '');
-
-      trackerHtml += `<div class="tr-node">
+    trackerHtml=`<div style="overflow-x:auto;padding:4px 0"><div class="tracker-route">`;
+    allHubs.forEach((hub,i)=>{
+      const passed=passedSet.has(hub), isActive=i===currentIdx;
+      const cls=passed?'done':(isActive?'active':'pending');
+      const emoji=i===0?'🏭':i===allHubs.length-1?'🏢':'📍';
+      const lastEvt=events.filter(e=>e.hub===hub).slice(-1)[0];
+      const stdT=i===0?(o.route.originStdTime||''):(o.route.waypoints?.[i-1]?.stdTime||'');
+      const timeStr=lastEvt?lastEvt.time.slice(11,16):(stdT?`표준${stdT}분`:'');
+      trackerHtml+=`<div class="tr-node">
         <div class="tr-dot ${cls}">${emoji}</div>
         <div class="tr-node-label" style="color:${passed?'var(--green)':isActive?'var(--accent)':'#999'}">${hub}</div>
-        <div class="tr-node-time">${timeStr}</div>
-      </div>`;
-
-      if (i < allHubs.length-1) {
-        const nextPassed = passedSet.has(allHubs[i+1]);
-        const fillPct = passed && nextPassed ? '100' : passed ? '50' : '0';
-        const wpObj = o.route.waypoints?.[i] || {};
-        const st = i===0 ? o.route.originStdTime : (typeof wpObj==='object' ? wpObj.stdTime : '');
-        trackerHtml += `<div class="tr-conn">
-          <div class="tr-conn-bg"></div>
+        <div class="tr-node-time">${timeStr}</div></div>`;
+      if (i<allHubs.length-1) {
+        const nextPassed=passedSet.has(allHubs[i+1]);
+        const fillPct=passed&&nextPassed?'100':passed?'50':'0';
+        const wpObj=o.route.waypoints?.[i]||{};
+        const st=i===0?o.route.originStdTime:(typeof wpObj==='object'?wpObj.stdTime:'');
+        trackerHtml+=`<div class="tr-conn"><div class="tr-conn-bg"></div>
           <div class="tr-conn-fill" style="width:${fillPct}%"></div>
-          ${st ? `<div class="tr-conn-label">⏱${st}분</div>` : ''}
-        </div>`;
+          ${st?`<div class="tr-conn-label">⏱${st}분</div>`:''}</div>`;
       }
     });
-    trackerHtml += `</div></div>`;
+    trackerHtml+=`</div></div>`;
 
-    // last known position
-    const currentHub = currentIdx >= 0 ? allHubs[currentIdx] : null;
-    const nextHub = (currentIdx >= 0 && currentIdx < allHubs.length-1) ? allHubs[currentIdx+1] : null;
-    const finalDest = destination || allHubs[allHubs.length-1] || '-'; // 오더별 최종 도착지명
-
+    const currentHub=currentIdx>=0?allHubs[currentIdx]:null;
+    const nextHub=(currentIdx>=0&&currentIdx<allHubs.length-1)?allHubs[currentIdx+1]:null;
+    const finalDest=destination||allHubs[allHubs.length-1]||'-';
     if (currentHub) {
-      const isAtDest = currentHub === destination;
-      if (isAtDest) {
-        trackerHtml += `<div class="alert alert-success" style="margin-top:8px;margin-bottom:0">
-          ✅ <b>배송 완료</b> — 최종 도착지: <b>${finalDest}</b> 수령 확인됨</div>`;
-      } else {
-        trackerHtml += `<div class="alert alert-info" style="margin-top:8px;margin-bottom:0">
-          🚛 <b>현재 위치:</b> ${currentHub} 통과
-          &nbsp;|&nbsp; <b>다음 거점:</b> ${nextHub||'?'}
-          &nbsp;|&nbsp; 🏢 <b>최종 도착지:</b> <b style="color:#1565C0">${finalDest}</b>
-        </div>`;
-      }
-    } else if (events.length > 0) {
-      trackerHtml += `<div class="alert alert-warn" style="margin-top:8px;margin-bottom:0">
-        ⏳ 이벤트 기록됨 — 경로 거점 매핑 확인 필요 / 🏢 최종 도착지: <b>${finalDest}</b></div>`;
+      const isAtDest=currentHub===destination;
+      trackerHtml+=isAtDest
+        ? `<div class="alert alert-success" style="margin-top:8px;margin-bottom:0">✅ <b>배송 완료</b> — 최종 도착지: <b>${finalDest}</b> 수령 확인됨</div>`
+        : `<div class="alert alert-info" style="margin-top:8px;margin-bottom:0">🚛 <b>현재 위치:</b> ${currentHub} 통과 &nbsp;|&nbsp; <b>다음 거점:</b> ${nextHub||'?'} &nbsp;|&nbsp; 🏢 <b>최종 도착지:</b> <b style="color:#1565C0">${finalDest}</b></div>`;
     } else {
-      trackerHtml += `<div class="alert alert-warn" style="margin-top:8px;margin-bottom:0">
-        ⏳ 아직 출발 전 &nbsp;|&nbsp; 🏢 최종 도착지: <b>${finalDest}</b></div>`;
+      trackerHtml+=`<div class="alert alert-warn" style="margin-top:8px;margin-bottom:0">⏳ 아직 출발 전 &nbsp;|&nbsp; 🏢 최종 도착지: <b>${finalDest}</b></div>`;
     }
   }
 
-  const lastEvt = events.slice(-1)[0];
+  const lastEvt=events.slice(-1)[0];
   return `<div class="tracker-card">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
       <div>
         <div style="font-size:15px;font-weight:800;color:var(--dk)">${o.no}</div>
-        <div style="font-size:12px;color:var(--gray);margin-top:2px">
-          고객사: <b>${o.customer}</b> &nbsp;|&nbsp; 제품: <b>${o.product}</b> (코드: ${pcode}) &nbsp;|&nbsp; ${o.boxes}박스 &nbsp;|&nbsp; ${o.date}
-        </div>
+        <div style="font-size:12px;color:var(--gray);margin-top:2px">고객사: <b>${o.customer}</b> &nbsp;|&nbsp; 제품: <b>${o.product}</b> (코드: ${pcode}) &nbsp;|&nbsp; ${o.boxes}박스 &nbsp;|&nbsp; ${o.date}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">${statusHtml}
-        ${lastEvt ? `<span style="font-size:11px;color:var(--gray)">최근: ${lastEvt.hub} ${lastEvt.event} ${lastEvt.time.slice(11,16)}</span>` : ''}
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>
+        ${lastEvt?`<span style="font-size:11px;color:var(--gray)">최근: ${lastEvt.hub} ${lastEvt.event} ${lastEvt.time.slice(11,16)}</span>`:''}
       </div>
     </div>
-    ${trackerHtml || '<div style="color:var(--gray);font-size:12px">경로 정보 없음</div>'}
+    ${trackerHtml||'<div style="color:var(--gray);font-size:12px">경로 정보 없음</div>'}
   </div>`;
 }
 
-// ─── PACKING ──────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── PACKING ──────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function fillPackingSelects() {
   fillSel('pk-order', S.orders().filter(o=>o.status==='대기').map(o=>({v:o.no, l:`${o.no} · ${o.customer}`})));
   renderPackingDone();
@@ -1026,10 +1127,8 @@ function doPacking() {
   const o=S.orders().find(x=>x.no===no);
   const arr=S.packings();
   arr.push({orderNo:no, customer:o?.customer||'', boxes:o?.boxes||0, doneAt:now(), person:'창고담당'});
-  S.set('packings',arr);
-  updateOrderStatus(no,'패킹중');
-  alert(`✅ [${no}] Packing 완료`);
-  fillPackingSelects();
+  S.set('packings', arr); updateOrderStatus(no,'패킹중');
+  alert(`✅ [${no}] Packing 완료`); fillPackingSelects();
 }
 function renderPackingDone() {
   el('packing-done-body').innerHTML = S.packings().map(p=>
@@ -1037,7 +1136,9 @@ function renderPackingDone() {
   ).join('') || '<tr><td colspan="5" class="empty">없음</td></tr>';
 }
 
-// ─── DISPATCH ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── DISPATCH ─────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function fillDispatchSelects() {
   fillSel('dp-order', S.orders().filter(o=>['패킹중','대기'].includes(o.status)).map(o=>({v:o.no, l:`${o.no} · ${o.customer}`})));
   fillSel('dp-vehicle', S.vehicles().map(vv=>({v:vv.no, l:`${vv.no} · ${vv.driver} (${vv.type||''})`})));
@@ -1054,19 +1155,17 @@ function doDispatch() {
   const arr=S.dispatches();
   arr.push({orderNo, vehicleNo:vno, driver:vv?.driver||'-', dphone:vv?.dphone||'-',
     departPlan:v('dp-depart-plan'), eta:v('dp-eta'), departAt:now(), note:v('dp-note'), status:'운송중'});
-  S.set('dispatches',arr);
-  updateOrderStatus(orderNo,'운송중');
-  // auto OUT event
+  S.set('dispatches', arr); updateOrderStatus(orderNo,'운송중');
   const o=S.orders().find(x=>x.no===orderNo);
-  const originHub = o?.route?.origin||'자사창고';
+  const originHub=o?.route?.origin||'자사창고';
   const events=S.events();
   events.push({time:now(), orderNo, customer:o?.customer||'', hub:originHub, event:'OUT', person:'배차담당', note:'차량출발'});
-  S.set('events',events);
+  S.set('events', events);
   alert(`✅ 배차완료\n오더: ${orderNo} | 차량: ${vno}`);
   fillDispatchSelects();
 }
 function renderDispatch() {
-  el('dispatch-table-body').innerHTML = S.dispatches().map(d => {
+  el('dispatch-table-body').innerHTML = S.dispatches().map(d=>{
     const o=S.orders().find(x=>x.no===d.orderNo);
     return `<tr><td><b>${d.orderNo}</b></td><td>${o?.customer||'-'}</td>
     <td style="font-size:11px">${getRouteShort(o||{})}</td>
@@ -1075,222 +1174,162 @@ function renderDispatch() {
   }).join('') || '<tr><td colspan="8" class="empty">없음</td></tr>';
 }
 
-// ─── TRACKING ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── TRACKING ─────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function fillTrackingSelects() {
   const active=S.orders().filter(o=>['운송중','패킹중','배차완료'].includes(o.status));
   fillSel('tr-order', active.map(o=>({v:o.no, l:`${o.no} · ${o.customer}`})));
   fillSel('tr-track-order', S.orders().map(o=>({v:o.no, l:`${o.no} · ${o.customer} [${o.status}]`})));
   fillSel('tr-hub', S.hubs().map(h=>({v:h.name, l:`${h.name} (${h.type})`})));
-  el('tr-time').value = localDT();   // ← 로컬 시간으로 기본값 설정
+  el('tr-time').value = localDT();
   renderTrackingLog();
 }
 function loadOrderHubs() {
   const no=v('tr-order'), o=S.orders().find(x=>x.no===no);
-  if (!o||!o.route) {
-    fillSel('tr-hub', S.hubs().map(h=>({v:h.name, l:`${h.name} (${h.type})`})));
-    el('tr-hub-hint').textContent=''; return;
-  }
+  if (!o||!o.route) { fillSel('tr-hub', S.hubs().map(h=>({v:h.name, l:`${h.name} (${h.type})`}))); el('tr-hub-hint').textContent=''; return; }
   const {origin, waypoints, destination}=o.route;
-  const names=[origin, ...(waypoints||[]).map(w=>typeof w==='string'?w:w.name), destination].filter(Boolean);
+  const names=[origin,...(waypoints||[]).map(w=>typeof w==='string'?w:w.name),destination].filter(Boolean);
   const hs=S.hubs();
-  fillSel('tr-hub', names.map(n => { const h=hs.find(x=>x.name===n); return {v:n, l:`${n} (${h?.type||''})`}; }));
+  fillSel('tr-hub', names.map(n=>{const h=hs.find(x=>x.name===n); return {v:n, l:`${n} (${h?.type||''})`};}));
   el('tr-hub-hint').textContent=`— 이 오더 경로 ${names.length}개 거점만 표시`;
 }
 function saveTracking() {
   const orderNo=v('tr-order'), hub=v('tr-hub'), eventType=v('tr-event');
   if (!orderNo||!hub) return alert('오더와 거점을 선택하세요');
   const o=S.orders().find(x=>x.no===orderNo);
-
-  // 처리일시: input 값을 직접 읽어 정규화 (datetime-local "T" → " " 변환)
-  const rawTime = document.getElementById('tr-time').value;
-  const t = normTime(rawTime);   // 사용자 지정값 우선, 비었으면 현재 로컬시각
+  const rawTime=document.getElementById('tr-time').value;
+  const t=normTime(rawTime);
   const events=S.events();
   events.push({time:t, orderNo, customer:o?.customer||'', hub, event:eventType, person:v('tr-person'), note:v('tr-note')});
-  S.set('events',events);
+  S.set('events', events);
   if (eventType==='도착완료') updateOrderStatus(orderNo,'도착완료');
 
-  // ── 비지정 거점 알람 감지 ─────────────────────────────────────────
-  if (o && o.route) {
-    const {origin, waypoints, destination} = o.route;
-    const routeHubs = new Set([
-      origin,
-      ...(waypoints||[]).map(w=>typeof w==='string'?w:w.name),
-      destination
-    ].filter(Boolean));
-
+  // 비지정 거점 알람
+  if (o&&o.route) {
+    const {origin, waypoints, destination}=o.route;
+    const routeHubs=new Set([origin,...(waypoints||[]).map(w=>typeof w==='string'?w:w.name),destination].filter(Boolean));
     if (!routeHubs.has(hub)) {
-      const alarms = S.alarms();
-      const alarmId = `ALM-${Date.now()}`;
-      alarms.push({
-        id: alarmId,
-        time: t,
-        type: 'OFF_ROUTE',
-        orderNo,
-        customer: o.customer||'',
-        hub,
-        event: eventType,
-        message: `[비지정 거점] 오더 ${orderNo}(${o.customer})의 지정경로 외 거점 "${hub}"에서 ${eventType} 이벤트 발생`,
-        read: false
-      });
+      const alarms=S.alarms();
+      const alarmId=`ALM-${Date.now()}`;
+      alarms.push({id:alarmId, time:t, type:'OFF_ROUTE', orderNo, customer:o.customer||'', hub, event:eventType,
+        message:`[비지정 거점] 오더 ${orderNo}(${o.customer})의 지정경로 외 거점 "${hub}"에서 ${eventType} 이벤트 발생`, read:false});
       S.set('alarms', alarms);
-      // 즉시 팝업 경고
-      alert(`🚨 경고: 비지정 거점 이벤트 감지!\n\n오더: ${orderNo} (${o.customer})\n발생 거점: "${hub}"\n이 거점은 해당 오더의 지정 경로에 없습니다.\n즉각 확인이 필요합니다.`);
-    } else {
-      alert(`✅ [${orderNo}] ${hub} ${eventType}`);
-    }
-  } else {
-    alert(`✅ [${orderNo}] ${hub} ${eventType}`);
-  }
+      alert(`🚨 경고: 비지정 거점 이벤트 감지!\n\n오더: ${orderNo} (${o.customer})\n발생 거점: "${hub}"\n이 거점은 해당 오더의 지정 경로에 없습니다.`);
+    } else { alert(`✅ [${orderNo}] ${hub} ${eventType}`); }
+  } else { alert(`✅ [${orderNo}] ${hub} ${eventType}`); }
 
   fillTrackingSelects(); showOrderTrack();
 }
 function showOrderTrack() {
-  const no=v('tr-track-order');
-  const o=S.orders().find(x=>x.no===no);
+  const no=v('tr-track-order'), o=S.orders().find(x=>x.no===no);
   if (!no) { el('order-track-display').innerHTML='<div class="empty">오더를 선택하세요</div>'; return; }
   const evts=S.events().filter(e=>e.orderNo===no).sort((a,b)=>a.time.localeCompare(b.time));
   const ps=S.products();
-  let html = buildTrackerCard(o, ps);
-  html += '<ul class="timeline" style="margin-top:12px">';
-  evts.forEach(e => {
-    html+=`<li class="tl-item ${e.event==='도착완료'?'done':''}">
-      <div class="tl-time">${e.time}</div>
-      <div class="tl-text">[${e.event}] ${e.hub}</div>
-      <div class="tl-sub">처리자: ${e.person||'-'}${e.note?' | '+e.note:''}</div>
-    </li>`;
-  });
+  let html=buildTrackerCard(o, ps);
+  html+='<ul class="timeline" style="margin-top:12px">';
+  evts.forEach(e=>{ html+=`<li class="tl-item ${e.event==='도착완료'?'done':''}">
+    <div class="tl-time">${e.time}</div><div class="tl-text">[${e.event}] ${e.hub}</div>
+    <div class="tl-sub">처리자: ${e.person||'-'}${e.note?' | '+e.note:''}</div></li>`; });
   if (!evts.length) html+='<li class="tl-item"><div class="tl-text" style="color:var(--gray)">이벤트 없음</div></li>';
   html+='</ul>';
   el('order-track-display').innerHTML=html;
 }
 function renderTrackingLog() {
-  el('tracking-log-body').innerHTML = S.events().slice().reverse().map(e => {
+  el('tracking-log-body').innerHTML = S.events().slice().reverse().map(e=>{
     const cls=e.event==='IN'?'s-in':e.event==='OUT'?'s-out':'s-done';
     return `<tr><td>${e.time}</td><td><b>${e.orderNo}</b></td><td>${e.customer}</td><td>${e.hub}</td>
     <td><span class="status ${cls}">${e.event}</span></td><td>${e.person||'-'}</td><td>${e.note||'-'}</td></tr>`;
   }).join('') || '<tr><td colspan="7" class="empty">이벤트 없음</td></tr>';
 }
 
-// ─── DASHBOARD ────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── DASHBOARD ────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function renderDashboard() {
   const orders=S.orders();
   const total=orders.filter(o=>!['도착완료'].includes(o.status)).length;
   const done=orders.filter(o=>o.status==='도착완료').length;
   const moving=orders.filter(o=>o.status==='운송중').length;
   const delay=orders.filter(o=>o.status==='지연').length;
-  el('kpi-total').textContent=total;
-  el('kpi-done').textContent=done;
-  el('kpi-moving').textContent=moving;
-  const offCount = S.alarms().filter(a=>a.type==='OFF_ROUTE').length;
-  el('kpi-delay').textContent=delay + offCount;
-  el('kpi-delay-label').textContent = offCount > 0 ? `지연 ${delay}건 + 비지정 ${offCount}건` : '지연 발생 건';
+  el('kpi-total').textContent=total; el('kpi-done').textContent=done; el('kpi-moving').textContent=moving;
+  const offCount=S.alarms().filter(a=>a.type==='OFF_ROUTE').length;
+  el('kpi-delay').textContent=delay+offCount;
+  el('kpi-delay-label').textContent=offCount>0?`지연 ${delay}건 + 비지정 ${offCount}건`:'지연 발생 건';
 
   const stMap={'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
-  el('dash-order-body').innerHTML = orders.slice(-10).reverse().map(o =>
+  el('dash-order-body').innerHTML = orders.slice(-10).reverse().map(o=>
     `<tr><td><b>${o.no}</b></td><td>${o.customer}</td><td>${o.product}</td>
     <td style="font-size:11px">${getRouteShort(o)}</td>
     <td><span class="status ${stMap[o.status]||''}">${o.status}</span></td></tr>`
   ).join('') || '<tr><td colspan="5" class="empty">출하오더 없음</td></tr>';
 
   const hubs=S.hubs(), events=S.events();
-  el('dash-hub-body').innerHTML = hubs.length ? hubs.map(h => {
+  el('dash-hub-body').innerHTML = hubs.length ? hubs.map(h=>{
     const last=events.filter(e=>e.hub===h.name).slice(-1)[0];
     const [bg,tc]=TYPE_COL[h.type]||['#eee','#333'];
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee">
       <div style="display:flex;align-items:center;gap:7px">
         <span style="width:10px;height:10px;border-radius:50%;background:${tc};flex-shrink:0;display:inline-block"></span>
-        <div><b style="font-size:12px">${h.name}</b><br><span style="font-size:10px;background:${bg};color:${tc};padding:1px 5px;border-radius:4px">${h.type}</span></div>
+        <div><b style="font-size:12px">${h.name}</b><br>${typeTag(h.type)}</div>
       </div>
-      <div style="text-align:right;font-size:11px;color:var(--gray)">${last ? last.event+' '+last.time.slice(11,16) : '-'}</div>
+      <div style="text-align:right;font-size:11px;color:var(--gray)">${last?last.event+' '+last.time.slice(11,16):'-'}</div>
     </div>`;
   }).join('') : '<div class="empty">거점 정보 없음</div>';
 
   const delayOrders=orders.filter(o=>o.status==='지연');
   const offRouteAlarms=S.alarms().filter(a=>a.type==='OFF_ROUTE');
-  const totalAlarmCount = delayOrders.length + offRouteAlarms.length;
-  el('alarm-count-badge').textContent=totalAlarmCount+'건';
-
-  let alarmHtml = '';
-  // 비지정 거점 알람 (긴급, 상단 배치)
-  if (offRouteAlarms.length) {
-    alarmHtml += offRouteAlarms.slice().reverse().map(a =>
-      `<div class="alert alert-danger" style="border-left-color:#8B0000;background:#FFF0F0">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div>
-            <b>🚨 비지정 거점 이벤트</b> — ${a.time}<br>
-            오더: <b>${a.orderNo}</b> (${a.customer}) &nbsp;|&nbsp; 거점: <b style="color:#C0392B">${a.hub}</b> &nbsp;|&nbsp; 유형: ${a.event}<br>
-            <span style="font-size:11px">${a.message}</span>
-          </div>
-          <button class="btn btn-xs" style="background:#C0392B;color:#fff;flex-shrink:0;margin-left:8px"
-            onclick="dismissAlarm('${a.id}')">확인</button>
-        </div>
-      </div>`
-    ).join('');
-  }
-  // 지연 알람
-  if (delayOrders.length) {
-    alarmHtml += delayOrders.map(o=>
-      `<div class="alert alert-danger">⚠ [${o.no}] ${o.customer} — 지연 발생 | ${getRouteShort(o)}</div>`
-    ).join('');
-  }
-  el('alarm-list').innerHTML = alarmHtml || '<div class="empty">알람 없음 ✅</div>';
+  el('alarm-count-badge').textContent=(delayOrders.length+offRouteAlarms.length)+'건';
+  let alarmHtml='';
+  if (offRouteAlarms.length) alarmHtml+=offRouteAlarms.slice().reverse().map(a=>
+    `<div class="alert alert-danger" style="border-left-color:#8B0000;background:#FFF0F0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><b>🚨 비지정 거점 이벤트</b> — ${a.time}<br>오더: <b>${a.orderNo}</b> (${a.customer}) | 거점: <b style="color:#C0392B">${a.hub}</b> | 유형: ${a.event}</div>
+        <button class="btn btn-xs" style="background:#C0392B;color:#fff;flex-shrink:0;margin-left:8px" onclick="dismissAlarm('${a.id}')">확인</button>
+      </div></div>`).join('');
+  if (delayOrders.length) alarmHtml+=delayOrders.map(o=>`<div class="alert alert-danger">⚠ [${o.no}] ${o.customer} — 지연 발생</div>`).join('');
+  el('alarm-list').innerHTML=alarmHtml||'<div class="empty">알람 없음 ✅</div>';
 }
 
-// ─── CEO ──────────────────────────────────────────────────────────────────
+function dismissAlarm(id) {
+  const arr=S.alarms().filter(a=>a.id!==id);
+  S.set('alarms', arr); renderDashboard();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ─── CEO ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function renderCEO() {
   const orders=S.orders(), events=S.events(), hubs=S.hubs();
   const total=orders.filter(o=>!['도착완료'].includes(o.status)).length;
   const done=orders.filter(o=>o.status==='도착완료').length;
   const delay=orders.filter(o=>o.status==='지연').length;
-  const ontime=done>0 ? Math.round((done/(done+delay))*100) : 100;
-  const avgWp=orders.length ? (orders.reduce((s,o)=>s+(o.route?.waypoints?.length||0),0)/orders.length).toFixed(1) : '-';
-
-  el('ceo-total').textContent=total;
-  el('ceo-done2').textContent=done;
-  el('ceo-delay2').textContent=delay;
-  el('ceo-ontime').textContent=ontime+'%';
-  el('ceo-ontime-bar').style.width=ontime+'%';
+  const ontime=done>0?Math.round((done/(done+delay))*100):100;
+  const avgWp=orders.length?(orders.reduce((s,o)=>s+(o.route?.waypoints?.length||0),0)/orders.length).toFixed(1):'-';
+  el('ceo-total').textContent=total; el('ceo-done2').textContent=done; el('ceo-delay2').textContent=delay;
+  el('ceo-ontime').textContent=ontime+'%'; el('ceo-ontime-bar').style.width=ontime+'%';
   el('ceo-avgwp').textContent=avgWp+'개소';
-
-  el('ceo-hub-list').innerHTML=hubs.length ? hubs.map(h=>{
+  el('ceo-hub-list').innerHTML=hubs.length?hubs.map(h=>{
     const last=events.filter(e=>e.hub===h.name).slice(-1)[0];
     return `<div class="ceo-row"><div class="ceo-row-label">${h.name}</div>
     <div class="ceo-row-val cv-white" style="font-size:10px">${last?last.event+' '+last.time.slice(11,16):'없음'}</div></div>`;
-  }).join('') : '<div style="color:rgba(255,255,255,.5);font-size:11px">없음</div>';
-
+  }).join(''):'<div style="color:rgba(255,255,255,.5);font-size:11px">없음</div>';
   el('ceo-order-list').innerHTML=orders.filter(o=>!['도착완료'].includes(o.status)).slice(0,5).map(o=>{
     const last=events.filter(e=>e.orderNo===o.no).slice(-1)[0];
-    const dest = o.route?.destination || '-';
-    const currentPos = last ? last.hub : '대기중';
+    const dest=o.route?.destination||'-';
     return `<div class="ceo-order-item">
       <div class="ceo-order-no">${o.no}</div>
       <div class="ceo-order-main">${o.customer} · ${o.product}</div>
-      <div class="ceo-order-step">📍 현재: ${currentPos} | 🏢 도착지: ${dest}</div>
-      <div class="ceo-order-step" style="margin-top:2px">${o.status}${last?' | '+last.event+' '+last.time.slice(11,16):''}</div>
+      <div class="ceo-order-step">📍 현재: ${last?last.hub:'대기중'} | 🏢 도착지: ${dest}</div>
+      <div class="ceo-order-step">${o.status}${last?' | '+last.event+' '+last.time.slice(11,16):''}</div>
     </div>`;
-  }).join('') || '<div style="color:rgba(255,255,255,.5);font-size:11px">없음</div>';
-
-  const offRouteAlarms=S.alarms().filter(a=>a.type==='OFF_ROUTE');
+  }).join('')||'<div style="color:rgba(255,255,255,.5);font-size:11px">없음</div>';
+  const offRA=S.alarms().filter(a=>a.type==='OFF_ROUTE');
   const delayAl=orders.filter(o=>o.status==='지연');
-  const totalAl=offRouteAlarms.length+delayAl.length;
-  let ceoAlarmHtml='';
-  if (offRouteAlarms.length) {
-    ceoAlarmHtml += offRouteAlarms.slice(-3).reverse().map(a=>
-      `<div class="ceo-alarm">
-        <div class="ceo-alarm-title">🚨 비지정거점: ${a.orderNo}</div>
-        <div class="ceo-alarm-desc">${a.hub} — 지정경로 외 이벤트 (${a.time.slice(11,16)})</div>
-      </div>`).join('');
-  }
-  if (delayAl.length) {
-    ceoAlarmHtml += delayAl.map(o=>
-      `<div class="ceo-alarm">
-        <div class="ceo-alarm-title">⚠ 지연: ${o.no}</div>
-        <div class="ceo-alarm-desc">${o.customer} — 지연 발생</div>
-      </div>`).join('');
-  }
-  el('ceo-alarm-list').innerHTML = ceoAlarmHtml ||
-    '<div style="color:rgba(255,255,255,.5);font-size:11px">✅ 알람 없음</div>';
-
+  let ceoAl='';
+  if (offRA.length) ceoAl+=offRA.slice(-3).reverse().map(a=>`<div class="ceo-alarm"><div class="ceo-alarm-title">🚨 비지정거점: ${a.orderNo}</div><div class="ceo-alarm-desc">${a.hub} — 지정경로 외 이벤트 (${a.time.slice(11,16)})</div></div>`).join('');
+  if (delayAl.length) ceoAl+=delayAl.map(o=>`<div class="ceo-alarm"><div class="ceo-alarm-title">⚠ 지연: ${o.no}</div><div class="ceo-alarm-desc">${o.customer}</div></div>`).join('');
+  el('ceo-alarm-list').innerHTML=ceoAl||'<div style="color:rgba(255,255,255,.5);font-size:11px">✅ 없음</div>';
   el('ceo-kpi-detail').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div style="text-align:center;padding:14px;background:var(--pale);border-radius:8px"><div style="font-size:28px;font-weight:800;color:var(--dk)">${ontime}%</div><div style="font-size:11px;color:var(--gray)">정시납품율</div></div>
@@ -1298,93 +1337,89 @@ function renderCEO() {
       <div style="text-align:center;padding:14px;background:#FFF3CD;border-radius:8px"><div style="font-size:28px;font-weight:800;color:var(--orange)">${total}</div><div style="font-size:11px;color:var(--gray)">진행중</div></div>
       <div style="text-align:center;padding:14px;background:#FFEBEE;border-radius:8px"><div style="font-size:28px;font-weight:800;color:var(--red)">${delay}</div><div style="font-size:11px;color:var(--gray)">지연 건</div></div>
     </div>`;
-
   const pts=[];
   if (delay>0) pts.push(`<div class="alert alert-danger">⚠ 지연 ${delay}건 — 즉각 조치 필요</div>`);
   if (ontime>=95) pts.push(`<div class="alert alert-success">✅ 정시납품율 ${ontime}% — 우수 수준</div>`);
   if (total>0) pts.push(`<div class="alert alert-info">📦 운송중 오더 ${total}건 정상 진행 중</div>`);
-  if (total===0&&done===0) pts.push(`<div class="alert alert-info">ℹ️ 현재 진행중인 출하오더 없음</div>`);
+  if (total===0&&done===0) pts.push(`<div class="alert alert-info">ℹ️ 진행중인 출하오더 없음</div>`);
   el('ceo-report-point').innerHTML=pts.join('')||'<div class="empty">특이사항 없음</div>';
 }
 
-// ─── UTILS ────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── UTILS ────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function v(id) { const e=document.getElementById(id); return e?e.value.trim():''; }
 function el(id) { return document.getElementById(id); }
-
-// 로컬 시간 기반 현재시각 문자열 (저장용: "YYYY-MM-DD HH:mm")
 function now() {
   const d=new Date(), pad=n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-// datetime-local input 초기값용 로컬 시간 ("YYYY-MM-DDTHH:mm")
 function localDT() {
   const d=new Date(), pad=n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-// datetime-local 입력값을 저장 포맷으로 정규화 ("T" → " ")
-function normTime(raw) { return raw ? raw.replace('T',' ') : now(); }
+function normTime(raw) { return raw?raw.replace('T',' '):now(); }
 function fillSel(id, opts) {
   const e=document.getElementById(id); if(!e) return;
   const cur=e.value;
   e.innerHTML='<option value="">-- 선택 --</option>'+opts.map(o=>`<option value="${o.v}"${o.v===cur?' selected':''}>${o.l}</option>`).join('');
 }
 
-// ─── SAMPLE DATA ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ─── SAMPLE DATA ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
 function initSampleData() {
-  // 고객사 - 없으면 추가
-  if (!S.customers().length) {
-    S.set('customers', [
-      {code:'C001', name:'Samsung Electronics', manager:'김철수', phone:'031-200-1234', addr:'수원시 영통구 삼성로 129', confirm:'서명+사진'},
-      {code:'C002', name:'LG Display', manager:'이영희', phone:'031-680-5678', addr:'파주시 월롱면 LG로 245', confirm:'QR스캔'},
-      {code:'C003', name:'SK Hynix', manager:'박민준', phone:'031-5185-4321', addr:'이천시 부발읍 SK하이닉스로 26', confirm:'서명'},
-    ]);
-  }
-  if (!S.products().length) {
-    S.set('products', [
-      {code:'P001', name:'OLED Module A타입', box:'50x40x30cm', qty:10, weight:8.5},
-      {code:'P002', name:'LCD Panel B타입',   box:'60x45x25cm', qty:6,  weight:12.0},
-      {code:'P003', name:'Camera Module C타입',box:'30x25x20cm', qty:20, weight:3.2},
-    ]);
-  }
-  if (!S.vehicles().length) {
-    S.set('vehicles', [
-      {no:'경기 4521가', type:'2.5톤 윙바디', cap:2500, driver:'홍길동', dphone:'010-1234-5678', status:'대기'},
-      {no:'인천 3847나', type:'1톤 탑차',     cap:1000, driver:'김영수', dphone:'010-9876-5432', status:'대기'},
-      {no:'서울 9012다', type:'5톤 냉동차',   cap:5000, driver:'이재훈', dphone:'010-5555-7777', status:'대기'},
-    ]);
-  }
-
-  // 거점: 버전 체크 — 경유지 5개 미만이면 전체 재로드
-  const hubs = S.hubs();
-  const wpCount = hubs.filter(h=>h.type==='경유지').length;
-  const destCount = hubs.filter(h=>h.type==='도착(고객사)').length;
-  if (wpCount < 5 || destCount < 3) {
-    S.set('hubs', [
-      // 출발지
-      {code:'HUB-W01', name:'자사물류창고 (화성)', type:'출발(자사창고)', addr:'경기도 화성시 서신면 공업단지로 100', mgr:'창고팀장'},
-      // 경유지 5개
-      {code:'HUB-T01', name:'수도권물류센터 (용인)', type:'경유지', addr:'경기도 용인시 처인구 물류단지길 50',  mgr:'물류담당'},
-      {code:'HUB-T02', name:'안성허브터미널',         type:'경유지', addr:'경기도 안성시 공도읍 공단로 120',    mgr:'터미널장'},
-      {code:'HUB-T03', name:'인천항 CY 창고',         type:'경유지', addr:'인천시 연수구 인천신항대로 600',     mgr:'CY담당'},
-      {code:'HUB-T04', name:'수원 중간집하장',         type:'경유지', addr:'경기도 수원시 팔달구 팔달로 180',    mgr:'집하장담당'},
-      {code:'HUB-T05', name:'파주 물류단지',           type:'경유지', addr:'경기도 파주시 탄현면 물류단지로 30', mgr:'단지관리'},
-      // 도착지 3개
-      {code:'HUB-D01', name:'Samsung Electronics 수원', type:'도착(고객사)', addr:'수원시 영통구 삼성로 129',          mgr:'자재입고담당'},
-      {code:'HUB-D02', name:'LG Display 파주공장',       type:'도착(고객사)', addr:'파주시 월롱면 LG로 245',             mgr:'입고팀'},
-      {code:'HUB-D03', name:'SK Hynix 이천캠퍼스',       type:'도착(고객사)', addr:'이천시 부발읍 SK하이닉스로 26',      mgr:'자재수령팀'},
-    ]);
-  }
+  DB.customers = [
+    {code:'C001', name:'Samsung Electronics', manager:'김철수', phone:'031-200-1234', addr:'수원시 영통구 삼성로 129', confirm:'서명+사진'},
+    {code:'C002', name:'LG Display', manager:'이영희', phone:'031-680-5678', addr:'파주시 월롱면 LG로 245', confirm:'QR스캔'},
+    {code:'C003', name:'SK Hynix', manager:'박민준', phone:'031-5185-4321', addr:'이천시 부발읍 SK하이닉스로 26', confirm:'서명'},
+  ];
+  DB.products = [
+    {code:'P001', name:'OLED Module A타입', box:'50x40x30cm', qty:10, weight:8.5},
+    {code:'P002', name:'LCD Panel B타입',   box:'60x45x25cm', qty:6,  weight:12.0},
+    {code:'P003', name:'Camera Module C타입',box:'30x25x20cm', qty:20, weight:3.2},
+  ];
+  DB.vehicles = [
+    {no:'경기 4521가', type:'2.5톤 윙바디', cap:2500, driver:'홍길동', dphone:'010-1234-5678', status:'대기'},
+    {no:'인천 3847나', type:'1톤 탑차',     cap:1000, driver:'김영수', dphone:'010-9876-5432', status:'대기'},
+    {no:'서울 9012다', type:'5톤 냉동차',   cap:5000, driver:'이재훈', dphone:'010-5555-7777', status:'대기'},
+  ];
+  DB.hubs = [
+    {code:'HUB-W01', name:'자사물류창고 (화성)',      type:'출발(자사창고)', addr:'경기도 화성시 서신면 공업단지로 100', mgr:'창고팀장'},
+    {code:'HUB-T01', name:'수도권물류센터 (용인)',     type:'경유지', addr:'경기도 용인시 처인구 물류단지길 50', mgr:'물류담당'},
+    {code:'HUB-T02', name:'안성허브터미널',            type:'경유지', addr:'경기도 안성시 공도읍 공단로 120', mgr:'터미널장'},
+    {code:'HUB-T03', name:'인천항 CY 창고',           type:'경유지', addr:'인천시 연수구 인천신항대로 600', mgr:'CY담당'},
+    {code:'HUB-T04', name:'수원 중간집하장',           type:'경유지', addr:'경기도 수원시 팔달구 팔달로 180', mgr:'집하장담당'},
+    {code:'HUB-T05', name:'파주 물류단지',             type:'경유지', addr:'경기도 파주시 탄현면 물류단지로 30', mgr:'단지관리'},
+    {code:'HUB-D01', name:'Samsung Electronics 수원', type:'도착(고객사)', addr:'수원시 영통구 삼성로 129', mgr:'자재입고담당'},
+    {code:'HUB-D02', name:'LG Display 파주공장',      type:'도착(고객사)', addr:'파주시 월롱면 LG로 245', mgr:'입고팀'},
+    {code:'HUB-D03', name:'SK Hynix 이천캠퍼스',      type:'도착(고객사)', addr:'이천시 부발읍 SK하이닉스로 26', mgr:'자재수령팀'},
+  ];
 }
 
-function dismissAlarm(id) {
-  const arr = S.alarms().filter(a => a.id !== id);
-  S.set('alarms', arr);
+// ══════════════════════════════════════════════════════════════════
+// ─── INIT ─────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// 아티팩트 모드: localStorage에서 직접 로드
+(function() {
+  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms'];
+  let hasData = false;
+  keys.forEach(k => {
+    try {
+      const raw = localStorage.getItem('lmts_' + k);
+      if (raw) { DB[k] = JSON.parse(raw); hasData = true; }
+    } catch(e) {}
+  });
+  if (!hasData || !DB.hubs.length) {
+    initSampleData();
+  }
+  // 네비바 상태 표시
+  const dot = document.getElementById('gh-dot');
+  const txt = document.getElementById('gh-status-text');
+  if (dot) dot.className = 'status-dot ok';
+  if (txt) txt.textContent = '로컬 모드';
   renderDashboard();
-}
-
-// ─── INIT ─────────────────────────────────────────────────────────────────
-initSampleData();
-renderDashboard();
+})();
 </script>
 </body>
 </html>
