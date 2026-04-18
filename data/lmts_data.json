@@ -1,0 +1,148 @@
+{
+  "customers": [
+    {
+      "code": "C001",
+      "name": "Samsung Electronics",
+      "manager": "김철수",
+      "phone": "031-200-1234",
+      "addr": "수원시 영통구 삼성로 129",
+      "confirm": "서명+사진"
+    },
+    {
+      "code": "C002",
+      "name": "LG Display",
+      "manager": "이영희",
+      "phone": "031-680-5678",
+      "addr": "파주시 월롱면 LG로 245",
+      "confirm": "QR스캔"
+    },
+    {
+      "code": "C003",
+      "name": "SK Hynix",
+      "manager": "박민준",
+      "phone": "031-5185-4321",
+      "addr": "이천시 부발읍 SK하이닉스로 26",
+      "confirm": "서명"
+    }
+  ],
+  "products": [
+    {
+      "code": "P001",
+      "name": "OLED Module A타입",
+      "box": "50x40x30cm",
+      "qty": 10,
+      "weight": 8.5
+    },
+    {
+      "code": "P002",
+      "name": "LCD Panel B타입",
+      "box": "60x45x25cm",
+      "qty": 6,
+      "weight": 12
+    },
+    {
+      "code": "P003",
+      "name": "Camera Module C타입",
+      "box": "30x25x20cm",
+      "qty": 20,
+      "weight": 3.2
+    }
+  ],
+  "vehicles": [
+    {
+      "no": "경기 4521가",
+      "type": "2.5톤 윙바디",
+      "cap": 2500,
+      "driver": "홍길동",
+      "dphone": "010-1234-5678",
+      "status": "대기"
+    },
+    {
+      "no": "인천 3847나",
+      "type": "1톤 탑차",
+      "cap": 1000,
+      "driver": "김영수",
+      "dphone": "010-9876-5432",
+      "status": "대기"
+    },
+    {
+      "no": "서울 9012다",
+      "type": "5톤 냉동차",
+      "cap": 5000,
+      "driver": "이재훈",
+      "dphone": "010-5555-7777",
+      "status": "대기"
+    }
+  ],
+  "hubs": [
+    {
+      "code": "HUB-W01",
+      "name": "자사물류창고 (화성)",
+      "type": "출발(자사창고)",
+      "addr": "경기도 화성시 서신면 공업단지로 100",
+      "mgr": "창고팀장"
+    },
+    {
+      "code": "HUB-T01",
+      "name": "수도권물류센터 (용인)",
+      "type": "경유지",
+      "addr": "경기도 용인시 처인구 물류단지길 50",
+      "mgr": "물류담당"
+    },
+    {
+      "code": "HUB-T02",
+      "name": "안성허브터미널",
+      "type": "경유지",
+      "addr": "경기도 안성시 공도읍 공단로 120",
+      "mgr": "터미널장"
+    },
+    {
+      "code": "HUB-T03",
+      "name": "인천항 CY 창고",
+      "type": "경유지",
+      "addr": "인천시 연수구 인천신항대로 600",
+      "mgr": "CY담당"
+    },
+    {
+      "code": "HUB-T04",
+      "name": "수원 중간집하장",
+      "type": "경유지",
+      "addr": "경기도 수원시 팔달구 팔달로 180",
+      "mgr": "집하장담당"
+    },
+    {
+      "code": "HUB-T05",
+      "name": "파주 물류단지",
+      "type": "경유지",
+      "addr": "경기도 파주시 탄현면 물류단지로 30",
+      "mgr": "단지관리"
+    },
+    {
+      "code": "HUB-D01",
+      "name": "Samsung Electronics 수원",
+      "type": "도착(고객사)",
+      "addr": "수원시 영통구 삼성로 129",
+      "mgr": "자재입고담당"
+    },
+    {
+      "code": "HUB-D02",
+      "name": "LG Display 파주공장",
+      "type": "도착(고객사)",
+      "addr": "파주시 월롱면 LG로 245",
+      "mgr": "입고팀"
+    },
+    {
+      "code": "HUB-D03",
+      "name": "SK Hynix 이천캠퍼스",
+      "type": "도착(고객사)",
+      "addr": "이천시 부발읍 SK하이닉스로 26",
+      "mgr": "자재수령팀"
+    }
+  ],
+  "orders": [],
+  "packings": [],
+  "dispatches": [],
+  "events": [],
+  "alarms": [],
+  "lastUpdated": "2026-04-18 09:00"
+}
