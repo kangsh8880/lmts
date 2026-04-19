@@ -118,6 +118,76 @@
       "mgr": "단지관리"
     },
     {
+      "code": "HUB-AIR-KR01",
+      "name": "인천국제공항 (ICN)",
+      "type": "경유지",
+      "addr": "인천시 중구 공항로 272",
+      "mgr": "항공화물팀"
+    },
+    {
+      "code": "HUB-AIR-KR02",
+      "name": "김해국제공항 (PUS)",
+      "type": "경유지",
+      "addr": "부산시 강서구 공항진입로 108",
+      "mgr": "항공화물팀"
+    },
+    {
+      "code": "HUB-AIR-US01",
+      "name": "LA국제공항 (LAX)",
+      "type": "경유지",
+      "addr": "1 World Way, Los Angeles, CA 90045",
+      "mgr": "Cargo Team"
+    },
+    {
+      "code": "HUB-AIR-US02",
+      "name": "JFK국제공항 (JFK)",
+      "type": "경유지",
+      "addr": "Jamaica, Queens, New York, NY 11430",
+      "mgr": "Cargo Team"
+    },
+    {
+      "code": "HUB-AIR-MX01",
+      "name": "멕시코시티국제공항 (MEX)",
+      "type": "경유지",
+      "addr": "Ciudad de Mexico, CDMX, Mexico",
+      "mgr": "Cargo Team"
+    },
+    {
+      "code": "HUB-AIR-MX02",
+      "name": "몬테레이국제공항 (MTY)",
+      "type": "경유지",
+      "addr": "Apodaca, Nuevo Leon, Mexico",
+      "mgr": "Cargo Team"
+    },
+    {
+      "code": "HUB-PORT-KR01",
+      "name": "부산항 (Busan Port)",
+      "type": "경유지",
+      "addr": "부산시 중구 중앙대로 89",
+      "mgr": "항만물류팀"
+    },
+    {
+      "code": "HUB-PORT-KR02",
+      "name": "평택항 (Pyeongtaek Port)",
+      "type": "경유지",
+      "addr": "경기도 평택시 포승읍 평택항로 97",
+      "mgr": "항만물류팀"
+    },
+    {
+      "code": "HUB-PORT-US01",
+      "name": "LA항 (Port of Los Angeles)",
+      "type": "경유지",
+      "addr": "425 S Palos Verdes St, San Pedro, CA 90731",
+      "mgr": "Cargo Team"
+    },
+    {
+      "code": "HUB-PORT-US02",
+      "name": "롱비치항 (Port of Long Beach)",
+      "type": "경유지",
+      "addr": "415 W Ocean Blvd, Long Beach, CA 90802",
+      "mgr": "Cargo Team"
+    },
+    {
       "code": "HUB-D01",
       "name": "Samsung Electronics 수원",
       "type": "도착(고객사)",
@@ -234,5 +304,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 22:00"
+  "lastUpdated": "2026-04-19 22:31"
 }
