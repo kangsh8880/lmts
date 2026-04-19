@@ -223,7 +223,7 @@ tr:last-child td{border-bottom:none;}
 <body>
 
 <!-- ══ LOADING OVERLAY ══ -->
-<div class="overlay" id="overlay">
+<div class="overlay hidden" id="overlay">
   <div class="spinner"></div>
   <div class="overlay-text" id="overlay-text">GitHub에서 데이터 불러오는 중...</div>
   <div class="overlay-sub" id="overlay-sub">kangsh8880/lmts</div>
@@ -252,6 +252,137 @@ tr:last-child td{border-bottom:none;}
     <div id="token-status" style="font-size:12px;color:var(--gray);margin-bottom:12px"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="closeTokenModal()">나중에 설정</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LEG DISPATCH MODAL ══ -->
+<div class="modal-bg hidden" id="leg-dispatch-modal">
+  <div class="modal" style="max-width:600px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-title">🚛 구간 배차 등록 / 수정</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:14px">
+      오더: <b id="ld-order-no" style="color:var(--dk)"></b>
+      &nbsp;|&nbsp; 고객사: <b id="ld-customer"></b>
+    </div>
+
+    <!-- 구간 표시 -->
+    <div style="background:var(--pale);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px">
+      <div style="font-size:10px;color:var(--gray);font-weight:700;margin-bottom:6px">📍 배차 구간</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="r-chip r-chip-origin" id="ld-from-chip">출발</span>
+        <span id="ld-arrow" style="color:var(--gray);font-size:16px">→</span>
+        <span class="r-chip r-chip-dest" id="ld-to-chip">도착</span>
+      </div>
+    </div>
+
+    <!-- 운송수단 선택 -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:8px">운송 수단 선택</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="ld-tab-truck" class="btn btn-primary btn-sm" onclick="ldSelectTransport('truck')">🚛 차량</button>
+        <button id="ld-tab-air"   class="btn btn-ghost btn-sm"  onclick="ldSelectTransport('air')">✈️ 항공</button>
+        <button id="ld-tab-sea"   class="btn btn-ghost btn-sm"  onclick="ldSelectTransport('sea')">🚢 선박</button>
+      </div>
+    </div>
+
+    <!-- 차량 입력 폼 -->
+    <div id="ld-form-truck">
+      <div class="form-row">
+        <div class="form-group"><label>배차 차량</label>
+          <select id="ld-vehicle" onchange="ldAutoFillDriver()"><option value="">-- 차량 선택 --</option></select></div>
+        <div class="form-group"><label>기사명</label><input id="ld-driver" placeholder="기사명"></div>
+        <div class="form-group"><label>연락처</label><input id="ld-dphone" placeholder="010-0000-0000"></div>
+      </div>
+    </div>
+
+    <!-- 항공 입력 폼 -->
+    <div id="ld-form-air" style="display:none">
+      <div class="form-row">
+        <div class="form-group"><label>항공사</label><input id="ld-airline" placeholder="대한항공, 아시아나 등"></div>
+        <div class="form-group"><label>항공편번호</label><input id="ld-flightno" placeholder="KE123, OZ456 등"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>출발공항</label><input id="ld-dep-airport" placeholder="ICN, GMP 등"></div>
+        <div class="form-group"><label>도착공항</label><input id="ld-arr-airport" placeholder="HAN, SGN 등"></div>
+      </div>
+    </div>
+
+    <!-- 선박 입력 폼 -->
+    <div id="ld-form-sea" style="display:none">
+      <div class="form-row">
+        <div class="form-group"><label>선사</label><input id="ld-shippingco" placeholder="HMM, KMTC 등"></div>
+        <div class="form-group"><label>선박명/항차</label><input id="ld-vessel" placeholder="선박명 또는 항차번호"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>출발항</label><input id="ld-dep-port" placeholder="인천항, 부산항 등"></div>
+        <div class="form-group"><label>도착항</label><input id="ld-arr-port" placeholder="호치민항, 하이퐁항 등"></div>
+      </div>
+    </div>
+
+    <!-- 공통: 일정 -->
+    <div class="form-row" style="margin-top:10px">
+      <div class="form-group"><label>출발 예정일시</label><input id="ld-depart-plan" type="datetime-local"></div>
+      <div class="form-group"><label>도착 예정(ETA)</label><input id="ld-eta" type="datetime-local"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px"><label>비고</label><input id="ld-note" placeholder="특이사항"></div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeLegDispatchModal()">취소</button>
+      <button class="btn btn-success" onclick="saveLegDispatch()">💾 배차 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ROUTE EDIT MODAL ══ -->
+<div class="modal-bg hidden" id="route-edit-modal">
+  <div class="modal" style="max-width:640px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-title">🗺️ 운송 경로 수정</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:16px">
+      오더번호: <b id="re-order-no" style="color:var(--dk)"></b>
+      &nbsp;|&nbsp; 고객사: <b id="re-customer"></b>
+      &nbsp;|&nbsp; 상태: <span id="re-status-badge"></span>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:4px">출발 거점</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="rb-badge rb-origin" style="flex-shrink:0">출발</div>
+        <select id="re-origin" onchange="reUpdatePreview()" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;"></select>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--gray)">→표준</span>
+          <input id="re-origin-std" type="number" min="0" placeholder="분" oninput="reUpdatePreview()" style="width:60px;padding:5px 6px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center">
+          <span style="font-size:10px;color:var(--gray)">분</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:6px">경유지 목록</label>
+      <div id="re-wp-list" style="border:1px solid var(--border);border-radius:6px;background:#FAFCFF;padding:8px;min-height:44px"></div>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center;padding:8px;background:#F5F8FF;border:1px dashed var(--border);border-radius:6px;margin-bottom:12px;flex-wrap:wrap">
+      <div class="rb-badge rb-wp" style="width:22px;height:22px;font-size:12px;flex-shrink:0">+</div>
+      <select id="re-wp-add" style="flex:2;min-width:140px;border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:12px;"></select>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <span style="font-size:10px;color:var(--gray)">→표준</span>
+        <input id="re-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:4px 5px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center">
+        <span style="font-size:10px;color:var(--gray)">분</span>
+      </div>
+      <button class="btn btn-yellow btn-sm" onclick="reAddWaypoint()">경유지 추가</button>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:4px">도착 거점</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="rb-badge rb-dest" style="flex-shrink:0">도착</div>
+        <select id="re-dest" onchange="reUpdatePreview()" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;"></select>
+      </div>
+    </div>
+    <div style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:16px">
+      <div style="font-size:10px;color:var(--gray);font-weight:700;margin-bottom:6px">📋 변경 후 경로 미리보기</div>
+      <div class="route-chips" id="re-route-preview"><span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span></div>
+    </div>
+    <div id="re-status-warn" class="alert alert-warn" style="display:none;margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeRouteEditModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveRouteEdit()">💾 경로 저장</button>
     </div>
   </div>
 </div>
@@ -450,7 +581,7 @@ tr:last-child td{border-bottom:none;}
       </select>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>제품</th><th>박스수</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>삭제</th></tr></thead>
+      <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>제품</th><th>박스수</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>경로변경</th><th>삭제</th></tr></thead>
       <tbody id="order-table-body"></tbody>
     </table></div>
   </div></div>
@@ -480,26 +611,30 @@ tr:last-child td{border-bottom:none;}
 
 <!-- ══ DISPATCH ══ -->
 <div id="page-dispatch" class="page">
-  <div class="sec-title">차량 배차 및 출발 관리</div>
-  <div class="grid2">
-    <div class="card"><div class="card-head">🚛 배차 등록</div><div class="card-body">
-      <div class="form-group" style="margin-bottom:10px"><label>출하오더</label>
-        <select id="dp-order" onchange="loadDispatchOrder()"><option value="">-- 선택 --</option></select></div>
-      <div id="dp-order-info"></div>
-      <div class="form-group" style="margin-bottom:10px"><label>배차 차량</label>
-        <select id="dp-vehicle"><option value="">-- 차량 선택 --</option></select></div>
-      <div class="form-row">
-        <div class="form-group"><label>출발 예정시각</label><input id="dp-depart-plan" type="datetime-local"></div>
-        <div class="form-group"><label>도착 예정시각(ETA)</label><input id="dp-eta" type="datetime-local"></div>
+  <div class="sec-title">구간별 배차 관리</div>
+
+  <!-- 오더 선택 -->
+  <div class="card"><div class="card-head">📋 오더 선택</div><div class="card-body">
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <div class="form-group" style="flex:2;min-width:220px"><label>출하오더 선택</label>
+        <select id="dp-order" onchange="loadDispatchOrder()" style="font-size:13px">
+          <option value="">-- 오더 선택 --</option>
+        </select>
       </div>
-      <div class="form-group" style="margin-bottom:12px"><label>비고</label><input id="dp-note"></div>
-      <button class="btn btn-success" onclick="doDispatch()" style="width:100%">🚛 배차 완료 / 출발 처리</button>
-    </div></div>
-    <div class="card"><div class="card-head">🚛 배차 현황</div><div class="card-body">
-      <div class="tbl-wrap"><table><thead><tr><th>오더번호</th><th>고객사</th><th>경로</th><th>차량</th><th>기사</th><th>출발시각</th><th>ETA</th><th>상태</th></tr></thead>
-      <tbody id="dispatch-table-body"></tbody></table></div>
-    </div></div>
-  </div>
+      <div style="font-size:11px;color:var(--gray);padding-bottom:8px">
+        ※ 패킹완료·배차완료·운송중 오더의 구간별 배차를 등록/수정합니다
+      </div>
+    </div>
+    <div id="dp-order-legs" style="margin-top:10px"></div>
+  </div></div>
+
+  <!-- 전체 배차 이력 -->
+  <div class="card"><div class="card-head">📊 전체 구간 배차 이력</div><div class="card-body">
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>오더번호</th><th>고객사</th><th>구간</th><th>운송수단</th><th>편명/차량</th><th>담당자/기사</th><th>출발예정</th><th>ETA</th><th>상태</th><th>수정</th></tr></thead>
+      <tbody id="dispatch-table-body"></tbody>
+    </table></div>
+  </div></div>
 </div>
 
 <!-- ══ TRACKING ══ -->
@@ -765,8 +900,9 @@ async function loadFromGitHub() {
     if (data) {
       // GitHub 데이터로 DB 업데이트
       Object.keys(DB).forEach(k => { if (data[k] !== undefined) DB[k] = data[k]; });
-      setSyncStatus('ok', `데이터 로드 완료 (${now().slice(11,16)})`);
       GH._connected = true;
+      ensureDefaultHubs();  // 누락 거점 자동 보완
+      setSyncStatus('ok', `데이터 로드 완료 (${now().slice(11,16)})`);
     } else {
       // 파일 없음 → 초기 샘플 데이터 푸시
       showOverlay('최초 실행: 초기 데이터를 GitHub에 저장 중...');
@@ -814,7 +950,7 @@ function goPage(p, btn) {
     dashboard: renderDashboard,
     order:    () => { fillOrderSelects(); renderOrders(); },
     packing:  fillPackingSelects,
-    dispatch: () => { fillDispatchSelects(); renderDispatch(); },
+    dispatch: () => { fillDispatchSelects(); renderDispatch(); loadDispatchOrder(); },
     tracking: () => { fillTrackingSelects(); renderTrackingLog(); },
     ceodash:  renderCEO,
   };
@@ -921,7 +1057,7 @@ function onOriginChange() { updateRoutePreview(); }
 function addWaypoint() {
   const name=v('o-wp-add'); if(!name) return alert('경유지를 선택하세요');
   if (wpList.find(w=>w.name===name)) return alert('이미 추가된 경유지');
-  wpList.push({name, stdTime: v('o-wp-std')||''});
+  wpList.push({name, stdTime: v('o-wp-std')||'', transport:'', transportNo:'', destChange:''});
   el('o-wp-std').value=''; renderWpList(); updateRoutePreview();
 }
 function removeWp(idx) { wpList.splice(idx,1); renderWpList(); updateRoutePreview(); }
@@ -932,23 +1068,66 @@ function moveWp(idx, dir) {
   renderWpList(); updateRoutePreview();
 }
 function updateWpTime(idx, val) { wpList[idx].stdTime=val; updateRoutePreview(); }
+function updateWpTransport(idx, val) { wpList[idx].transport=val; if(!val) wpList[idx].transportNo=''; renderWpList(); updateRoutePreview(); }
+function updateWpTransportNo(idx, val) { wpList[idx].transportNo=val; updateRoutePreview(); }
+function toggleWpDestChange(idx, checked) { wpList[idx].destChange=checked?'__pending__':''; renderWpList(); updateRoutePreview(); }
+function updateWpDestChange(idx, val) { wpList[idx].destChange=val; updateRoutePreview(); }
+
+const TRANSPORT_ICON = {truck:'🚛', air:'✈️', sea:'🚢'};
+const TRANSPORT_LABEL = {truck:'차량', air:'항공', sea:'선박'};
 
 function renderWpList() {
   const c=el('waypoint-list');
   if (!wpList.length) { c.innerHTML='<div style="font-size:11px;color:var(--gray);padding:6px 0 4px 38px">경유지 없음 — 직배송</div>'; return; }
-  c.innerHTML = wpList.map((w,i)=>`
-    <div class="wp-item">
-      <div class="wp-seq">${i+1}</div>
-      <div class="wp-name">${w.name}</div>
-      <div class="wp-time-wrap">
-        <span class="wp-time-label">→다음<br>표준</span>
-        <input class="wp-time-input" type="number" min="0" placeholder="분" value="${w.stdTime||''}" oninput="updateWpTime(${i},this.value)">
-        <span style="font-size:10px;color:var(--gray)">분</span>
+  const destHubs = S.hubs().filter(h=>h.type==='도착(고객사)');
+  c.innerHTML = wpList.map((w,i)=>{
+    const hasTransport = w.transport && w.transport!=='';
+    const hasDestChange = w.destChange && w.destChange!=='';
+    const destChangeActive = w.destChange !== '' && w.destChange !== undefined;
+    return `
+    <div class="wp-item" style="flex-direction:column;align-items:stretch;gap:0;padding:8px 10px;">
+      <!-- 1행: 기본 정보 -->
+      <div style="display:flex;align-items:center;gap:5px;">
+        <div class="wp-seq" style="flex-shrink:0">${i+1}</div>
+        <div class="wp-name" style="flex:1;font-size:12px;font-weight:700;">${w.name}</div>
+        <div style="display:flex;align-items:center;gap:3px;flex-shrink:0;">
+          <span style="font-size:9px;color:var(--gray);white-space:nowrap">→표준</span>
+          <input class="wp-time-input" type="number" min="0" placeholder="분" value="${w.stdTime||''}" oninput="updateWpTime(${i},this.value)">
+          <span style="font-size:9px;color:var(--gray)">분</span>
+        </div>
+        <button class="wp-btn wp-up ${i===0?'wp-disabled':''}" onclick="moveWp(${i},-1)" ${i===0?'disabled':''}>↑</button>
+        <button class="wp-btn wp-down ${i===wpList.length-1?'wp-disabled':''}" onclick="moveWp(${i},1)" ${i===wpList.length-1?'disabled':''}>↓</button>
+        <button class="wp-btn wp-del" onclick="removeWp(${i})">✕</button>
       </div>
-      <button class="wp-btn wp-up ${i===0?'wp-disabled':''}" onclick="moveWp(${i},-1)" ${i===0?'disabled':''}>↑</button>
-      <button class="wp-btn wp-down ${i===wpList.length-1?'wp-disabled':''}" onclick="moveWp(${i},1)" ${i===wpList.length-1?'disabled':''}>↓</button>
-      <button class="wp-btn wp-del" onclick="removeWp(${i})">✕</button>
-    </div>`).join('');
+      <!-- 2행: 운송수단 변경 -->
+      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-left:28px;flex-wrap:wrap;">
+        <span style="font-size:10px;color:var(--gray);font-weight:600;flex-shrink:0;">출발 운송수단</span>
+        <select onchange="updateWpTransport(${i},this.value)" style="font-size:10px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:#fff;height:24px;">
+          <option value="" ${!w.transport?'selected':''}>-- 이전 구간 유지 --</option>
+          <option value="truck" ${w.transport==='truck'?'selected':''}>🚛 차량</option>
+          <option value="air" ${w.transport==='air'?'selected':''}>✈️ 항공편</option>
+          <option value="sea" ${w.transport==='sea'?'selected':''}>🚢 선박</option>
+        </select>
+        ${hasTransport?`<input type="text" placeholder="${TRANSPORT_LABEL[w.transport]||'식별번호'}" value="${w.transportNo||''}" oninput="updateWpTransportNo(${i},this.value)" style="font-size:10px;padding:2px 7px;width:110px;border:1px solid var(--border);border-radius:4px;height:24px;">
+        ${w.transportNo?`<span style="font-size:10px;font-weight:600;color:var(--dk)">${TRANSPORT_ICON[w.transport]} ${w.transportNo}</span>`:''}`:
+        ''}
+      </div>
+      <!-- 3행: 도착지 변경 -->
+      <div style="display:flex;align-items:center;gap:6px;margin-top:5px;padding-left:28px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:4px;font-size:10px;cursor:pointer;font-weight:600;color:var(--gray);">
+          <input type="checkbox" ${destChangeActive?'checked':''} onchange="toggleWpDestChange(${i},this.checked)" style="width:auto;margin:0;">
+          <span>이후 도착지 변경</span>
+        </label>
+        ${destChangeActive?`
+        <select onchange="updateWpDestChange(${i},this.value)" style="font-size:10px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:#fff;height:24px;">
+          <option value="__pending__" ${!hasDestChange?'selected':''}>-- 새 도착지 선택 --</option>
+          ${destHubs.map(h=>`<option value="${h.name}" ${w.destChange===h.name?'selected':''}>${h.name}</option>`).join('')}
+        </select>
+        ${hasDestChange&&w.destChange!=='__pending__'?`<span style="font-size:10px;font-weight:700;color:var(--green)">🏢→ ${w.destChange}</span>`:''}
+        `:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function updateRoutePreview() {
@@ -959,10 +1138,18 @@ function updateRoutePreview() {
     if (stdOrigin) parts.push(`<span class="r-chip r-chip-time">⏱ ${stdOrigin}분</span>`);
   }
   wpList.forEach((w,i)=>{
-    parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}</span>`);
+    const tIcon = w.transport ? TRANSPORT_ICON[w.transport] : '→';
+    const tNo = w.transportNo ? ` (${w.transportNo})` : '';
+    parts.push(`<span class="r-arrow">${tIcon}</span><span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}${tNo}</span>`);
     if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${w.stdTime}분</span>`);
+    if (w.destChange && w.destChange !== '__pending__') {
+      parts.push(`<span class="r-chip" style="background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;font-size:10px;">🔀→🏢 ${w.destChange}</span>`);
+    }
   });
-  if (dest) parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-dest">🏢 ${dest}</span>`);
+  // 최종 도착지: 마지막 destChange 또는 기본 dest
+  const lastDestChange = [...wpList].reverse().find(w=>w.destChange && w.destChange!=='__pending__');
+  const finalDest = lastDestChange ? lastDestChange.destChange : dest;
+  if (finalDest) parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-dest">🏢 ${finalDest}</span>`);
   el('route-chips').innerHTML = parts.length ? parts.join('') : '<span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
 }
 
@@ -972,9 +1159,32 @@ function createOrder() {
   if (!customer||!product||!boxes) return alert('고객사/제품/박스수량 필수');
   if (!origin) return alert('출발 거점을 선택하세요');
   if (!dest)   return alert('도착 거점을 선택하세요');
+
+  // 드롭다운에 선택된 채 "경유지 추가" 버튼을 누르지 않은 경유지 자동 포함
+  const pendingWp = v('o-wp-add');
+  if (pendingWp && !wpList.find(w => w.name === pendingWp)) {
+    wpList.push({name: pendingWp, stdTime: v('o-wp-std') || '', transport:'', transportNo:'', destChange:''});
+    renderWpList();
+  }
+
+  // 최종 도착지: 마지막 destChange가 있으면 해당 값 사용
+  const lastDestChange = [...wpList].reverse().find(w=>w.destChange && w.destChange!=='__pending__');
+  const finalDest = lastDestChange ? lastDestChange.destChange : dest;
+
   const arr = S.orders();
   arr.push({no, date, customer, product, boxes:parseInt(boxes)||1, note:v('o-note'), status:'대기', created:now(),
-    route:{origin, originStdTime:v('o-origin-std')||'', waypoints:wpList.map(w=>({name:w.name, stdTime:w.stdTime||''})), destination:dest}});
+    route:{
+      origin, originStdTime:v('o-origin-std')||'',
+      waypoints: wpList.map(w=>({
+        name: w.name,
+        stdTime: w.stdTime||'',
+        transport: w.transport||'',
+        transportNo: w.transportNo||'',
+        destChange: (w.destChange && w.destChange!=='__pending__') ? w.destChange : ''
+      })),
+      destination: finalDest
+    }
+  });
   S.set('orders', arr);
   fillOrderSelects(); renderOrders();
   alert(`✅ 오더 [${no}] 생성 완료`);
@@ -986,24 +1196,33 @@ function renderOrders() {
   const stMap={'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
   el('order-table-body').innerHTML = rows.length ? rows.map(o=>{
     const gi=S.orders().findIndex(x=>x.no===o.no);
+    const canEdit = ['대기','패킹중'].includes(o.status);
     return `<tr><td><b>${o.no}</b></td><td>${o.date}</td><td>${o.customer}</td><td>${o.product}</td><td>${o.boxes}박스</td>
     <td style="min-width:200px">${buildRouteChips(o)}</td>
     <td><span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span></td>
     <td>${o.note||'-'}</td>
+    <td><button class="btn btn-xs" style="background:#EBF5FF;color:var(--accent);border:1px solid var(--border);" onclick="openRouteEdit('${o.no}')" title="경로 수정">✏️</button></td>
     <td><button class="btn btn-danger btn-xs" onclick="delOrder(${gi})">삭제</button></td></tr>`;
-  }).join('') : '<tr><td colspan="9" class="empty">출하오더 없음</td></tr>';
+  }).join('') : '<tr><td colspan="10" class="empty">출하오더 없음</td></tr>';
 }
 
 function buildRouteChips(o, small=true) {
   if (!o||!o.route) return '<span style="color:var(--gray);font-size:11px">-</span>';
   const {origin, waypoints, destination}=o.route;
-  const fs=small?'font-size:10px;':'';
-  let html=`<span class="r-chip r-chip-origin" style="${fs}">${origin||'?'}</span>`;
+  const fs=small?'font-size:9px;':'';
+  const TI={truck:'🚛',air:'✈️',sea:'🚢'};
+  let html=`<span class="r-chip r-chip-origin" style="${fs}">🏭 ${origin||'?'}</span>`;
   if (waypoints?.length) waypoints.forEach((w,i)=>{
     const wn=typeof w==='string'?w:w.name;
-    html+=`<span class="r-arrow" style="${fs}">→</span><span class="r-chip r-chip-wp" style="${fs}">${i+1}.${wn}</span>`;
+    const wt=typeof w==='object'?w.transport:'';
+    const wno=typeof w==='object'?w.transportNo:'';
+    const wdc=typeof w==='object'?w.destChange:'';
+    const tIcon = wt ? TI[wt]||'→' : '→';
+    const tLabel = wno ? ` (${wno})` : '';
+    html+=`<span class="r-arrow" style="${fs}">${tIcon}</span><span class="r-chip r-chip-wp" style="${fs}">📍${i+1}.${wn}${tLabel}</span>`;
+    if (wdc) html+=`<span class="r-chip" style="${fs}background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;">🔀🏢${wdc}</span>`;
   });
-  if (destination) html+=`<span class="r-arrow" style="${fs}">→</span><span class="r-chip r-chip-dest" style="${fs}">${destination}</span>`;
+  if (destination) html+=`<span class="r-arrow" style="${fs}">→</span><span class="r-chip r-chip-dest" style="${fs}">🏢 ${destination}</span>`;
   return `<div class="route-chips">${html}</div>`;
 }
 
@@ -1018,6 +1237,175 @@ function delOrder(idx) {
   if (!confirm('삭제하시겠습니까?')) return;
   const arr=S.orders(); arr.splice(idx,1); S.set('orders',arr); renderOrders();
 }
+
+// ══════════════════════════════════════════════════════════════════
+// ─── 경로 수정 모달 ───────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+let reWpList = [];   // 수정 모달 전용 경유지 배열
+let reOrderNo = '';  // 수정 중인 오더번호
+
+function openRouteEdit(orderNo) {
+  const o = S.orders().find(x => x.no === orderNo);
+  if (!o) return alert('오더를 찾을 수 없습니다');
+
+  reOrderNo = orderNo;
+  el('re-order-no').textContent = o.no;
+  el('re-customer').textContent = o.customer;
+
+  // 상태 뱃지
+  const stMap = {'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
+  el('re-status-badge').innerHTML = `<span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>`;
+
+  // 운송중/도착완료 경고
+  const warn = el('re-status-warn');
+  if (['운송중','도착완료'].includes(o.status)) {
+    warn.textContent = `⚠️ 현재 "${o.status}" 상태입니다. 경로 변경 시 기존 추적 이벤트와 불일치가 발생할 수 있습니다.`;
+    warn.style.display = '';
+  } else {
+    warn.style.display = 'none';
+  }
+
+  // 거점 셀렉트 초기화
+  const hs = S.hubs();
+  const origins = hs.filter(h => h.type === '출발(자사창고)');
+  const wayHubs = hs.filter(h => h.type === '경유지');
+  const dests   = hs.filter(h => h.type === '도착(고객사)');
+
+  fillSel('re-origin', origins.map(h => ({v: h.name, l: h.name})));
+  fillSel('re-wp-add', wayHubs.map(h => ({v: h.name, l: h.name})));
+  fillSel('re-dest',   dests.map(h => ({v: h.name, l: h.name})));
+
+  // 현재 경로 값 세팅
+  const route = o.route || {};
+  el('re-origin').value = route.origin || (origins[0]?.name || '');
+  el('re-origin-std').value = route.originStdTime || '';
+  el('re-dest').value = route.destination || '';
+
+  // 경유지 배열 복사
+  reWpList = (route.waypoints || []).map(w =>
+    typeof w === 'string' ? {name: w, stdTime: ''} : {name: w.name || w, stdTime: w.stdTime || ''}
+  );
+
+  reRenderWpList();
+  reUpdatePreview();
+  el('route-edit-modal').classList.remove('hidden');
+}
+
+function closeRouteEditModal() {
+  el('route-edit-modal').classList.add('hidden');
+  reWpList = [];
+  reOrderNo = '';
+}
+
+function reAddWaypoint() {
+  const name = el('re-wp-add').value;
+  if (!name) return alert('경유지를 선택하세요');
+  if (reWpList.find(w => w.name === name)) return alert('이미 추가된 경유지');
+  reWpList.push({name, stdTime: el('re-wp-std').value || ''});
+  el('re-wp-std').value = '';
+  reRenderWpList();
+  reUpdatePreview();
+}
+
+function reRemoveWp(idx) { reWpList.splice(idx, 1); reRenderWpList(); reUpdatePreview(); }
+
+function reMoveWp(idx, dir) {
+  const ni = idx + dir;
+  if (ni < 0 || ni >= reWpList.length) return;
+  [reWpList[idx], reWpList[ni]] = [reWpList[ni], reWpList[idx]];
+  reRenderWpList(); reUpdatePreview();
+}
+
+function reUpdateWpTime(idx, val) { reWpList[idx].stdTime = val; reUpdatePreview(); }
+
+function reRenderWpList() {
+  const c = el('re-wp-list');
+  if (!reWpList.length) {
+    c.innerHTML = '<div style="font-size:11px;color:var(--gray);padding:6px 4px">경유지 없음 — 직배송</div>';
+    return;
+  }
+  c.innerHTML = reWpList.map((w, i) => `
+    <div class="wp-item">
+      <div class="wp-seq">${i+1}</div>
+      <div class="wp-name">${w.name}</div>
+      <div class="wp-time-wrap">
+        <span class="wp-time-label">→표준</span>
+        <input class="wp-time-input" type="number" min="0" placeholder="분" value="${w.stdTime||''}" oninput="reUpdateWpTime(${i},this.value)">
+        <span style="font-size:9px;color:var(--gray)">분</span>
+      </div>
+      <button class="wp-btn wp-up ${i===0?'wp-disabled':''}" onclick="reMoveWp(${i},-1)" ${i===0?'disabled':''}>↑</button>
+      <button class="wp-btn wp-down ${i===reWpList.length-1?'wp-disabled':''}" onclick="reMoveWp(${i},1)" ${i===reWpList.length-1?'disabled':''}>↓</button>
+      <button class="wp-btn wp-del" onclick="reRemoveWp(${i})">✕</button>
+    </div>`).join('');
+}
+
+function reUpdatePreview() {
+  const origin = el('re-origin').value;
+  const dest   = el('re-dest').value;
+  const stdOrigin = el('re-origin-std').value;
+  const parts = [];
+  if (origin) {
+    parts.push(`<span class="r-chip r-chip-origin">🏭 ${origin}</span>`);
+    if (stdOrigin) parts.push(`<span class="r-chip r-chip-time">⏱ ${stdOrigin}분</span>`);
+  }
+  reWpList.forEach((w, i) => {
+    parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}</span>`);
+    if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${w.stdTime}분</span>`);
+  });
+  if (dest) parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-dest">🏢 ${dest}</span>`);
+  el('re-route-preview').innerHTML = parts.length ? parts.join('') : '<span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
+}
+
+function saveRouteEdit() {
+  const origin = el('re-origin').value;
+  const dest   = el('re-dest').value;
+  const originStd = el('re-origin-std').value;
+
+  if (!origin) return alert('출발 거점을 선택하세요');
+  if (!dest)   return alert('도착 거점을 선택하세요');
+
+  // 드롭다운에 선택된 채 추가 안 한 경유지 자동 포함
+  const pendingWp = el('re-wp-add').value;
+  if (pendingWp && !reWpList.find(w => w.name === pendingWp)) {
+    reWpList.push({name: pendingWp, stdTime: el('re-wp-std').value || ''});
+  }
+
+  const arr = S.orders();
+  const idx = arr.findIndex(o => o.no === reOrderNo);
+  if (idx < 0) return alert('오더를 찾을 수 없습니다');
+
+  arr[idx].route = {
+    origin,
+    originStdTime: originStd || '',
+    waypoints: reWpList.map(w => ({name: w.name, stdTime: w.stdTime || ''})),
+    destination: dest
+  };
+
+  S.set('orders', arr);
+  closeRouteEditModal();
+  renderOrders();
+
+  // 대시보드 갱신
+  if (el('page-dashboard').classList.contains('active')) renderDashboard();
+
+  // 배차 페이지가 활성화 상태면 구간 카드도 즉시 갱신
+  if (el('page-dispatch').classList.contains('active')) {
+    // dp-order에 현재 수정한 오더가 선택돼 있으면 구간 카드 갱신
+    if (v('dp-order') === reOrderNo) {
+      loadDispatchOrder();
+    } else {
+      // 해당 오더를 자동 선택하고 구간 카드 표시
+      const dpSel = el('dp-order');
+      if ([...dpSel.options].some(opt => opt.value === reOrderNo)) {
+        dpSel.value = reOrderNo;
+      }
+      loadDispatchOrder();
+    }
+  }
+
+  alert(`✅ [${reOrderNo}] 경로 수정 완료`);
+}
+
 function updateOrderStatus(no, status) {
   const arr=S.orders(), idx=arr.findIndex(o=>o.no===no);
   if (idx>=0) { arr[idx].status=status; S.set('orders',arr); }
@@ -1057,6 +1445,7 @@ function buildTrackerCard(o, ps) {
     for (let i=allHubs.length-1;i>=0;i--) { if (passedSet.has(allHubs[i])) { currentIdx=i; break; } }
 
     trackerHtml=`<div style="overflow-x:auto;padding:4px 0"><div class="tracker-route">`;
+    const TI2={truck:'🚛',air:'✈️',sea:'🚢'};
     allHubs.forEach((hub,i)=>{
       const passed=passedSet.has(hub), isActive=i===currentIdx;
       const cls=passed?'done':(isActive?'active':'pending');
@@ -1073,9 +1462,21 @@ function buildTrackerCard(o, ps) {
         const fillPct=passed&&nextPassed?'100':passed?'50':'0';
         const wpObj=o.route.waypoints?.[i]||{};
         const st=i===0?o.route.originStdTime:(typeof wpObj==='object'?wpObj.stdTime:'');
+        // 운송수단 정보
+        const wt=typeof wpObj==='object'?wpObj.transport:'';
+        const wno=typeof wpObj==='object'?wpObj.transportNo:'';
+        const tLabel=wt?(TI2[wt]||'')+(wno?` ${wno}`:''):'';
+        const connLabel=[st?`⏱${st}분`:'', tLabel].filter(Boolean).join(' ');
         trackerHtml+=`<div class="tr-conn"><div class="tr-conn-bg"></div>
           <div class="tr-conn-fill" style="width:${fillPct}%"></div>
-          ${st?`<div class="tr-conn-label">⏱${st}분</div>`:''}</div>`;
+          ${connLabel?`<div class="tr-conn-label">${connLabel}</div>`:''}</div>`;
+        // 도착지 변경 표시
+        const wdc=typeof wpObj==='object'?wpObj.destChange:'';
+        if (wdc) {
+          trackerHtml+=`</div></div><div style="display:flex;align-items:center;gap:4px;margin:2px 0 4px 4px;flex-shrink:0;">
+            <span style="font-size:9px;background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;border-radius:8px;padding:1px 6px;font-weight:700;white-space:nowrap;">🔀 도착지변경→🏢 ${wdc}</span>
+          </div><div class="tracker-route" style="margin:0;">`;
+        }
       }
     });
     trackerHtml+=`</div></div>`;
@@ -1137,42 +1538,306 @@ function renderPackingDone() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ─── DISPATCH ─────────────────────────────────────────────────
+// ─── DISPATCH (구간별 배차) ────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
+
+// 운송수단 아이콘 (기존 상수 재사용: TRANSPORT_ICON, TRANSPORT_LABEL)
+
+// 오더의 구간(leg) 목록 반환
+// leg[i] = {fromHub, toHub, legIdx}
+function getOrderLegs(o) {
+  if (!o?.route) return [];
+  const {origin, waypoints, destination} = o.route;
+  const hubs = [origin, ...(waypoints||[]).map(w => typeof w==='string'?w:w.name), destination].filter(Boolean);
+  return hubs.slice(0,-1).map((h,i) => ({fromHub:h, toHub:hubs[i+1], legIdx:i}));
+}
+
+// 특정 오더·구간의 배차 기록 조회
+function getLegDispatch(orderNo, legIdx) {
+  return S.dispatches().find(d => d.orderNo===orderNo && d.legIdx===legIdx) || null;
+}
+
+// 배차 페이지 진입 시 셀렉트 채우기
 function fillDispatchSelects() {
-  fillSel('dp-order', S.orders().filter(o=>['패킹중','대기'].includes(o.status)).map(o=>({v:o.no, l:`${o.no} · ${o.customer}`})));
-  fillSel('dp-vehicle', S.vehicles().map(vv=>({v:vv.no, l:`${vv.no} · ${vv.driver} (${vv.type||''})`})));
+  // 패킹중·운송중·배차완료 + 대기도 포함 (초기 배차 가능)
+  const orders = S.orders().filter(o => !['도착완료'].includes(o.status));
+  fillSel('dp-order', orders.map(o => ({v:o.no, l:`${o.no} · ${o.customer} [${o.status}]`})));
   renderDispatch();
+  loadDispatchOrder(); // ← 선택된 오더의 구간 카드 항상 최신 경로로 갱신
 }
+
+// 오더 선택 시 구간 카드 렌더
 function loadDispatchOrder() {
-  const no=v('dp-order'), o=S.orders().find(x=>x.no===no);
-  el('dp-order-info').innerHTML = o ? `<div class="alert alert-info">${o.no} | ${o.customer} | ${o.product}<br>경로: ${getRouteShort(o)}</div>` : '';
+  const no = v('dp-order');
+  const legsDiv = el('dp-order-legs');
+  if (!no) { legsDiv.innerHTML = ''; return; }
+  const o = S.orders().find(x => x.no === no);
+  if (!o) { legsDiv.innerHTML = ''; return; }
+
+  const legs = getOrderLegs(o);
+  if (!legs.length) {
+    legsDiv.innerHTML = '<div class="alert alert-warn">경로 정보가 없습니다. 출하오더에서 경로를 먼저 설정하세요.</div>';
+    return;
+  }
+
+  const stMap = {'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done'};
+
+  let html = `<div style="font-size:11px;color:var(--gray);margin-bottom:10px">
+    <b style="color:var(--dk)">${o.no}</b> | ${o.customer} | ${o.product} | ${o.boxes}박스 |
+    상태: <span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>
+  </div>`;
+
+  html += '<div style="display:flex;flex-direction:column;gap:8px">';
+
+  legs.forEach((leg, i) => {
+    const d = getLegDispatch(no, i);
+    const isFirst = i === 0;
+    const tIcon  = d ? (TRANSPORT_ICON[d.transportType]||'🚛') : '';
+    const tLabel = d ? (TRANSPORT_LABEL[d.transportType]||'차량') : '';
+
+    // 운송수단 요약
+    let transportSummary = '';
+    if (d) {
+      if (d.transportType === 'truck') {
+        transportSummary = `${d.vehicleNo||'-'} · ${d.driver||'-'}`;
+      } else if (d.transportType === 'air') {
+        transportSummary = `${d.airline||''} ${d.flightNo||''}`;
+      } else if (d.transportType === 'sea') {
+        transportSummary = `${d.shippingCo||''} ${d.vessel||''}`;
+      }
+    }
+
+    const statusBadge = d
+      ? `<span class="status s-dispatch" style="background:#E8F5E9;color:#2E7D32">${tIcon} ${tLabel} 배차완료</span>`
+      : `<span class="status s-ready">미배차</span>`;
+
+    html += `
+    <div style="background:#fff;border:1px solid ${d?'var(--green)':'var(--border)'};border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:${isFirst?'var(--dk)':'var(--yellow)'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">
+        ${i+1}
+      </div>
+      <div style="flex:1;min-width:180px">
+        <div style="font-size:12px;font-weight:700;color:var(--dk)">
+          구간 ${i+1}: ${leg.fromHub} → ${leg.toHub}
+        </div>
+        ${d ? `<div style="font-size:11px;color:var(--gray);margin-top:3px">
+          ${tIcon} ${transportSummary}
+          ${d.departPlan ? ` | 출발예정: ${d.departPlan.replace('T',' ')}` : ''}
+          ${d.eta ? ` | ETA: ${d.eta.replace('T',' ')}` : ''}
+        </div>` : '<div style="font-size:11px;color:#999;margin-top:2px">배차 미등록</div>'}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        ${statusBadge}
+        <button class="btn btn-sm" style="background:${d?'#EBF5FF':'var(--dk)'};color:${d?'var(--accent)':'#fff'};border:1px solid ${d?'var(--border)':'var(--dk)'};"
+          onclick="openLegDispatch('${no}',${i})">
+          ${d ? '✏️ 수정' : '+ 배차등록'}
+        </button>
+      </div>
+    </div>`;
+  });
+
+  html += '</div>';
+  legsDiv.innerHTML = html;
 }
-function doDispatch() {
-  const orderNo=v('dp-order'), vno=v('dp-vehicle');
-  if (!orderNo||!vno) return alert('오더와 차량을 선택하세요');
-  const vv=S.vehicles().find(x=>x.no===vno);
-  const arr=S.dispatches();
-  arr.push({orderNo, vehicleNo:vno, driver:vv?.driver||'-', dphone:vv?.dphone||'-',
-    departPlan:v('dp-depart-plan'), eta:v('dp-eta'), departAt:now(), note:v('dp-note'), status:'운송중'});
-  S.set('dispatches', arr); updateOrderStatus(orderNo,'운송중');
-  const o=S.orders().find(x=>x.no===orderNo);
-  const originHub=o?.route?.origin||'자사창고';
-  const events=S.events();
-  events.push({time:now(), orderNo, customer:o?.customer||'', hub:originHub, event:'OUT', person:'배차담당', note:'차량출발'});
-  S.set('events', events);
-  alert(`✅ 배차완료\n오더: ${orderNo} | 차량: ${vno}`);
-  fillDispatchSelects();
+
+// ─── 구간 배차 모달 ───────────────────────────────────────────
+let ldOrderNo = '', ldLegIdx = -1, ldTransport = 'truck';
+
+function openLegDispatch(orderNo, legIdx) {
+  const o = S.orders().find(x => x.no === orderNo);
+  if (!o) return;
+  const legs = getOrderLegs(o);
+  const leg  = legs[legIdx];
+  if (!leg) return;
+
+  ldOrderNo  = orderNo;
+  ldLegIdx   = legIdx;
+  ldTransport = 'truck';
+
+  // 모달 헤더
+  el('ld-order-no').textContent  = orderNo;
+  el('ld-customer').textContent  = o.customer;
+  el('ld-from-chip').textContent = '🏭 ' + leg.fromHub;
+  el('ld-to-chip').textContent   = '🏢 ' + leg.toHub;
+
+  // 차량 목록
+  fillSel('ld-vehicle', S.vehicles().map(vv => ({v:vv.no, l:`${vv.no} · ${vv.driver} (${vv.type||''})`})));
+
+  // 기존 배차 데이터 로드
+  const d = getLegDispatch(orderNo, legIdx);
+  if (d) {
+    ldTransport = d.transportType || 'truck';
+    el('ld-vehicle').value  = d.vehicleNo || '';
+    el('ld-driver').value   = d.driver || '';
+    el('ld-dphone').value   = d.dphone || '';
+    el('ld-airline').value  = d.airline || '';
+    el('ld-flightno').value = d.flightNo || '';
+    el('ld-dep-airport').value = d.depAirport || '';
+    el('ld-arr-airport').value = d.arrAirport || '';
+    el('ld-shippingco').value  = d.shippingCo || '';
+    el('ld-vessel').value      = d.vessel || '';
+    el('ld-dep-port').value    = d.depPort || '';
+    el('ld-arr-port').value    = d.arrPort || '';
+    el('ld-depart-plan').value = d.departPlan || '';
+    el('ld-eta').value         = d.eta || '';
+    el('ld-note').value        = d.note || '';
+  } else {
+    // 초기화
+    ['ld-vehicle','ld-driver','ld-dphone','ld-airline','ld-flightno',
+     'ld-dep-airport','ld-arr-airport','ld-shippingco','ld-vessel',
+     'ld-dep-port','ld-arr-port','ld-depart-plan','ld-eta','ld-note'].forEach(id => {
+      const e = el(id); if (e) e.value = '';
+    });
+    // 차량 자동 선택: 이전 구간 차량 유지
+    if (ldLegIdx > 0) {
+      const prevD = getLegDispatch(orderNo, ldLegIdx - 1);
+      if (prevD?.vehicleNo) el('ld-vehicle').value = prevD.vehicleNo;
+    }
+  }
+
+  ldSelectTransport(ldTransport);
+  el('leg-dispatch-modal').classList.remove('hidden');
 }
+
+function ldSelectTransport(type) {
+  ldTransport = type;
+  ['truck','air','sea'].forEach(t => {
+    const tab  = el(`ld-tab-${t}`);
+    const form = el(`ld-form-${t}`);
+    if (t === type) {
+      tab.className  = 'btn btn-primary btn-sm';
+      form.style.display = '';
+    } else {
+      tab.className  = 'btn btn-ghost btn-sm';
+      form.style.display = 'none';
+    }
+  });
+
+  // 차량 선택 시 기사·연락처 자동 채우기
+  if (type === 'truck') {
+    const vno = el('ld-vehicle').value;
+    if (vno) ldAutoFillDriver();
+  }
+}
+
+function ldAutoFillDriver() {
+  const vno = el('ld-vehicle').value;
+  const vv  = S.vehicles().find(x => x.no === vno);
+  if (vv) {
+    el('ld-driver').value = vv.driver || '';
+    el('ld-dphone').value = vv.dphone || '';
+  }
+}
+
+function closeLegDispatchModal() {
+  el('leg-dispatch-modal').classList.add('hidden');
+  ldOrderNo = ''; ldLegIdx = -1;
+}
+
+function saveLegDispatch() {
+  if (!ldOrderNo || ldLegIdx < 0) return;
+  const o    = S.orders().find(x => x.no === ldOrderNo);
+  const legs = getOrderLegs(o);
+  const leg  = legs[ldLegIdx];
+
+  // 입력값 수집
+  const base = {
+    orderNo:       ldOrderNo,
+    legIdx:        ldLegIdx,
+    fromHub:       leg.fromHub,
+    toHub:         leg.toHub,
+    transportType: ldTransport,
+    departPlan:    el('ld-depart-plan').value,
+    eta:           el('ld-eta').value,
+    savedAt:       now(),
+    note:          el('ld-note').value,
+    status:        '배차완료'
+  };
+
+  if (ldTransport === 'truck') {
+    const vno = el('ld-vehicle').value;
+    if (!vno) return alert('차량을 선택하세요');
+    const vv = S.vehicles().find(x => x.no === vno);
+    Object.assign(base, {
+      vehicleNo: vno,
+      driver:    el('ld-driver').value || vv?.driver || '-',
+      dphone:    el('ld-dphone').value || vv?.dphone || '-'
+    });
+  } else if (ldTransport === 'air') {
+    if (!el('ld-airline').value && !el('ld-flightno').value) return alert('항공사 또는 편명을 입력하세요');
+    Object.assign(base, {
+      airline:    el('ld-airline').value,
+      flightNo:   el('ld-flightno').value,
+      depAirport: el('ld-dep-airport').value,
+      arrAirport: el('ld-arr-airport').value
+    });
+  } else if (ldTransport === 'sea') {
+    if (!el('ld-vessel').value) return alert('선박명을 입력하세요');
+    Object.assign(base, {
+      shippingCo: el('ld-shippingco').value,
+      vessel:     el('ld-vessel').value,
+      depPort:    el('ld-dep-port').value,
+      arrPort:    el('ld-arr-port').value
+    });
+  }
+
+  // 저장 (기존 기록 있으면 교체, 없으면 추가)
+  const arr = S.dispatches();
+  const existIdx = arr.findIndex(d => d.orderNo === ldOrderNo && d.legIdx === ldLegIdx);
+  if (existIdx >= 0) arr[existIdx] = base;
+  else arr.push(base);
+  S.set('dispatches', arr);
+
+  // 최초 배차(구간 0)이면 오더 상태 → 운송중, OUT 이벤트 추가
+  if (ldLegIdx === 0 && !['운송중','배차완료'].includes(o?.status)) {
+    updateOrderStatus(ldOrderNo, '운송중');
+    const events = S.events();
+    events.push({
+      time: now(), orderNo: ldOrderNo, customer: o?.customer||'',
+      hub: leg.fromHub, event: 'OUT', person: '배차담당',
+      note: `${TRANSPORT_LABEL[ldTransport]} 출발`
+    });
+    S.set('events', events);
+  }
+
+  closeLegDispatchModal();
+  renderDispatch();
+  loadDispatchOrder(); // 구간 카드 갱신
+  alert(`✅ 구간 ${ldLegIdx+1} 배차 저장 완료\n${leg.fromHub} → ${leg.toHub}`);
+}
+
 function renderDispatch() {
-  el('dispatch-table-body').innerHTML = S.dispatches().map(d=>{
-    const o=S.orders().find(x=>x.no===d.orderNo);
-    return `<tr><td><b>${d.orderNo}</b></td><td>${o?.customer||'-'}</td>
-    <td style="font-size:11px">${getRouteShort(o||{})}</td>
-    <td>${d.vehicleNo}</td><td>${d.driver}</td><td>${d.departAt}</td><td>${d.eta||'-'}</td>
-    <td><span class="status s-moving">${d.status}</span></td></tr>`;
-  }).join('') || '<tr><td colspan="8" class="empty">없음</td></tr>';
+  const STAT_CLS = {배차완료:'s-dispatch', 운송중:'s-moving', 도착완료:'s-done'};
+  el('dispatch-table-body').innerHTML = S.dispatches().map(d => {
+    const o = S.orders().find(x => x.no === d.orderNo);
+    const tIcon  = TRANSPORT_ICON[d.transportType] || '🚛';
+    const tLabel = TRANSPORT_LABEL[d.transportType] || '차량';
+
+    let detail = '-';
+    if (d.transportType === 'truck') detail = `${d.vehicleNo||'-'}`;
+    else if (d.transportType === 'air') detail = `${d.airline||''} ${d.flightNo||''}`.trim() || '-';
+    else if (d.transportType === 'sea') detail = `${d.shippingCo||''} ${d.vessel||''}`.trim() || '-';
+
+    let person = '-';
+    if (d.transportType === 'truck') person = d.driver || '-';
+    else if (d.transportType === 'air') person = `${d.depAirport||''}→${d.arrAirport||''}`.replace('→','→') || '-';
+    else if (d.transportType === 'sea') person = `${d.depPort||''}→${d.arrPort||''}` || '-';
+
+    return `<tr>
+      <td><b>${d.orderNo}</b></td>
+      <td>${o?.customer||'-'}</td>
+      <td style="font-size:11px;white-space:nowrap">${d.fromHub||'-'} → ${d.toHub||'-'}</td>
+      <td>${tIcon} ${tLabel}</td>
+      <td style="font-size:11px">${detail}</td>
+      <td style="font-size:11px">${person}</td>
+      <td style="font-size:11px">${(d.departPlan||'-').replace('T',' ')}</td>
+      <td style="font-size:11px">${(d.eta||'-').replace('T',' ')}</td>
+      <td><span class="status ${STAT_CLS[d.status]||'s-dispatch'}">${d.status||'배차완료'}</span></td>
+      <td><button class="btn btn-xs" style="background:#EBF5FF;color:var(--accent);border:1px solid var(--border);" onclick="openLegDispatch('${d.orderNo}',${d.legIdx})">✏️</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="10" class="empty">배차 이력 없음</td></tr>';
 }
+
 
 // ══════════════════════════════════════════════════════════════════
 // ─── TRACKING ─────────────────────────────────────────────────
@@ -1386,15 +2051,66 @@ function initSampleData() {
   ];
   DB.hubs = [
     {code:'HUB-W01', name:'자사물류창고 (화성)',      type:'출발(자사창고)', addr:'경기도 화성시 서신면 공업단지로 100', mgr:'창고팀장'},
+    // ── 국내 물류거점
     {code:'HUB-T01', name:'수도권물류센터 (용인)',     type:'경유지', addr:'경기도 용인시 처인구 물류단지길 50', mgr:'물류담당'},
     {code:'HUB-T02', name:'안성허브터미널',            type:'경유지', addr:'경기도 안성시 공도읍 공단로 120', mgr:'터미널장'},
     {code:'HUB-T03', name:'인천항 CY 창고',           type:'경유지', addr:'인천시 연수구 인천신항대로 600', mgr:'CY담당'},
     {code:'HUB-T04', name:'수원 중간집하장',           type:'경유지', addr:'경기도 수원시 팔달구 팔달로 180', mgr:'집하장담당'},
     {code:'HUB-T05', name:'파주 물류단지',             type:'경유지', addr:'경기도 파주시 탄현면 물류단지로 30', mgr:'단지관리'},
+    // ── 한국 공항
+    {code:'HUB-AIR-KR01', name:'인천국제공항 (ICN)', type:'경유지', addr:'인천시 중구 공항로 272', mgr:'항공화물팀'},
+    {code:'HUB-AIR-KR02', name:'김해국제공항 (PUS)', type:'경유지', addr:'부산시 강서구 공항진입로 108', mgr:'항공화물팀'},
+    // ── 미국 공항
+    {code:'HUB-AIR-US01', name:'LA국제공항 (LAX)',   type:'경유지', addr:'1 World Way, Los Angeles, CA 90045', mgr:'Cargo Team'},
+    {code:'HUB-AIR-US02', name:'JFK국제공항 (JFK)',  type:'경유지', addr:'Jamaica, Queens, New York, NY 11430', mgr:'Cargo Team'},
+    // ── 멕시코 공항
+    {code:'HUB-AIR-MX01', name:'멕시코시티국제공항 (MEX)', type:'경유지', addr:'Ciudad de Mexico, CDMX, Mexico', mgr:'Cargo Team'},
+    {code:'HUB-AIR-MX02', name:'몬테레이국제공항 (MTY)',   type:'경유지', addr:'Apodaca, Nuevo Leon, Mexico', mgr:'Cargo Team'},
+    // ── 한국 항구
+    {code:'HUB-PORT-KR01', name:'부산항 (Busan Port)',        type:'경유지', addr:'부산시 중구 중앙대로 89', mgr:'항만물류팀'},
+    {code:'HUB-PORT-KR02', name:'평택항 (Pyeongtaek Port)',   type:'경유지', addr:'경기도 평택시 포승읍 평택항로 97', mgr:'항만물류팀'},
+    // ── 미국 항구
+    {code:'HUB-PORT-US01', name:'LA항 (Port of Los Angeles)',    type:'경유지', addr:'425 S Palos Verdes St, San Pedro, CA 90731', mgr:'Cargo Team'},
+    {code:'HUB-PORT-US02', name:'롱비치항 (Port of Long Beach)', type:'경유지', addr:'415 W Ocean Blvd, Long Beach, CA 90802', mgr:'Cargo Team'},
+    // ── 도착 거점
     {code:'HUB-D01', name:'Samsung Electronics 수원', type:'도착(고객사)', addr:'수원시 영통구 삼성로 129', mgr:'자재입고담당'},
     {code:'HUB-D02', name:'LG Display 파주공장',      type:'도착(고객사)', addr:'파주시 월롱면 LG로 245', mgr:'입고팀'},
     {code:'HUB-D03', name:'SK Hynix 이천캠퍼스',      type:'도착(고객사)', addr:'이천시 부발읍 SK하이닉스로 26', mgr:'자재수령팀'},
   ];
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ─── 기본 거점 자동 보완 (업데이트 시 누락 거점 추가) ───────────
+// ══════════════════════════════════════════════════════════════════
+const DEFAULT_NEW_HUBS = [
+  {code:'HUB-AIR-KR01', name:'인천국제공항 (ICN)', type:'경유지', addr:'인천시 중구 공항로 272', mgr:'항공화물팀'},
+  {code:'HUB-AIR-KR02', name:'김해국제공항 (PUS)', type:'경유지', addr:'부산시 강서구 공항진입로 108', mgr:'항공화물팀'},
+  {code:'HUB-AIR-US01', name:'LA국제공항 (LAX)',   type:'경유지', addr:'1 World Way, Los Angeles, CA 90045', mgr:'Cargo Team'},
+  {code:'HUB-AIR-US02', name:'JFK국제공항 (JFK)',  type:'경유지', addr:'Jamaica, Queens, New York, NY 11430', mgr:'Cargo Team'},
+  {code:'HUB-AIR-MX01', name:'멕시코시티국제공항 (MEX)', type:'경유지', addr:'Ciudad de Mexico, CDMX, Mexico', mgr:'Cargo Team'},
+  {code:'HUB-AIR-MX02', name:'몬테레이국제공항 (MTY)',   type:'경유지', addr:'Apodaca, Nuevo Leon, Mexico', mgr:'Cargo Team'},
+  {code:'HUB-PORT-KR01', name:'부산항 (Busan Port)',        type:'경유지', addr:'부산시 중구 중앙대로 89', mgr:'항만물류팀'},
+  {code:'HUB-PORT-KR02', name:'평택항 (Pyeongtaek Port)',   type:'경유지', addr:'경기도 평택시 포승읍 평택항로 97', mgr:'항만물류팀'},
+  {code:'HUB-PORT-US01', name:'LA항 (Port of Los Angeles)',    type:'경유지', addr:'425 S Palos Verdes St, San Pedro, CA 90731', mgr:'Cargo Team'},
+  {code:'HUB-PORT-US02', name:'롱비치항 (Port of Long Beach)', type:'경유지', addr:'415 W Ocean Blvd, Long Beach, CA 90802', mgr:'Cargo Team'},
+];
+
+// 로드 후 기존 데이터에 누락 거점 자동 추가
+function ensureDefaultHubs() {
+  const hubs = S.hubs();
+  const existCodes = new Set(hubs.map(h => h.code));
+  const toAdd = DEFAULT_NEW_HUBS.filter(h => !existCodes.has(h.code));
+  if (toAdd.length > 0) {
+    // 도착(고객사) 거점들 앞에 삽입 (경유지이므로)
+    const destIdx = hubs.findIndex(h => h.type === '도착(고객사)');
+    if (destIdx >= 0) {
+      hubs.splice(destIdx, 0, ...toAdd);
+    } else {
+      hubs.push(...toAdd);
+    }
+    S.set('hubs', hubs);
+    console.log(`✅ 기본 거점 ${toAdd.length}개 자동 추가:`, toAdd.map(h=>h.name).join(', '));
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════
