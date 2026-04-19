@@ -389,8 +389,17 @@
       "event": "IN",
       "person": "",
       "note": ""
+    },
+    {
+      "time": "2026-04-19 22:43",
+      "orderNo": "ORD-260419-001",
+      "customer": "Samsung Electronics",
+      "hub": "수도권물류센터 (용인)",
+      "event": "IN",
+      "person": "",
+      "note": ""
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 22:42"
+  "lastUpdated": "2026-04-19 22:43"
 }
