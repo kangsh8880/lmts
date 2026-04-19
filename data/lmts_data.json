@@ -160,46 +160,29 @@
       "no": "ORD-260419-002",
       "date": "2026-04-19",
       "customer": "LG Display",
-      "product": "OLED Module A타입",
-      "boxes": 20,
+      "product": "LCD Panel B타입",
+      "boxes": 10,
       "note": "",
       "status": "대기",
-      "created": "2026-04-19 15:11",
+      "created": "2026-04-19 15:14",
       "route": {
         "origin": "자사물류창고 (화성)",
-        "originStdTime": "20",
+        "originStdTime": "30",
         "waypoints": [
           {
             "name": "수도권물류센터 (용인)",
-            "stdTime": "10"
+            "stdTime": ""
+          },
+          {
+            "name": "안성허브터미널",
+            "stdTime": ""
+          },
+          {
+            "name": "파주 물류단지",
+            "stdTime": ""
           }
         ],
         "destination": "LG Display 파주공장"
-      }
-    },
-    {
-      "no": "ORD-260419-003",
-      "date": "2026-04-19",
-      "customer": "SK Hynix",
-      "product": "Camera Module C타입",
-      "boxes": 30,
-      "note": "",
-      "status": "대기",
-      "created": "2026-04-19 15:12",
-      "route": {
-        "origin": "자사물류창고 (화성)",
-        "originStdTime": "20",
-        "waypoints": [
-          {
-            "name": "수도권물류센터 (용인)",
-            "stdTime": "10"
-          },
-          {
-            "name": "인천항 CY 창고",
-            "stdTime": "50"
-          }
-        ],
-        "destination": "SK Hynix 이천캠퍼스"
       }
     }
   ],
@@ -207,5 +190,5 @@
   "dispatches": [],
   "events": [],
   "alarms": [],
-  "lastUpdated": "2026-04-19 15:12"
+  "lastUpdated": "2026-04-19 15:14"
 }
