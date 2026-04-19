@@ -308,6 +308,21 @@
       "vehicleNo": "경기 4521가",
       "driver": "홍길동",
       "dphone": "010-1234-5678"
+    },
+    {
+      "orderNo": "ORD-260419-001",
+      "legIdx": 1,
+      "fromHub": "수도권물류센터 (용인)",
+      "toHub": "인천국제공항 (ICN)",
+      "transportType": "truck",
+      "departPlan": "2026-04-19T16:39",
+      "eta": "2026-04-19T17:39",
+      "savedAt": "2026-04-19 22:40",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "인천 3847나",
+      "driver": "김영수",
+      "dphone": "010-9876-5432"
     }
   ],
   "events": [
@@ -331,5 +346,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 22:34"
+  "lastUpdated": "2026-04-19 22:40"
 }
