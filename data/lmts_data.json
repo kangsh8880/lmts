@@ -147,7 +147,7 @@
       "product": "OLED Module A타입",
       "boxes": 5,
       "note": "",
-      "status": "대기",
+      "status": "패킹중",
       "created": "2026-04-19 13:26",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -186,9 +186,17 @@
       }
     }
   ],
-  "packings": [],
+  "packings": [
+    {
+      "orderNo": "ORD-260419-001",
+      "customer": "Samsung Electronics",
+      "boxes": 5,
+      "doneAt": "2026-04-19 21:49",
+      "person": "창고담당"
+    }
+  ],
   "dispatches": [],
   "events": [],
   "alarms": [],
-  "lastUpdated": "2026-04-19 15:14"
+  "lastUpdated": "2026-04-19 21:49"
 }
