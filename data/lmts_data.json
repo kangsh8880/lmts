@@ -323,6 +323,22 @@
       "vehicleNo": "인천 3847나",
       "driver": "김영수",
       "dphone": "010-9876-5432"
+    },
+    {
+      "orderNo": "ORD-260419-001",
+      "legIdx": 2,
+      "fromHub": "인천국제공항 (ICN)",
+      "toHub": "김해국제공항 (PUS)",
+      "transportType": "air",
+      "departPlan": "2026-04-19T19:43",
+      "eta": "2026-04-19T21:45",
+      "savedAt": "2026-04-19 22:41",
+      "note": "",
+      "status": "배차완료",
+      "airline": "아시아나",
+      "flightNo": "OZ852",
+      "depAirport": "ICN",
+      "arrAirport": "PUS"
     }
   ],
   "events": [
@@ -346,5 +362,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 22:40"
+  "lastUpdated": "2026-04-19 22:41"
 }
