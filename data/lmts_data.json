@@ -354,6 +354,21 @@
       "vehicleNo": "서울 9012다",
       "driver": "이재훈",
       "dphone": "010-5555-7777"
+    },
+    {
+      "orderNo": "ORD-260419-001",
+      "legIdx": 4,
+      "fromHub": "수원 중간집하장",
+      "toHub": "Samsung Electronics 수원",
+      "transportType": "truck",
+      "departPlan": "2026-04-20T09:42",
+      "eta": "2026-04-20T10:42",
+      "savedAt": "2026-04-19 22:42",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "서울 9012다",
+      "driver": "이재훈",
+      "dphone": "010-5555-7777"
     }
   ],
   "events": [
@@ -377,5 +392,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 22:41"
+  "lastUpdated": "2026-04-19 22:42"
 }
