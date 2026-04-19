@@ -139,10 +139,27 @@
       "mgr": "자재수령팀"
     }
   ],
-  "orders": [],
+  "orders": [
+    {
+      "no": "ORD-260419-001",
+      "date": "2026-04-19",
+      "customer": "Samsung Electronics",
+      "product": "OLED Module A타입",
+      "boxes": 5,
+      "note": "",
+      "status": "대기",
+      "created": "2026-04-19 13:26",
+      "route": {
+        "origin": "자사물류창고 (화성)",
+        "originStdTime": "",
+        "waypoints": [],
+        "destination": "Samsung Electronics 수원"
+      }
+    }
+  ],
   "packings": [],
   "dispatches": [],
   "events": [],
   "alarms": [],
-  "lastUpdated": "2026-04-18 09:00"
+  "lastUpdated": "2026-04-19 13:26"
 }
