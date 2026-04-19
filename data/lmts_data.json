@@ -155,11 +155,32 @@
         "waypoints": [],
         "destination": "Samsung Electronics 수원"
       }
+    },
+    {
+      "no": "ORD-260419-002",
+      "date": "2026-04-19",
+      "customer": "LG Display",
+      "product": "OLED Module A타입",
+      "boxes": 20,
+      "note": "",
+      "status": "대기",
+      "created": "2026-04-19 15:11",
+      "route": {
+        "origin": "자사물류창고 (화성)",
+        "originStdTime": "20",
+        "waypoints": [
+          {
+            "name": "수도권물류센터 (용인)",
+            "stdTime": "10"
+          }
+        ],
+        "destination": "LG Display 파주공장"
+      }
     }
   ],
   "packings": [],
   "dispatches": [],
   "events": [],
   "alarms": [],
-  "lastUpdated": "2026-04-19 13:26"
+  "lastUpdated": "2026-04-19 15:11"
 }
