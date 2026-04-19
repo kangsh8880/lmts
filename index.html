@@ -223,7 +223,7 @@ tr:last-child td{border-bottom:none;}
 <body>
 
 <!-- ══ LOADING OVERLAY ══ -->
-<div class="overlay hidden" id="overlay">
+<div class="overlay" id="overlay">
   <div class="spinner"></div>
   <div class="overlay-text" id="overlay-text">GitHub에서 데이터 불러오는 중...</div>
   <div class="overlay-sub" id="overlay-sub">kangsh8880/lmts</div>
@@ -698,7 +698,8 @@ const S = {
   set(k, v) {
     DB[k] = v;
     DB.lastUpdated = now();
-    // localStorage에 저장 (아티팩트 로컬 모드)
+    GH.scheduleSave();  // GitHub에 자동 저장
+    // localStorage에도 캐시 (오프라인 폴백)
     try { localStorage.setItem('lmts_' + k, JSON.stringify(v)); } catch(e) {}
   },
   customers:  () => S.get('customers'),
@@ -746,10 +747,9 @@ async function testAndSaveToken() {
   try {
     await GH.testConnection(token);
     GH.saveToken(token);
-    el('token-status').innerHTML = '<span style="color:var(--green)">✅ 연결 성공!</span>';
+    el('token-status').innerHTML = '<span style="color:var(--green)">✅ 연결 성공! 데이터를 불러옵니다...</span>';
     closeTokenModal();
-    loadFromLocalStorage();
-    renderDashboard();
+    await loadFromGitHub();
   } catch(e) {
     el('token-status').innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
   }
@@ -1400,26 +1400,7 @@ function initSampleData() {
 // ══════════════════════════════════════════════════════════════════
 // ─── INIT ─────────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
-// 아티팩트 모드: localStorage에서 직접 로드
-(function() {
-  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms'];
-  let hasData = false;
-  keys.forEach(k => {
-    try {
-      const raw = localStorage.getItem('lmts_' + k);
-      if (raw) { DB[k] = JSON.parse(raw); hasData = true; }
-    } catch(e) {}
-  });
-  if (!hasData || !DB.hubs.length) {
-    initSampleData();
-  }
-  // 네비바 상태 표시
-  const dot = document.getElementById('gh-dot');
-  const txt = document.getElementById('gh-status-text');
-  if (dot) dot.className = 'status-dot ok';
-  if (txt) txt.textContent = '로컬 모드';
-  renderDashboard();
-})();
+loadFromGitHub();
 </script>
 </body>
 </html>
