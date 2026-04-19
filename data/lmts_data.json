@@ -151,8 +151,13 @@
       "created": "2026-04-19 13:26",
       "route": {
         "origin": "자사물류창고 (화성)",
-        "originStdTime": "",
-        "waypoints": [],
+        "originStdTime": "20",
+        "waypoints": [
+          {
+            "name": "수도권물류센터 (용인)",
+            "stdTime": "30"
+          }
+        ],
         "destination": "Samsung Electronics 수원"
       }
     },
@@ -220,5 +225,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 21:50"
+  "lastUpdated": "2026-04-19 21:59"
 }
