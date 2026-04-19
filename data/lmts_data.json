@@ -339,6 +339,21 @@
       "flightNo": "OZ852",
       "depAirport": "ICN",
       "arrAirport": "PUS"
+    },
+    {
+      "orderNo": "ORD-260419-001",
+      "legIdx": 3,
+      "fromHub": "김해국제공항 (PUS)",
+      "toHub": "수원 중간집하장",
+      "transportType": "truck",
+      "departPlan": "2026-04-19T12:41",
+      "eta": "2026-04-20T08:41",
+      "savedAt": "2026-04-19 22:41",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "서울 9012다",
+      "driver": "이재훈",
+      "dphone": "010-5555-7777"
     }
   ],
   "events": [
