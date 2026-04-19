@@ -222,8 +222,17 @@
       "event": "OUT",
       "person": "배차담당",
       "note": "차량출발"
+    },
+    {
+      "time": "2026-04-19 23:00",
+      "orderNo": "ORD-260419-001",
+      "customer": "Samsung Electronics",
+      "hub": "수도권물류센터 (용인)",
+      "event": "IN",
+      "person": "",
+      "note": ""
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 21:59"
+  "lastUpdated": "2026-04-19 22:00"
 }
