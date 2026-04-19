@@ -147,7 +147,7 @@
       "product": "OLED Module A타입",
       "boxes": 5,
       "note": "",
-      "status": "패킹중",
+      "status": "운송중",
       "created": "2026-04-19 13:26",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -195,8 +195,30 @@
       "person": "창고담당"
     }
   ],
-  "dispatches": [],
-  "events": [],
+  "dispatches": [
+    {
+      "orderNo": "ORD-260419-001",
+      "vehicleNo": "경기 4521가",
+      "driver": "홍길동",
+      "dphone": "010-1234-5678",
+      "departPlan": "2026-04-19T21:50",
+      "eta": "2026-04-21T22:52",
+      "departAt": "2026-04-19 21:50",
+      "note": "Test",
+      "status": "운송중"
+    }
+  ],
+  "events": [
+    {
+      "time": "2026-04-19 21:50",
+      "orderNo": "ORD-260419-001",
+      "customer": "Samsung Electronics",
+      "hub": "자사물류창고 (화성)",
+      "event": "OUT",
+      "person": "배차담당",
+      "note": "차량출발"
+    }
+  ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 21:49"
+  "lastUpdated": "2026-04-19 21:50"
 }
