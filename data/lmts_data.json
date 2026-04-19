@@ -226,6 +226,18 @@
           {
             "name": "수도권물류센터 (용인)",
             "stdTime": "30"
+          },
+          {
+            "name": "인천국제공항 (ICN)",
+            "stdTime": "50"
+          },
+          {
+            "name": "김해국제공항 (PUS)",
+            "stdTime": "20"
+          },
+          {
+            "name": "수원 중간집하장",
+            "stdTime": "30"
           }
         ],
         "destination": "Samsung Electronics 수원"
@@ -319,5 +331,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 22:32"
+  "lastUpdated": "2026-04-19 22:34"
 }
