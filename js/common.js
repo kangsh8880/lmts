@@ -189,38 +189,56 @@ async function testAndSaveToken() {
 // ─── 앱 초기화 ────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
 async function loadFromGitHub() {
-  showOverlay('GitHub에서 데이터 불러오는 중...', `${GH.REPO} / ${GH.DATA_PATH}`);
+  const SK = 'lmts_session_db';
+  const cached = sessionStorage.getItem(SK);
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      Object.keys(DB).forEach(k => { if (c[k] !== undefined) DB[k] = c[k]; });
+      GH._connected = !!GH.token();
+      ensureDefaultHubs();
+      setSyncStatus(GH._connected ? 'ok' : 'warn', GH._connected ? '세션 캐시 사용 중' : 'GitHub 미연결 (캐시)');
+      return;
+    } catch(e) { sessionStorage.removeItem(SK); }
+  }
+  if (!GH.token()) {
+    setSyncStatus('warn', 'GitHub 미연결 — 우상단 클릭하여 연결');
+    loadFromLocalStorage();
+    if (!DB.hubs.length) initSampleData();
+    ensureDefaultHubs();
+    try { sessionStorage.setItem(SK, JSON.stringify(DB)); } catch(e) {}
+    return;
+  }
+  showOverlay('GitHub에서 데이터 불러오는 중...', GH.REPO + ' / ' + GH.DATA_PATH);
   try {
     const data = await GH.load();
     if (data) {
-      // GitHub 데이터로 DB 업데이트
       Object.keys(DB).forEach(k => { if (data[k] !== undefined) DB[k] = data[k]; });
       GH._connected = true;
-      ensureDefaultHubs();  // 누락 거점 자동 보완
-      setSyncStatus('ok', `데이터 로드 완료 (${now().slice(11,16)})`);
+      ensureDefaultHubs();
+      setSyncStatus('ok', '데이터 로드 완료 (' + now().slice(11,16) + ')');
     } else {
-      // 파일 없음 → 초기 샘플 데이터 푸시
-      showOverlay('최초 실행: 초기 데이터를 GitHub에 저장 중...');
+      showOverlay('최초 실행: 샘플 데이터 저장 중...');
       initSampleData();
       await GH.save(DB);
       GH._connected = true;
+      setSyncStatus('ok', '초기 데이터 저장 완료');
     }
+    try { sessionStorage.setItem(SK, JSON.stringify(DB)); } catch(e) {}
   } catch(e) {
-    if (e.message === 'TOKEN_INVALID' || !GH.token()) {
-      hideOverlay();
-      setSyncStatus('err', '토큰 미설정');
-      openTokenModal();
-      // localStorage 캐시로 폴백
-      loadFromLocalStorage();
-      return;
-    }
-    // 기타 오류 → localStorage 폴백
     console.error('GitHub load error:', e);
-    setSyncStatus('err', `로드 실패: ${e.message}`);
+    if (e.message === 'TOKEN_INVALID') {
+      GH.saveToken('');
+      setSyncStatus('err', '토큰 오류 — 우상단 클릭하여 재설정');
+    } else {
+      setSyncStatus('warn', 'GitHub 연결 실패 — 캐시 사용 중');
+    }
     loadFromLocalStorage();
+    if (!DB.hubs.length) initSampleData();
+    ensureDefaultHubs();
+    try { sessionStorage.setItem(SK, JSON.stringify(DB)); } catch(e) {}
   }
   hideOverlay();
-  renderDashboard();
 }
 
 function loadFromLocalStorage() {
