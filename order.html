@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMTS - 출하오더 관리</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ══ LOADING OVERLAY ══ -->
+<div class="overlay hidden" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-text" id="overlay-text">GitHub에서 데이터 불러오는 중...</div>
+  <div class="overlay-sub" id="overlay-sub">kangsh8880/lmts</div>
+</div>
+
+<!-- ══ TOKEN SETUP MODAL ══ -->
+<div class="modal-bg" id="token-modal">
+  <div class="modal">
+    <div class="modal-title">🔑 GitHub 연결 설정</div>
+    <div class="modal-desc">
+      LMTS 데이터를 GitHub에 저장하려면 Personal Access Token이 필요합니다.<br>
+      토큰은 이 브라우저에만 저장되며, 외부로 전송되지 않습니다.
+    </div>
+    <div class="modal-step">
+      <b>토큰 발급 방법:</b><br>
+      ① GitHub → Settings → Developer settings<br>
+      ② <b>Personal access tokens → Fine-grained tokens → Generate new token</b><br>
+      ③ Repository access: <code>kangsh8880/lmts</code> 선택<br>
+      ④ Permissions → Contents: <code>Read and Write</code> 설정<br>
+      ⑤ Generate token → 복사
+    </div>
+    <div class="token-input-wrap">
+      <input id="token-input" type="password" placeholder="github_pat_xxxxx...">
+      <button class="btn btn-primary" onclick="testAndSaveToken()">연결 테스트</button>
+    </div>
+    <div id="token-status" style="font-size:12px;color:var(--gray);margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeTokenModal()">나중에 설정</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ROUTE EDIT MODAL ══ -->
+<div class="modal-bg hidden" id="route-edit-modal">
+  <div class="modal" style="max-width:640px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-title">🗺️ 운송 경로 수정</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:16px">
+      오더번호: <b id="re-order-no" style="color:var(--dk)"></b>
+      &nbsp;|&nbsp; 고객사: <b id="re-customer"></b>
+      &nbsp;|&nbsp; 상태: <span id="re-status-badge"></span>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:4px">출발 거점</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="rb-badge rb-origin" style="flex-shrink:0">출발</div>
+        <select id="re-origin" onchange="reUpdatePreview()" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;"></select>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--gray)">→표준</span>
+          <input id="re-origin-std" type="number" min="0" placeholder="분" oninput="reUpdatePreview()" style="width:60px;padding:5px 6px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center">
+          <span style="font-size:10px;color:var(--gray)">분</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:6px">경유지 목록</label>
+      <div id="re-wp-list" style="border:1px solid var(--border);border-radius:6px;background:#FAFCFF;padding:8px;min-height:44px"></div>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center;padding:8px;background:#F5F8FF;border:1px dashed var(--border);border-radius:6px;margin-bottom:12px;flex-wrap:wrap">
+      <div class="rb-badge rb-wp" style="width:22px;height:22px;font-size:12px;flex-shrink:0">+</div>
+      <select id="re-wp-add" style="flex:2;min-width:140px;border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:12px;"></select>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <span style="font-size:10px;color:var(--gray)">→표준</span>
+        <input id="re-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:4px 5px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center">
+        <span style="font-size:10px;color:var(--gray)">분</span>
+      </div>
+      <button class="btn btn-yellow btn-sm" onclick="reAddWaypoint()">경유지 추가</button>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:4px">도착 거점</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="rb-badge rb-dest" style="flex-shrink:0">도착</div>
+        <select id="re-dest" onchange="reUpdatePreview()" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;"></select>
+      </div>
+    </div>
+    <div style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:16px">
+      <div style="font-size:10px;color:var(--gray);font-weight:700;margin-bottom:6px">📋 변경 후 경로 미리보기</div>
+      <div class="route-chips" id="re-route-preview"><span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span></div>
+    </div>
+    <div id="re-status-warn" class="alert alert-warn" style="display:none;margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeRouteEditModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveRouteEdit()">💾 경로 저장</button>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-logo">📦 LMTS<span>물류출하추적시스템</span></div>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="index.html" data-page="index.html">🏠 대시보드</a>
+    <a class="nav-tab" href="master.html" data-page="master.html">⚙️ 기준정보</a>
+    <a class="nav-tab" href="order.html" data-page="order.html">📋 출하오더</a>
+    <a class="nav-tab" href="packing.html" data-page="packing.html">📦 박스Packing</a>
+    <a class="nav-tab" href="dispatch.html" data-page="dispatch.html">🚛 차량배차</a>
+    <a class="nav-tab" href="tracking.html" data-page="tracking.html">📍 거점In/Out</a>
+    <a class="nav-tab" href="ceodash.html" data-page="ceodash.html">👑 CEO대시보드</a>
+    <a class="nav-tab" href="analytics.html" data-page="analytics.html">📊 물류분석</a>
+  </div>
+  <div class="nav-status" onclick="openTokenModal()" title="GitHub 연결 설정">
+    <div class="status-dot" id="gh-dot"></div>
+    <span id="gh-status-text" style="color:#AACCEE">연결 중...</span>
+  </div>
+</nav>
+
+<div style="max-width:1300px;margin:0 auto;padding:6px 16px 0">
+  <div class="sync-bar hidden" id="sync-bar">
+    <span id="sync-bar-icon">💾</span>
+    <span id="sync-bar-text"></span>
+  </div>
+</div>
+
+<div class="page" style="display:block;padding:16px;max-width:1300px;margin:0 auto">
+
+  <div class="sec-title">출하오더 관리</div>
+  <div class="card"><div class="card-head">📋 신규 출하오더 생성</div><div class="card-body">
+    <div class="form-row">
+      <div class="form-group"><label>오더번호</label><input id="o-no" readonly></div>
+      <div class="form-group"><label>출하예정일</label><input id="o-date" type="date"></div>
+      <div class="form-group"><label>고객사</label><select id="o-customer"><option value="">-- 선택 --</option></select></div>
+      <div class="form-group"><label>제품</label><select id="o-product"><option value="">-- 선택 --</option></select></div>
+      <div class="form-group"><label>박스수량</label><input id="o-boxes" type="number" placeholder="1" min="1"></div>
+      <div class="form-group"><label>특이사항</label><input id="o-note"></div>
+    </div>
+    <div class="route-builder">
+      <div class="rb-title">🗺️ 운송 경로 설정 <span style="font-size:10px;color:var(--gray);font-weight:400;margin-left:6px">출발지 → 경유지(순서·표준시간 지정) → 도착지</span></div>
+      <div class="rb-row">
+        <div class="rb-badge rb-origin">출발</div>
+        <div style="flex:1"><select id="o-origin" onchange="onOriginChange()"><option value="">-- 출발 거점 선택 --</option></select></div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--gray);white-space:nowrap">→다음거점<br>표준시간</span>
+          <input id="o-origin-std" type="number" min="0" placeholder="분" style="width:60px;padding:5px 6px;font-size:11px;text-align:center">
+          <span style="font-size:10px;color:var(--gray)">분</span>
+        </div>
+      </div>
+      <div class="rb-vline"></div>
+      <div id="waypoint-list"></div>
+      <div class="rb-add-row">
+        <div class="rb-badge rb-wp" style="width:24px;height:24px;font-size:13px;flex-shrink:0">+</div>
+        <select id="o-wp-add" style="flex:2;min-width:140px"><option value="">-- 경유지 선택 --</option></select>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span style="font-size:10px;color:var(--gray);white-space:nowrap">→다음까지<br>표준시간</span>
+          <input id="o-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:5px 6px;font-size:11px;border:1px solid var(--border);border-radius:5px;text-align:center">
+          <span style="font-size:10px;color:var(--gray)">분</span>
+        </div>
+        <button class="btn btn-yellow btn-sm" onclick="addWaypoint()" style="flex-shrink:0">경유지 추가</button>
+      </div>
+      <div class="rb-vline"></div>
+      <div class="rb-row">
+        <div class="rb-badge rb-dest">도착</div>
+        <div style="flex:1"><select id="o-dest" onchange="updateRoutePreview()"><option value="">-- 도착 거점 선택 --</option></select></div>
+      </div>
+      <div class="route-preview"><div class="rp-title">📋 설정된 경로 미리보기</div>
+        <div class="route-chips" id="route-chips"><span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span></div>
+      </div>
+    </div>
+    <div style="margin-top:14px;text-align:right"><button class="btn btn-primary" onclick="createOrder()">+ 오더 생성</button></div>
+  </div></div>
+  <div class="card"><div class="card-head">📋 출하오더 목록</div><div class="card-body">
+    <div style="margin-bottom:10px">
+      <select id="o-filter-status" onchange="renderOrders()" style="width:130px">
+        <option value="">전체 상태</option>
+        <option value="대기">대기</option><option value="패킹중">패킹중</option>
+        <option value="배차완료">배차완료</option><option value="운송중">운송중</option>
+        <option value="도착완료">도착완료</option><option value="지연">지연</option>
+      </select>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>제품</th><th>박스수</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>경로변경</th><th>삭제</th></tr></thead>
+      <tbody id="order-table-body"></tbody>
+    </table></div>
+  </div></div>
+</div>
+
+<script src="js/common.js"></script>
+<script src="js/order.js"></script>
+</body>
+</html>

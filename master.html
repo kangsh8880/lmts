@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMTS - 기준정보 관리</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ══ LOADING OVERLAY ══ -->
+<div class="overlay hidden" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-text" id="overlay-text">GitHub에서 데이터 불러오는 중...</div>
+  <div class="overlay-sub" id="overlay-sub">kangsh8880/lmts</div>
+</div>
+
+<!-- ══ TOKEN SETUP MODAL ══ -->
+<div class="modal-bg" id="token-modal">
+  <div class="modal">
+    <div class="modal-title">🔑 GitHub 연결 설정</div>
+    <div class="modal-desc">
+      LMTS 데이터를 GitHub에 저장하려면 Personal Access Token이 필요합니다.<br>
+      토큰은 이 브라우저에만 저장되며, 외부로 전송되지 않습니다.
+    </div>
+    <div class="modal-step">
+      <b>토큰 발급 방법:</b><br>
+      ① GitHub → Settings → Developer settings<br>
+      ② <b>Personal access tokens → Fine-grained tokens → Generate new token</b><br>
+      ③ Repository access: <code>kangsh8880/lmts</code> 선택<br>
+      ④ Permissions → Contents: <code>Read and Write</code> 설정<br>
+      ⑤ Generate token → 복사
+    </div>
+    <div class="token-input-wrap">
+      <input id="token-input" type="password" placeholder="github_pat_xxxxx...">
+      <button class="btn btn-primary" onclick="testAndSaveToken()">연결 테스트</button>
+    </div>
+    <div id="token-status" style="font-size:12px;color:var(--gray);margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeTokenModal()">나중에 설정</button>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="nav">
+  <div class="nav-logo">📦 LMTS<span>물류출하추적시스템</span></div>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="index.html" data-page="index.html">🏠 대시보드</a>
+    <a class="nav-tab" href="master.html" data-page="master.html">⚙️ 기준정보</a>
+    <a class="nav-tab" href="order.html" data-page="order.html">📋 출하오더</a>
+    <a class="nav-tab" href="packing.html" data-page="packing.html">📦 박스Packing</a>
+    <a class="nav-tab" href="dispatch.html" data-page="dispatch.html">🚛 차량배차</a>
+    <a class="nav-tab" href="tracking.html" data-page="tracking.html">📍 거점In/Out</a>
+    <a class="nav-tab" href="ceodash.html" data-page="ceodash.html">👑 CEO대시보드</a>
+    <a class="nav-tab" href="analytics.html" data-page="analytics.html">📊 물류분석</a>
+  </div>
+  <div class="nav-status" onclick="openTokenModal()" title="GitHub 연결 설정">
+    <div class="status-dot" id="gh-dot"></div>
+    <span id="gh-status-text" style="color:#AACCEE">연결 중...</span>
+  </div>
+</nav>
+
+<div style="max-width:1300px;margin:0 auto;padding:6px 16px 0">
+  <div class="sync-bar hidden" id="sync-bar">
+    <span id="sync-bar-icon">💾</span>
+    <span id="sync-bar-text"></span>
+  </div>
+</div>
+
+<div class="page" style="display:block;padding:16px;max-width:1300px;margin:0 auto">
+
+  <div class="sec-title">기준정보 관리</div>
+  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap" id="master-tab-btns">
+    <button class="btn btn-primary btn-sm" onclick="showMaster('customer',this)">👥 고객사</button>
+    <button class="btn btn-ghost btn-sm"   onclick="showMaster('product',this)">📦 제품</button>
+    <button class="btn btn-ghost btn-sm"   onclick="showMaster('vehicle',this)">🚛 차량·기사</button>
+    <button class="btn btn-ghost btn-sm"   onclick="showMaster('hub',this)">📍 거점(Hub)</button>
+  </div>
+  <div id="master-customer">
+    <div class="card"><div class="card-head">👥 고객사 등록</div><div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label>고객사코드</label><input id="c-code" placeholder="C001"></div>
+        <div class="form-group"><label>고객사명</label><input id="c-name"></div>
+        <div class="form-group"><label>담당자</label><input id="c-manager"></div>
+        <div class="form-group"><label>연락처</label><input id="c-phone" placeholder="010-0000-0000"></div>
+        <div class="form-group" style="flex:2"><label>주소</label><input id="c-addr"></div>
+        <div class="form-group"><label>수령확인방식</label><select id="c-confirm"><option>서명</option><option>사진</option><option>QR스캔</option><option>서명+사진</option></select></div>
+        <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveCustomer()">+ 등록</button></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>고객사명</th><th>담당자</th><th>연락처</th><th>주소</th><th>확인방식</th><th>삭제</th></tr></thead>
+      <tbody id="customer-table-body"></tbody></table></div>
+    </div></div>
+  </div>
+  <div id="master-product" style="display:none">
+    <div class="card"><div class="card-head">📦 제품 등록</div><div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label>제품코드</label><input id="p-code" placeholder="P001"></div>
+        <div class="form-group"><label>제품명</label><input id="p-name"></div>
+        <div class="form-group"><label>박스규격</label><input id="p-box" placeholder="40x30x25cm"></div>
+        <div class="form-group"><label>박스당수량</label><input id="p-qty" type="number"></div>
+        <div class="form-group"><label>중량(kg)</label><input id="p-weight" type="number"></div>
+        <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveProduct()">+ 등록</button></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>제품명</th><th>박스규격</th><th>박스당수량</th><th>중량</th><th>삭제</th></tr></thead>
+      <tbody id="product-table-body"></tbody></table></div>
+    </div></div>
+  </div>
+  <div id="master-vehicle" style="display:none">
+    <div class="card"><div class="card-head">🚛 차량·기사 등록</div><div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label>차량번호</label><input id="v-no" placeholder="경기 1234가"></div>
+        <div class="form-group"><label>차종</label><input id="v-type"></div>
+        <div class="form-group"><label>적재용량(kg)</label><input id="v-cap" type="number"></div>
+        <div class="form-group"><label>기사명</label><input id="v-driver"></div>
+        <div class="form-group"><label>연락처</label><input id="v-dphone" placeholder="010-0000-0000"></div>
+        <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveVehicle()">+ 등록</button></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>차량번호</th><th>차종</th><th>적재용량</th><th>기사명</th><th>연락처</th><th>상태</th><th>삭제</th></tr></thead>
+      <tbody id="vehicle-table-body"></tbody></table></div>
+    </div></div>
+  </div>
+  <div id="master-hub" style="display:none">
+    <div class="card"><div class="card-head">📍 거점(Hub) 등록</div><div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label>거점코드</label><input id="h-code" placeholder="HUB001"></div>
+        <div class="form-group"><label>거점명</label><input id="h-name"></div>
+        <div class="form-group"><label>유형</label><select id="h-type"><option>출발(자사창고)</option><option>경유지</option><option>도착(고객사)</option></select></div>
+        <div class="form-group" style="flex:2"><label>주소</label><input id="h-addr"></div>
+        <div class="form-group"><label>담당자</label><input id="h-mgr"></div>
+        <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveHub()">+ 등록</button></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>거점명</th><th>유형</th><th>주소</th><th>담당자</th><th>삭제</th></tr></thead>
+      <tbody id="hub-table-body"></tbody></table></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--gray)">
+        <span class="tag" style="background:#D6E4F0;color:#365C89">출발(자사창고)</span>출발&nbsp;
+        <span class="tag" style="background:#FFF3CD;color:#7B4F00">경유지</span>중간경유&nbsp;
+        <span class="tag" style="background:#E8F5E9;color:#1B5E20">도착(고객사)</span>최종목적지
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<script src="js/common.js"></script>
+<script src="js/master.js"></script>
+</body>
+</html>
