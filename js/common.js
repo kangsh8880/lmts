@@ -1,3 +1,7 @@
+// ── 우클릭(소스보기) 방지 ──────────────────────────────────────────
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+
 // ══ LMTS common.js ─ 공통 코드 ══
 
 // ══════════════════════════════════════════════════════════════════
