@@ -508,6 +508,17 @@ function ensureDefaultHubs() {
 // ══════════════════════════════════════════════════════════════════
 async function lmtsInit() {
   await loadFromGitHub();
-  if (typeof window.lmtsReady === 'function') window.lmtsReady();
+  if (typeof window.lmtsReady === 'function') {
+    window.lmtsReady();
+  } else {
+    setTimeout(() => {
+      if (typeof window.lmtsReady === 'function') window.lmtsReady();
+    }, 50);
+  }
 }
-lmtsInit();
+// 모든 스크립트 파싱 완료 후 실행 (Race condition 방지)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', lmtsInit);
+} else {
+  setTimeout(lmtsInit, 0);
+}
