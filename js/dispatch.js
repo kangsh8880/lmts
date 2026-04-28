@@ -110,10 +110,10 @@ function loadDispatchOrder() {
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
         ${statusBadge}
-        <button class="btn btn-sm" style="background:${d?'#EBF5FF':'var(--dk)'};color:${d?'var(--accent)':'#fff'};border:1px solid ${d?'var(--border)':'var(--dk)'};"
-          onclick="openLegDispatch('${no}',${i})">
-          ${d ? '✏️ 수정' : '+ 배차등록'}
-        </button>
+        ${isLegPassed(no, leg)
+          ? '<button class="btn btn-sm" disabled style="background:#F5F5F5;color:#BDBDBD;border:1px solid #E0E0E0;cursor:not-allowed;" title="통과완료 — 변경불가">🔒 잠금</button>'
+          : `<button class="btn btn-sm" style="background:${d?'#EBF5FF':'var(--dk)'};color:${d?'var(--accent)':'#fff'};border:1px solid ${d?'var(--border)':'var(--dk)'};" onclick="openLegDispatch('${no}',${i})">${d?'✏️ 수정':'+ 배차등록'}</button>`
+        }
       </div>
     </div>`;
   });
