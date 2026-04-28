@@ -157,16 +157,26 @@ function showOverlay(text, sub) {
 function hideOverlay() { el('overlay').classList.add('hidden'); }
 
 function setSyncStatus(state, text, silent=false) {
+  // nav 우상단 연결 상태 dot 업데이트
   const dot = el('gh-dot');
-  const stText = el('gh-status-text');
+  const txt = el('gh-status-text');
+  if (dot) dot.className = 'status-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : '');
+  if (txt) {
+    if (state === 'ok') txt.textContent = 'GitHub 연결됨';
+    else if (state === 'err') txt.textContent = '연결 오류';
+    else txt.textContent = 'GitHub 미연결';
+  }
+  // silent=true 이면 sync bar 표시 안 함 (세션캐시 사용 시 등)
+  if (silent) return;
   const bar = el('sync-bar');
-  dot.className = 'status-dot ' + (state === 'ok' ? 'ok' : state === 'err' ? 'err' : 'sync');
-  stText.textContent = state === 'ok' ? 'GitHub 연결됨' : state === 'err' ? '저장 오류' : '동기화 중';
   if (bar) {
     bar.classList.remove('hidden');
+    bar.style.borderColor = '';
+    bar.style.color = '';
     el('sync-bar-icon').textContent = state === 'ok' ? '✅' : state === 'err' ? '❌' : '💾';
     el('sync-bar-text').textContent = text;
     if (state === 'ok') setTimeout(() => bar.classList.add('hidden'), 3000);
+    if (state === 'warn') { bar.style.borderColor = 'var(--yellow)'; bar.style.color = 'var(--yellow)'; }
   }
 }
 
