@@ -285,17 +285,6 @@
   "dispatches": [
     {
       "orderNo": "ORD-260419-001",
-      "vehicleNo": "경기 4521가",
-      "driver": "홍길동",
-      "dphone": "010-1234-5678",
-      "departPlan": "2026-04-19T21:50",
-      "eta": "2026-04-21T22:52",
-      "departAt": "2026-04-19 21:50",
-      "note": "Test",
-      "status": "운송중"
-    },
-    {
-      "orderNo": "ORD-260419-001",
       "legIdx": 0,
       "fromHub": "자사물류창고 (화성)",
       "toHub": "수도권물류센터 (용인)",
@@ -410,5 +399,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-04-19 22:43"
+  "lastUpdated": "2026-04-28 18:16"
 }
