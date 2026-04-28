@@ -1,3 +1,11 @@
+function getRouteShort(o) {
+  if (!o||!o.route) return '-';
+  const {origin, waypoints, destination}=o.route;
+  const mid=waypoints?.length?` →(${waypoints.length}경유) `:' → ';
+  return `${origin||'?'}${mid}${destination||'?'}`;
+}
+
+
 // ══ LMTS dashboard.js ══
 
 // ─── DASHBOARD ────────────────────────────────────────────────
