@@ -201,7 +201,14 @@ async function loadFromGitHub() {
       Object.keys(DB).forEach(k => { if (c[k] !== undefined) DB[k] = c[k]; });
       GH._connected = !!GH.token();
       ensureDefaultHubs();
-      setSyncStatus(GH._connected ? 'ok' : 'warn', GH._connected ? '세션 캐시 사용 중' : 'GitHub 미연결 (캐시)');
+      // 세션 캐시 사용 시 sync bar 없이 nav 연결 상태 점만 표시
+      if (GH._connected) {
+        const dot = el('gh-dot'); if(dot) dot.className = 'status-dot ok';
+        const txt = el('gh-status-text'); if(txt) txt.textContent = 'GitHub 연결됨';
+      } else {
+        const dot = el('gh-dot'); if(dot) dot.className = 'status-dot';
+        const txt = el('gh-status-text'); if(txt) txt.textContent = 'GitHub 미연결';
+      }
       return;
     } catch(e) { sessionStorage.removeItem(SK); }
   }
