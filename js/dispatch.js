@@ -296,7 +296,9 @@ function saveLegDispatch() {
 
 function renderDispatch() {
   const STAT_CLS = {배차완료:'s-dispatch', 운송중:'s-moving', 도착완료:'s-done'};
-  el('dispatch-table-body').innerHTML = S.dispatches().map(d => {
+  // legIdx/fromHub/toHub 없는 불완전 레코드 제외
+  const validDispatches = S.dispatches().filter(d => d.legIdx !== undefined && d.fromHub && d.toHub);
+  el('dispatch-table-body').innerHTML = validDispatches.map(d => {
     const o = S.orders().find(x => x.no === d.orderNo);
     const tIcon  = TRANSPORT_ICON[d.transportType] || '🚛';
     const tLabel = TRANSPORT_LABEL[d.transportType] || '차량';
