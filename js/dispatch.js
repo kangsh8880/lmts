@@ -1,5 +1,9 @@
 // ══ LMTS dispatch.js ══
 
+// 운송수단 아이콘·레이블 (dispatch.js 자체 정의)
+const TRANSPORT_ICON  = { truck:'🚛', air:'✈️', sea:'🚢' };
+const TRANSPORT_LABEL = { truck:'차량', air:'항공', sea:'선박' };
+
 // ─── DISPATCH (구간별 배차) ────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
 
