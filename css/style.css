@@ -477,13 +477,14 @@ input::placeholder, textarea::placeholder { color: #A0AEC0; font-size: 12px; }
 
 /* ── FORM INPUT HEIGHT 통일 (42px) ─────────────────────────── */
 input[type=text],input[type=date],input[type=datetime-local],
-input[type=number],input[type=email],input[type=tel],select {
+input[type=number],input[type=email],input[type=tel],
+input:not([type]),
+select {
   height: 42px !important;
   min-height: 42px !important;
   padding: 0 12px !important;
   box-sizing: border-box !important;
   vertical-align: middle;
-  line-height: 42px;
 }
 textarea {
   height: auto !important;
@@ -491,6 +492,9 @@ textarea {
   padding: 9px 12px !important;
   line-height: 1.6;
 }
+.form-row { align-items: flex-end !important; }
+.form-group { display:flex; flex-direction:column; justify-content:flex-end; }
+
 /* form-row 세로 중앙 정렬 */
 .form-row {
   align-items: flex-end !important;
