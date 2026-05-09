@@ -364,3 +364,33 @@ input::placeholder, textarea::placeholder { color: #A0AEC0; font-size: 12px; }
   .grid2 { grid-template-columns: 1fr; }
   .kpi-val { font-size: 32px; }
 }
+
+/* ── CEO DASHBOARD ──────────────────────────────────────────── */
+.ceo-phone {
+  background: linear-gradient(145deg, #1E3A5F 0%, #2D5282 100%);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  color: #fff;
+  box-shadow: var(--shadow-lg);
+  height: 100%;
+}
+.ceo-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.7); margin-bottom: 14px; letter-spacing: .3px; }
+.ceo-kpi-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.ceo-kpi { flex: 1; text-align: center; background: rgba(255,255,255,.10); border-radius: var(--radius-sm); padding: 10px 6px; }
+.ceo-kpi-val { font-size: 24px; font-weight: 800; }
+.ceo-kpi-label { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 2px; }
+.cv-white { color: #fff; }
+.cv-red   { color: #FC8181; }
+.cv-green { color: #68D391; }
+.ceo-section { margin-bottom: 14px; }
+.ceo-section-title { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.6); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+.ceo-hub-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 12px; }
+.ceo-hub-row:last-child { border-bottom: none; }
+.ceo-hub-name2 { color: rgba(255,255,255,.75); }
+.ceo-hub-val  { font-size: 11px; font-weight: 600; color: #7ABDE8; }
+.ceo-hub-val.none { color: rgba(255,255,255,.3); font-weight: 400; }
+.ceo-order-item { background: rgba(255,255,255,.08); border-radius: var(--radius-sm); padding: 8px 10px; margin-bottom: 6px; }
+.ceo-order-no   { font-size: 11px; font-weight: 700; color: #fff; }
+.ceo-order-info { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 2px; }
+.ceo-order-status { font-size: 10px; font-weight: 600; margin-top: 4px; }
+.ceo-alarm-item { background: rgba(252,129,129,.15); border: 1px solid rgba(252,129,129,.3); border-radius: var(--radius-sm); padding: 8px 10px; margin-bottom: 6px; font-size: 12px; color: #FC8181; }
