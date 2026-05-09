@@ -474,3 +474,64 @@ input::placeholder, textarea::placeholder { color: #A0AEC0; font-size: 12px; }
   font-size: 11px; color: var(--orange);
   background: #FFF7ED; border-radius: 4px; padding: 2px 6px; margin-top: 4px;
 }
+
+/* ── FORM INPUT HEIGHT 통일 (42px) ─────────────────────────── */
+input[type=text],input[type=date],input[type=datetime-local],
+input[type=number],input[type=email],input[type=tel],select {
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+  vertical-align: middle;
+  line-height: 42px;
+}
+textarea {
+  height: auto !important;
+  min-height: 80px !important;
+  padding: 9px 12px !important;
+  line-height: 1.6;
+}
+/* form-row 세로 중앙 정렬 */
+.form-row {
+  align-items: flex-end !important;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+/* 버튼 높이도 42px에 맞춤 */
+.btn-primary[onclick*="add"], .btn-primary[onclick*="등록"],
+button[onclick*="add"], button[onclick*="submit"], button[onclick*="등록"] {
+  height: 42px;
+  min-height: 42px;
+}
+
+/* ── CEO 거점현황 행 — 거점명·시간 같은 줄 ────────────────────── */
+.ceo-row {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  gap: 8px;
+}
+.ceo-row:last-child { border-bottom: none; }
+.ceo-row-label {
+  font-size: 12px;
+  color: rgba(255,255,255,.8);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ceo-row-val {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cv-white { color: #fff !important; }
+.cv-green { color: #68D391 !important; }
+.cv-red   { color: #FC8181 !important; }
+.cv-gray  { color: rgba(255,255,255,.45) !important; }
