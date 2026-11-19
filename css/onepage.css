@@ -1,0 +1,31 @@
+/* ══ 한 페이지 맞춤(onepage) : 본문 스크롤 없이 영역별 내부 스크롤 ══ */
+@media (min-width:901px){
+  body.one{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  body.one .nav{flex:0 0 auto}
+  body.one .op-page{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:12px 16px;max-width:none;width:100%;margin:0;overflow:hidden}
+  body.one .op-page .sec-title{flex:0 0 auto;margin:0}
+  body.one .op-page .card{margin:0;display:flex;flex-direction:column;min-height:0;min-width:0}
+  body.one .op-page .card-head{flex:0 0 auto}
+  body.one .op-page .card-body{flex:1;min-height:0;overflow:auto}
+  body.one .op-page .tbl-wrap{overflow:auto}
+  body.one .op-page thead th{position:sticky;top:0;z-index:2}
+  body.one .op-cols{flex:1;min-height:0;display:grid;gap:12px;grid-template-columns:minmax(0,5fr) minmax(0,7fr);grid-template-rows:minmax(0,1fr)}
+  body.one .op-track{flex:1;min-height:0;display:grid;gap:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1.25fr) minmax(0,1fr)}
+  body.one .op-track .op-wide{grid-column:1 / -1}
+  body.one .op-ana{flex:1;min-height:0;display:grid;gap:12px;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1.25fr) minmax(0,1fr)}
+  body.one .op-ana .op-span2{grid-column:span 2}
+  body.one #ana-kpi-row{margin:0;flex:0 0 auto;gap:10px}
+  body.one #ana-kpi-row .kpi-card{padding:8px 12px}
+  body.one #ana-kpi-row .kpi-val{font-size:26px}
+  body.one .op-page .banner-card{flex:0 0 auto}
+  body.one .op-page .banner-card .card-body{overflow:visible}
+}
+.page.op-page{display:block;padding:12px 16px;max-width:none;margin:0}
+@media (min-width:901px){
+  body.one .sync-bar{position:fixed;top:14px;right:170px;z-index:60;margin:0}
+  body.one .op-page{display:flex}
+}
+@media (max-width:900px){
+  .op-cols,.op-track,.op-ana{display:grid;gap:12px;grid-template-columns:1fr}
+  .op-ana .op-span2,.op-track .op-wide{grid-column:auto}
+}
