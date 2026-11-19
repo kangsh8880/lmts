@@ -42,9 +42,11 @@ function saveHub() {
   const code=v('h-code'), name=v('h-name');
   if (!code||!name) return alert('거점코드와 거점명 필수');
   const arr = S.hubs();
-  arr.push({code, name, type:v('h-type'), addr:v('h-addr'), mgr:v('h-mgr')});
+  const lat=parseFloat(v('h-lat')), lng=parseFloat(v('h-lng'));
+  const g = HUB_GEO[name];
+  arr.push({code, name, type:v('h-type'), addr:v('h-addr'), mgr:v('h-mgr'), lat:isNaN(lat)?(g?g[0]:null):lat, lng:isNaN(lng)?(g?g[1]:null):lng});
   S.set('hubs', arr);
-  ['h-code','h-name','h-addr','h-mgr'].forEach(id => el(id).value='');
+  ['h-code','h-name','h-addr','h-mgr','h-lat','h-lng'].forEach(id => el(id).value='');
   renderMasterTable('hub');
 }
 
@@ -64,8 +66,8 @@ function renderMasterTable(tab) {
     <td><span class="status s-ready">${vv.status}</span></td>
     <td><button class="btn btn-danger btn-xs" onclick="delItem('vehicles',${i})">삭제</button></td></tr>`).join('') || empty(7);
   if (tab==='hub') el('hub-table-body').innerHTML = S.hubs().map((h,i)=>
-    `<tr><td>${h.code}</td><td><b>${h.name}</b></td><td>${typeTag(h.type)}</td><td>${h.addr||'-'}</td><td>${h.mgr||'-'}</td>
-    <td><button class="btn btn-danger btn-xs" onclick="delItem('hubs',${i})">삭제</button></td></tr>`).join('') || empty(6);
+    `<tr><td>${h.code}</td><td><b>${h.name}</b></td><td>${typeTag(h.type)}</td><td>${h.addr||'-'}</td><td>${h.mgr||'-'}</td><td>${h.lat!=null&&h.lat!==''?(+h.lat).toFixed(4)+', '+(+h.lng).toFixed(4):'<span style="color:#c0392b">미입력</span>'}</td>
+    <td><button class="btn btn-danger btn-xs" onclick="delItem('hubs',${i})">삭제</button></td></tr>`).join('') || empty(7);
 }
 
 function delItem(key, idx) {

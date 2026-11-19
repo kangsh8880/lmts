@@ -1,0 +1,260 @@
+// ══ LMTS map.js — 위치추적(지도) ══
+// 거점 이벤트(IN/OUT)와 구간 표준시간으로 "현재 위치"를 추정하고, 출발~현재(실선)와 현재~도착(점선) 경로를 지도에 표시한다.
+const MP = (() => {
+  const esc = DC.esc;
+  const ICON = { truck: '🚛', air: '✈️', sea: '🚢' }, LABEL = { truck: '차량', air: '항공', sea: '선박' };
+  const C_DONE = '#365C89', C_TODO = '#9fb3cc', C_BAD = '#c0392b';
+  const S_ = { map: null, lg: null, mk: null, order: null, legs: [], st: null, pos: null, timer: null, raf: null, fitted: false };
+  const rad = Math.PI / 180;
+  const fmt = d => d ? `${DC.pad(d.getMonth()+1)}-${DC.pad(d.getDate())} ${DC.pad(d.getHours())}:${DC.pad(d.getMinutes())}` : '-';
+  const dur = m => { m = Math.round(Math.abs(m)); const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), r = m % 60; return d ? `${d}일 ${h}시간` : h ? `${h}시간 ${r}분` : `${r}분`; };
+
+  // ── 좌표 ──────────────────────────────────────────────
+  function hubLL(name) { const h = S.hubs().find(x => x.name === name); return (!h || h.lat == null || h.lat === '' || isNaN(+h.lat) || isNaN(+h.lng)) ? null : [+h.lat, +h.lng]; }
+  function hav(a, b) { const dl = (b[0]-a[0])*rad, dg = (b[1]-a[1])*rad, x = Math.sin(dl/2)**2 + Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dg/2)**2; return 12742 * Math.asin(Math.sqrt(x)); }
+  function stopsGeo(o) {      // 날짜변경선을 건너는 경로(한국→미국)가 끊기지 않도록 경도를 연속값으로 보정
+    let prev = null;
+    return DC.nodes(o).map(n => { const ll = hubLL(n); if (!ll) return { name: n, ll: null };
+      let g = ll[1]; if (prev != null) { while (g - prev > 180) g -= 360; while (g - prev < -180) g += 360; } prev = g; return { name: n, ll: [ll[0], g] }; });
+  }
+  function legMode(o, i, from, to) {
+    const d = S.dispatches().find(x => x.orderNo === o.no && x.legIdx === i);
+    if (d && d.transportType) return d.transportType;
+    const fm = DC.hubMode(from), tm = DC.hubMode(to);
+    if (fm === 'air' && tm === 'air') return 'air';
+    if (fm === 'sea' && tm === 'sea') { const a = hubLL(from), b = hubLL(to); return (a && b && hav(a, b) < 150) ? 'truck' : 'sea'; }
+    return 'truck';
+  }
+  // 대권(지구 곡선) 경로 + 수송수단별 곡률(항공: 위로 볼록, 선박: 반대로 완만)
+  function arcPts(a, b, bulge) {
+    const A = [Math.cos(a[0]*rad)*Math.cos(a[1]*rad), Math.cos(a[0]*rad)*Math.sin(a[1]*rad), Math.sin(a[0]*rad)];
+    const B = [Math.cos(b[0]*rad)*Math.cos(b[1]*rad), Math.cos(b[0]*rad)*Math.sin(b[1]*rad), Math.sin(b[0]*rad)];
+    const om = Math.acos(Math.max(-1, Math.min(1, A[0]*B[0] + A[1]*B[1] + A[2]*B[2])));
+    const dlat = b[0]-a[0], dlng = b[1]-a[1], len = Math.hypot(dlat, dlng) || 1;
+    const n = Math.max(24, Math.min(140, Math.round(len * 2))), out = []; let pl = a[1];
+    for (let k = 0; k <= n; k++) { const t = k / n; let la, lo;
+      if (om < 1e-6) { la = a[0]; lo = a[1]; } else { const s1 = Math.sin((1-t)*om)/Math.sin(om), s2 = Math.sin(t*om)/Math.sin(om);
+        const v = [A[0]*s1+B[0]*s2, A[1]*s1+B[1]*s2, A[2]*s1+B[2]*s2]; la = Math.asin(v[2])/rad; lo = Math.atan2(v[1], v[0])/rad; }
+      while (lo - pl > 180) lo -= 360; while (lo - pl < -180) lo += 360; pl = lo;
+      const off = bulge * len * Math.sin(Math.PI * t);
+      out.push([la + (dlng/len)*off, lo - (dlat/len)*off]); }
+    out[0] = a.slice(); out[out.length-1] = b.slice();
+    return out;
+  }
+  function cumOf(pts) { const c = [0]; for (let i = 1; i < pts.length; i++) c.push(c[i-1] + Math.hypot(pts[i][0]-pts[i-1][0], (pts[i][1]-pts[i-1][1]) * Math.cos(pts[i][0]*rad))); return c; }
+  function setPts(L, pts) { L.pts = pts; L.cum = cumOf(pts); L.len = L.cum[L.cum.length-1] || 1e-9; }
+  function pointAt(L, f) {
+    f = Math.max(0, Math.min(1, f)); const t = f * L.len; let i = 1; while (i < L.cum.length - 1 && L.cum[i] < t) i++;
+    const s = (L.cum[i] - L.cum[i-1]) || 1e-9, r = (t - L.cum[i-1]) / s, a = L.pts[i-1], b = L.pts[i];
+    return [a[0] + (b[0]-a[0])*r, a[1] + (b[1]-a[1])*r];
+  }
+  function split(L, f) {      // 경로를 진행률 f 지점에서 둘로 나눔
+    f = Math.max(0, Math.min(1, f)); const t = f * L.len, P = pointAt(L, f); let i = 1; while (i < L.cum.length - 1 && L.cum[i] < t) i++;
+    return [[...L.pts.slice(0, i), P], [P, ...L.pts.slice(i)]];
+  }
+  // 차량 구간: 공개 도로경로(OSRM)를 시도하고 실패하면 직선 — 결과는 브라우저에 저장해 재사용
+  function roadKey(a, b) { return [a[0].toFixed(3), a[1].toFixed(3), b[0].toFixed(3), b[1].toFixed(3)].join(','); }
+  function roadCache() { try { return JSON.parse(localStorage.getItem('lmts_road_cache') || '{}'); } catch (e) { return {}; } }
+  function saveRoad(k, v) { try { const c = roadCache(); c[k] = v; localStorage.setItem('lmts_road_cache', JSON.stringify(c)); } catch (e) {} }
+  function decimate(p, max) { if (p.length <= max) return p; const o = [], st = (p.length - 1) / (max - 1); for (let i = 0; i < max; i++) o.push(p[Math.round(i * st)]); return o; }
+  async function loadRoad(L, token) {
+    const k = roadKey(L.a, L.b), c = roadCache()[k];
+    if (c) { setPts(L, c); L.road = true; return true; }
+    if (L.a[1] > 180 || L.b[1] > 180 || L.a[1] < -180 || L.b[1] < -180) return false;
+    try {
+      const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 7000);
+      const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${L.a[1]},${L.a[0]};${L.b[1]},${L.b[0]}?overview=simplified&geometries=geojson`, { signal: ctl.signal });
+      clearTimeout(tm); const j = await r.json();
+      if (token !== S_.token || !j.routes || !j.routes[0]) return false;
+      const pts = decimate(j.routes[0].geometry.coordinates.map(x => [x[1], x[0]]), 160);
+      pts[0] = L.a.slice(); pts[pts.length-1] = L.b.slice(); saveRoad(k, pts); setPts(L, pts); L.road = true; return true;
+    } catch (e) { return false; }
+  }
+
+  // ── 위치 추정 ─────────────────────────────────────────
+  function legDefs(o) {
+    const ns = DC.nodes(o), sd = DC.stds(o), ev = DC.evsOf(o), g = stopsGeo(o), out = [];
+    let after = '';
+    for (let i = 0; i < ns.length - 1; i++) {
+      const outs = ev.filter(e => e.hub === ns[i] && e.event === 'OUT' && e.time >= after), tOut = outs.length ? outs[0].time : null;
+      const inn = tOut ? ev.find(e => e.hub === ns[i+1] && e.event === 'IN' && e.time >= tOut) : null;
+      if (inn) after = inn.time; else if (tOut) after = tOut;
+      const mode = legMode(o, i, ns[i], ns[i+1]);
+      const d = S.dispatches().find(x => x.orderNo === o.no && x.legIdx === i);
+      let std = sd[i], est = false;
+      if (std == null) { const a = d && DC.toDate(d.departPlan), b = d && DC.toDate(d.eta); std = (a && b && b > a) ? DC.mins(a, b) : 60; est = true; }
+      const L = { i, from: ns[i], to: ns[i+1], mode, std, stdEst: est, tOut, tIn: inn ? inn.time : null, a: g[i].ll, b: g[i+1].ll, road: false };
+      if (L.a && L.b) setPts(L, mode === 'truck' ? [L.a, L.b] : arcPts(L.a, L.b, mode === 'air' ? 0.12 : -0.05));
+      out.push(L);
+    }
+    return { legs: out, stops: g, ev };
+  }
+  function calc(o, now) {
+    const D = legDefs(o), legs = D.legs, n = legs.length;
+    const hasArr = o.status === '도착완료' || D.ev.some(e => e.event === '도착완료') || (n && legs[n-1].tIn);
+    let k = -1; legs.forEach(L => { if (L.tOut) k = L.i; });
+    const sum = (f, t) => legs.slice(f, t).reduce((a, L) => a + L.std, 0), total = sum(0, n);
+    const t0 = legs.find(L => L.tOut) ? DC.toDate(legs.find(L => L.tOut).tOut) : now;
+    const st = { D, legs, n, total, now, plan: new Date(t0.getTime() + total * 60000) };
+    if (hasArr) { Object.assign(st, { state: 'done', leg: n, prog: 1, pct: 100, eta: DC.toDate(D.ev.filter(e => e.event === '도착완료' || (e.event === 'IN' && e.hub === legs[n-1]?.to)).pop()?.time) || now, delta: 0, over: 0 }); st.delta = DC.mins(st.plan, st.eta); return st; }
+    if (k < 0) { Object.assign(st, { state: 'pre', leg: 0, prog: 0, pct: 0, eta: new Date(now.getTime() + total * 60000), over: 0 }); st.delta = DC.mins(st.plan, st.eta); return st; }
+    const L = legs[k];
+    if (L.tIn) { const dw = DC.mins(DC.toDate(L.tIn), now); const eta = new Date(now.getTime() + sum(k+1, n) * 60000);
+      Object.assign(st, { state: 'at', leg: k + 1, prog: 0, pct: Math.min(100, sum(0, k+1) / total * 100), eta, dwell: Math.max(0, dw), over: 0 }); st.delta = DC.mins(st.plan, eta); return st; }
+    const el = DC.mins(DC.toDate(L.tOut), now), raw = el / L.std, over = Math.max(0, el - L.std);
+    const eta = new Date(now.getTime() + (over ? 0 : (L.std - el)) * 60000 + sum(k+1, n) * 60000);
+    Object.assign(st, { state: 'move', leg: k, prog: Math.max(0, Math.min(raw, 0.985)), raw, over, elapsed: Math.max(0, el),
+      pct: Math.min(99.9, (sum(0, k) + L.std * Math.min(raw, 1)) / total * 100), eta });
+    st.delta = DC.mins(st.plan, eta); return st;
+  }
+  function curPos(st) {
+    const { legs, n } = st; if (!n) return null;
+    if (st.state === 'done') return legs[n-1].b;
+    if (st.state === 'move') { const L = legs[st.leg]; return L.pts ? pointAt(L, st.prog) : null; }
+    const L = legs[Math.min(st.leg, n-1)]; return st.leg >= n ? L.b : L.a;
+  }
+
+  // ── 지도 그리기 ───────────────────────────────────────
+  function styleOf(mode, done, bad) {
+    const base = { weight: mode === 'air' ? 4 : 5, opacity: done ? 0.95 : 0.85, color: done ? (bad ? C_BAD : C_DONE) : C_TODO, lineCap: 'round', lineJoin: 'round' };
+    if (mode === 'air') base.dashArray = '12 9'; if (mode === 'sea') base.dashArray = '1 11';
+    return base;
+  }
+  function drawRoute() {
+    if (!S_.map || !S_.st) return; const st = S_.st; S_.lg.clearLayers();
+    const bad = st.over > 0;
+    st.legs.forEach(L => {
+      if (!L.pts) return;
+      if (L.i < st.leg || st.state === 'done') L.layers = [L.mode ? L.pts : L.pts].map(p => L_.polyline(p, styleOf(L.mode, true, false)));
+      else if (L.i === st.leg && st.state === 'move') { const [a, b] = split(L, st.prog); L.layers = [L_.polyline(a, styleOf(L.mode, true, bad)), L_.polyline(b, styleOf(L.mode, false))]; }
+      else L.layers = [L_.polyline(L.pts, styleOf(L.mode, false))];
+      L.layers.forEach(x => x.addTo(S_.lg));
+      // 구간 수단 아이콘(구간 중앙)
+      const mid = pointAt(L, 0.5), ic = L_.marker(mid, { icon: L_.divIcon({ className: '', html: `<div style="font-size:15px;background:#fff;border:1px solid #888;border-radius:10px;padding:0 3px;line-height:18px">${ICON[L.mode]}</div>`, iconSize: [26, 20], iconAnchor: [13, 10] }), interactive: false, keyboard: false }); ic.addTo(S_.lg);
+    });
+    st.D.stops.forEach((s, i) => {
+      if (!s.ll) return;
+      const pass = i < st.leg || st.state === 'done' || (st.state === 'at' && i === st.leg ? false : false), curHub = (st.state === 'at' || st.state === 'pre') && i === st.leg;
+      const passed = (st.state === 'done') || i < st.leg || (st.state === 'move' && i <= st.leg);
+      const typ = i === 0 ? '🏭' : i === st.D.stops.length - 1 ? '🏢' : (DC.HUBMODE_ICON[DC.hubMode(s.name)] || '📍');
+      const mk = L_.marker(s.ll, { icon: L_.divIcon({ className: '', html: `<div class="mp-hub ${passed ? 'pass' : ''} ${curHub ? 'cur' : ''}">${typ}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }) });
+      const evs = st.D.ev.filter(e => e.hub === s.name).map(e => `${e.event} ${e.time.slice(5, 16)}`).join('<br>');
+      mk.bindTooltip(`<b>${esc(s.name)}</b>${evs ? '<br>' + evs : ''}`, { className: 'mp-tip', direction: 'top', offset: [0, -12] }); mk.addTo(S_.lg);
+    });
+  }
+  function mkIcon(st) {
+    const L = st.legs[Math.min(st.leg, st.n - 1)], ic = st.state === 'done' ? '✅' : st.state === 'move' ? ICON[L.mode] : '📍';
+    return L_.divIcon({ className: '', html: `<div class="mp-mk ${st.state === 'done' ? 'done' : st.over > 0 ? 'bad' : ''}"><span>${ic}</span></div>`, iconSize: [38, 38], iconAnchor: [19, 19] });
+  }
+  function animate(from, to, ms, cb) {
+    cancelAnimationFrame(S_.raf); if (!from || ms <= 0) { cb(to, 1); return; } const t0 = performance.now();
+    const step = t => { const r = Math.min(1, (t - t0) / ms), e = r < .5 ? 2*r*r : 1 - Math.pow(-2*r + 2, 2) / 2; cb([from[0] + (to[0]-from[0])*e, from[1] + (to[1]-from[1])*e], r); if (r < 1) S_.raf = requestAnimationFrame(step); };
+    S_.raf = requestAnimationFrame(step);
+  }
+  function placeMarker(animateMs) {
+    const st = S_.st, p = curPos(st); if (!p || !S_.map) return;
+    if (!S_.mk) S_.mk = L_.marker(p, { icon: mkIcon(st), zIndexOffset: 1000 }).addTo(S_.map); else S_.mk.setIcon(mkIcon(st));
+    const from = S_.pos; S_.pos = p;
+    animate(from && S_.mk ? S_.mk.getLatLng() && [S_.mk.getLatLng().lat, S_.mk.getLatLng().lng] : null, p, animateMs, q => S_.mk.setLatLng(q));
+  }
+
+  // ── 우측 패널 ─────────────────────────────────────────
+  function panel() {
+    const o = S_.order, st = S_.st; if (!o || !st) return;
+    const bad = st.over > 0 || st.delta > 30 || o.status === '지연', D = st.D;
+    const where = st.state === 'done' ? `도착 완료 — ${esc(DC.shortName(st.legs[st.n-1].to))}` :
+      st.state === 'pre' ? `출발 전 — ${esc(DC.shortName(D.stops[0].name))} 대기` :
+      st.state === 'at' ? `${esc(DC.shortName(D.stops[st.leg].name))} 체류 중 (${dur(st.dwell)} 경과)` :
+      `${esc(DC.shortName(st.legs[st.leg].from))} → ${esc(DC.shortName(st.legs[st.leg].to))} ${LABEL[st.legs[st.leg].mode]} 이동 중`;
+    const dl = st.delta, dtxt = st.state === 'done' ? (dl > 0 ? `계획 대비 +${dur(dl)}` : '계획 내 도착') : (dl > 0 ? `계획 대비 +${dur(dl)} 지연 예상` : `계획 대비 ${dur(dl)} 여유`);
+    let cum = 0;
+    const baseT = st.legs.find(L => L.tOut) ? DC.toDate(st.legs.find(L => L.tOut).tOut) : st.now;
+    let tl = '';
+    D.stops.forEach((s, i) => {
+      const L = st.legs[i - 1], planT = new Date(baseT.getTime() + (i ? st.legs.slice(0, i).reduce((a, x) => a + x.std, 0) : 0) * 60000);
+      const evs = D.ev.filter(e => e.hub === s.name), inn = evs.find(e => e.event === 'IN' || e.event === '도착완료'), out = evs.find(e => e.event === 'OUT');
+      const passed = st.state === 'done' || i < st.leg || (st.state === 'move' && i <= st.leg), cur = (st.state === 'at' || st.state === 'pre') && i === st.leg;
+      tl += `<div class="mp-st"><div class="mp-dot ${passed ? 'pass' : ''} ${cur ? 'cur' + (bad ? '' : ' ok') : ''}">${passed ? '✓' : cur ? '●' : ''}</div><div><div class="mp-stn">${esc(s.name)}${s.ll ? '' : ' <span style="color:#c0392b;font-weight:400">· 좌표 미입력</span>'}</div>
+        <div class="mp-stt">계획 ${fmt(planT)}${inn ? ` · <b>IN ${inn.time.slice(5, 16)}</b>` : ''}${out ? ` · <b>OUT ${out.time.slice(5, 16)}</b>` : ''}</div></div></div>`;
+      if (i < D.stops.length - 1) {
+        const Lg = st.legs[i], done = i < st.leg || st.state === 'done', curL = i === st.leg && st.state === 'move';
+        const pr = done ? 100 : curL ? Math.min(100, Math.round(st.raw * 1000) / 10) : 0;
+        const act = (Lg.tOut && Lg.tIn) ? DC.mins(DC.toDate(Lg.tOut), DC.toDate(Lg.tIn)) : null;
+        tl += `<div class="mp-leg ${done ? 'done' : ''} ${curL ? 'cur' + (bad ? '' : ' ok') : ''}">${ICON[Lg.mode]} ${LABEL[Lg.mode]} · 표준 ${Lg.std}분${Lg.stdEst ? '(미입력→기본값)' : ''}${act != null ? ` · 실적 <b>${act}분</b>` : ''}${curL ? ` · 진행 <b>${pr.toFixed(1)}%</b>${st.over > 0 ? ` <span style="color:#c0392b">(+${dur(st.over)} 초과)</span>` : ''}` : ''}
+          <div class="mp-bar"><i style="width:${Math.min(100, pr)}%"></i></div></div>`;
+      }
+    });
+    el('mp-head').textContent = `📍 ${o.no} 위치 현황`;
+    el('mp-side').innerHTML = `<div class="mp-ord">${esc(o.no)} <span class="status" style="font-size:11px">${esc(o.status)}</span></div>
+      <div class="mp-sub">${esc(o.customer)} · ${esc(ordText(o))}</div>
+      <div class="mp-kpis"><div class="mp-kpi"><small>진행률</small><b>${st.pct.toFixed(1)}%</b></div>
+        <div class="mp-kpi ${bad ? 'bad' : 'ok'}"><small>${st.state === 'done' ? '도착 시각' : '도착 예상(ETA)'}</small><b>${fmt(st.eta)}</b></div>
+        <div class="mp-kpi ${bad ? 'bad' : 'ok'}"><small>계획 도착</small><b>${fmt(st.plan)}</b></div></div>
+      <div class="mp-now"><b>현재 위치 ${st.state === 'move' ? '(추정)' : ''}</b><br>${where}<br><span style="color:${bad ? '#c0392b' : '#1a4fa0'};font-weight:700">${dtxt}</span></div>
+      <div class="mp-note">※ 마지막 거점 이벤트(IN/OUT)와 구간 표준시간 비율로 위치를 추정합니다. 기준시각 ${fmt(st.now)} (${DC.refNow().live ? '현재 시각' : '마지막 이벤트 시각'}) · 지도 수단: 🚛 차량 실선 · ✈️ 항공 곡선 · 🚢 선박 점선</div>
+      <div class="mp-tl">${tl}</div>`;
+  }
+
+  // ── 제어 ──────────────────────────────────────────────
+  const el = id => document.getElementById(id);
+  let L_ = null;
+  function chips() {
+    const act = S.orders().filter(o => o.status !== '도착완료'), mv = act.filter(o => ['운송중', '지연'].includes(o.status));
+    el('mp-chips').innerHTML = (mv.length ? mv : act).map(o => `<span class="mp-chip ${S_.order && S_.order.no === o.no ? 'on' : ''} ${o.status === '지연' ? 'bad' : ''}" onclick="MP.pick('${o.no}')">${o.status === '운송중' ? '🚚 ' : ''}${esc(o.no)} · ${esc(o.customer)}</span>`).join('') || '<span style="font-size:12px;color:#666">진행 중인 오더가 없습니다</span>';
+    el('mp-list').innerHTML = S.orders().slice().sort((a, b) => (a.status === '도착완료') - (b.status === '도착완료')).map(o => `<option value="${esc(o.no)}">${esc(o.customer)} [${esc(o.status)}]</option>`).join('');
+  }
+  function warn(st) {
+    const miss = st.D.stops.filter(s => !s.ll).map(s => s.name), w = el('mp-warn');
+    if (miss.length) { w.innerHTML = `⚠️ 좌표가 없는 거점: <b>${miss.map(esc).join(', ')}</b><br>[기준정보 → 거점]에서 위도·경도를 입력하면 지도에 표시됩니다.`; w.classList.remove('hidden'); } else w.classList.add('hidden');
+  }
+  function fit(pad) {
+    if (!S_.map || !S_.st) return; const pts = []; S_.st.legs.forEach(L => L.pts && pts.push(...L.pts)); S_.st.D.stops.forEach(s => s.ll && pts.push(s.ll));
+    if (pts.length) S_.map.fitBounds(L_.latLngBounds(pts), { padding: [50, 50], maxZoom: 12 });
+  }
+  function pick(no) {
+    const o = S.orders().find(x => x.no === no); if (!o) { alert('오더번호를 찾을 수 없습니다: ' + no); return; }
+    S_.order = o; S_.fitted = false; S_.mk && S_.map.removeLayer(S_.mk); S_.mk = null; S_.pos = null; S_.token = Math.random();
+    el('mp-q').value = no; refresh(false); chips();
+    const t = S_.token; S_.st.legs.filter(L => L.mode === 'truck' && L.a && L.b).forEach(L => loadRoad(L, t).then(ok => { if (ok && t === S_.token) { drawRoute(); placeMarker(0); if (!S_.fitted) fit(); } }));
+    try { history.replaceState(null, '', '?order=' + encodeURIComponent(no)); } catch (e) {}
+  }
+  function refresh(anim) {
+    if (!S_.order) return; const st = S_.st ? calcKeep() : null;
+    S_.st = calcWithPts(S_.order); drawRoute(); placeMarker(anim ? 1400 : 0); panel(); warn(S_.st);
+    if (!S_.fitted && S_.map) { fit(); S_.fitted = true; }
+  }
+  const calcKeep = () => null;
+  function calcWithPts(o) {       // 이전에 읽어 둔 도로경로를 재계산 후에도 유지
+    const old = S_.st && S_.order === o ? S_.st.legs : [], st = calc(o, DC.refNow().t);
+    st.legs.forEach(L => { const p = old.find(x => x.i === L.i && x.from === L.from && x.to === L.to); if (p && p.road && L.mode === 'truck') { L.pts = p.pts; L.cum = p.cum; L.len = p.len; L.road = true; } else if (L.mode === 'truck' && L.a && L.b) { const c = roadCache()[roadKey(L.a, L.b)]; if (c) { setPts(L, c); L.road = true; } } });
+    return st;
+  }
+  function search() { const q = el('mp-q').value.trim(); if (q) pick(q); }
+  function replay() {
+    const st = S_.st; if (!st || !S_.map || !S_.mk) return; const pts = [];
+    st.legs.forEach(L => { if (!L.pts) return; if (L.i < st.leg || st.state === 'done') pts.push(...L.pts); else if (L.i === st.leg && st.state === 'move') pts.push(...split(L, st.prog)[0]); });
+    if (pts.length < 2) return; const cum = cumOf(pts), tot = cum[cum.length-1] || 1, t0 = performance.now(), ms = 7000; cancelAnimationFrame(S_.raf);
+    const step = t => { const r = Math.min(1, (t - t0) / ms), tt = r * tot; let i = 1; while (i < cum.length - 1 && cum[i] < tt) i++;
+      const s = (cum[i]-cum[i-1]) || 1e-9, q = (tt - cum[i-1]) / s, a = pts[i-1], b = pts[i]; S_.mk.setLatLng([a[0] + (b[0]-a[0])*q, a[1] + (b[1]-a[1])*q]); S_.map.panTo(S_.mk.getLatLng(), { animate: false });
+      if (r < 1) S_.raf = requestAnimationFrame(step); else placeMarker(0); };
+    S_.raf = requestAnimationFrame(step);
+  }
+  function focusNow() { if (S_.pos && S_.map) S_.map.setView(S_.pos, Math.max(S_.map.getZoom(), 7), { animate: true }); }
+  function init() {
+    initNav(); chips();
+    if (typeof L === 'undefined') { el('mp-map').innerHTML = '<div class="mp-empty">지도 라이브러리를 불러오지 못했습니다.<br>인터넷 연결을 확인한 뒤 새로고침(Ctrl+Shift+R) 하세요.</div>'; }
+    else {
+      L_ = L; S_.map = L_.map('mp-map', { zoomControl: true, worldCopyJump: false, minZoom: 2, attributionControl: true }).setView([36.5, 127.8], 6);
+      L_.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, subdomains: 'abcd', attribution: '© OpenStreetMap · © CARTO' }).addTo(S_.map);
+      S_.lg = L_.layerGroup().addTo(S_.map);
+    }
+    const q = new URLSearchParams(location.search).get('order');
+    const first = (q && S.orders().find(o => o.no === q)) || S.orders().find(o => o.status === '운송중') || S.orders().find(o => o.status === '지연') || S.orders().find(o => o.status !== '도착완료') || S.orders()[0];
+    if (first && S_.map) pick(first.no); else if (!first) el('mp-side').innerHTML = '<div class="empty">등록된 오더가 없습니다</div>';
+    el('mp-q').addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
+    clearInterval(S_.timer); S_.timer = setInterval(() => { if (S_.order && !document.hidden) { chips(); refresh(true); } }, 20000);
+    window.addEventListener('resize', () => S_.map && S_.map.invalidateSize());
+  }
+  return { init, pick, search, replay, fit: () => fit(), focusNow, _s: S_, _calc: calc };
+})();
+window.lmtsReady = function () { MP.init(); };

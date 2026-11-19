@@ -521,6 +521,22 @@ const DEFAULT_NEW_HUBS = [
 ];
 
 // 로드 후 기존 데이터에 누락 거점 자동 추가
+// ─── 거점 좌표(위도·경도) 기본값 — 위치추적 지도용 ─────────────
+const HUB_GEO = {
+  '자사물류창고 (화성)':[37.1995,126.8312], '수도권물류센터 (용인)':[37.2411,127.1776], '안성허브터미널':[37.0078,127.2797],
+  '인천항 CY 창고':[37.4563,126.6053], '수원 중간집하장':[37.2636,127.0286], '파주 물류단지':[37.7600,126.7800],
+  '인천국제공항 (ICN)':[37.4602,126.4407], '김해국제공항 (PUS)':[35.1795,128.9382], 'LA국제공항 (LAX)':[33.9416,-118.4085],
+  'JFK국제공항 (JFK)':[40.6413,-73.7781], '멕시코시티국제공항 (MEX)':[19.4361,-99.0719], '몬테레이국제공항 (MTY)':[25.7785,-100.1069],
+  '부산항 (Busan Port)':[35.1028,129.0403], '평택항 (Pyeongtaek Port)':[36.9667,126.8333], 'LA항 (Port of Los Angeles)':[33.7290,-118.2620],
+  '롱비치항 (Port of Long Beach)':[33.7540,-118.2160], 'Samsung Electronics 수원':[37.2565,127.0560], 'LG Display 파주공장':[37.7633,126.7439],
+  'SK Hynix 이천캠퍼스':[37.2764,127.4437]
+};
+function ensureHubGeo() {
+  const hubs = S.hubs(); let ch = 0;
+  hubs.forEach(h => { if ((h.lat == null || h.lat === '' || h.lng == null || h.lng === '') && HUB_GEO[h.name]) { h.lat = HUB_GEO[h.name][0]; h.lng = HUB_GEO[h.name][1]; ch++; } });
+  if (ch) S.set('hubs', hubs);
+}
+
 function ensureDefaultHubs() {
   // 구버전 상태명 이전: '패킹중'은 Packing 완료 시점에만 부여되던 값이므로 '패킹완료'로 통일
   (DB.orders||[]).forEach(o => { if (o.status === '패킹중') o.status = '패킹완료'; });
@@ -538,6 +554,7 @@ function ensureDefaultHubs() {
     S.set('hubs', hubs);
     console.log(`✅ 기본 거점 ${toAdd.length}개 자동 추가:`, toAdd.map(h=>h.name).join(', '));
   }
+  ensureHubGeo();
 }
 
 // ══════════════════════════════════════════════════════════════════
