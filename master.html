@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 기준정보 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260552">
-  <link rel="stylesheet" href="css/theme.css?v=20260552">
-  <script src="js/theme.js?v=20260552"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260554">
+  <link rel="stylesheet" href="css/theme.css?v=20260554">
+  <script src="js/theme.js?v=20260554"></script>
 </head>
 <body>
 
@@ -92,7 +92,7 @@
         <div class="form-group"><label>수령확인방식</label><select id="c-confirm"><option>서명</option><option>사진</option><option>QR스캔</option><option>서명+사진</option></select></div>
         <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveCustomer()">+ 등록</button></div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>고객사명</th><th>담당자</th><th>연락처</th><th>주소</th><th>확인방식</th><th>삭제</th></tr></thead>
+      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>고객사명</th><th>담당자</th><th>연락처</th><th>주소</th><th>확인방식</th><th>수정 / 삭제</th></tr></thead>
       <tbody id="customer-table-body"></tbody></table></div>
     </div></div>
   </div>
@@ -106,7 +106,7 @@
         <div class="form-group"><label>중량(kg)</label><input id="p-weight" type="number"></div>
         <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveProduct()">+ 등록</button></div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>Box No</th><th>제품명</th><th>박스규격</th><th>총수량</th><th>중량</th><th>삭제</th></tr></thead>
+      <div class="tbl-wrap"><table><thead><tr><th>Box No</th><th>제품명</th><th>박스규격</th><th>총수량</th><th>중량</th><th>수정 / 삭제</th></tr></thead>
       <tbody id="product-table-body"></tbody></table></div>
     </div></div>
   </div>
@@ -120,7 +120,7 @@
         <div class="form-group"><label>연락처</label><input id="v-dphone" placeholder="010-0000-0000"></div>
         <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveVehicle()">+ 등록</button></div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>차량번호</th><th>차종</th><th>적재용량</th><th>기사명</th><th>연락처</th><th>상태</th><th>삭제</th></tr></thead>
+      <div class="tbl-wrap"><table><thead><tr><th>차량번호</th><th>차종</th><th>적재용량</th><th>기사명</th><th>연락처</th><th>상태</th><th>수정 / 삭제</th></tr></thead>
       <tbody id="vehicle-table-body"></tbody></table></div>
     </div></div>
   </div>
@@ -136,7 +136,7 @@
         <div class="form-group" style="flex:0 0 90px"><label>경도</label><input id="h-lng" type="number" step="0.0001" placeholder="126.8312"></div>
         <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveHub()">+ 등록</button></div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>거점명</th><th>유형</th><th>주소</th><th>담당자</th><th>좌표(위도, 경도)</th><th>삭제</th></tr></thead>
+      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>거점명</th><th>유형</th><th>주소</th><th>담당자</th><th>좌표(위도, 경도)</th><th>수정 / 삭제</th></tr></thead>
       <tbody id="hub-table-body"></tbody></table></div>
       <div style="margin-top:8px;font-size:11px;color:var(--gray)">
         <span class="tag" style="background:#D6E4F0;color:#365C89">출발(자사창고)</span>출발&nbsp;
@@ -147,7 +147,7 @@
   </div>
 </div>
 
-<script src="js/common.js?v=20260552"></script>
-<script src="js/master.js?v=20260552"></script>
+<script src="js/common.js?v=20260554"></script>
+<script src="js/master.js?v=20260554"></script>
 </body>
 </html>
