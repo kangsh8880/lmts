@@ -158,7 +158,7 @@ const DC = (() => {
     const dw = rows.filter(r => r.dwell != null && r.dwell >= 0);
     return {
       ev: rows, stay, expect: moving().filter(m => m.to === name),
-      inN: ev.filter(e => e.event === 'IN').length, outN: ev.filter(e => e.event === 'OUT').length,
+      inN: ev.filter(e => e.event === 'IN').length, arrN: ev.filter(e => e.event === '도착완료').length, outN: ev.filter(e => e.event === 'OUT').length,
       avgDwell: dw.length ? Math.round(dw.reduce((s, r) => s + r.dwell, 0) / dw.length) : null, dwN: dw.length, last: ev[ev.length - 1] || null
     };
   }

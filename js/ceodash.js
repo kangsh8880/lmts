@@ -67,12 +67,16 @@ function renderHubDetail() {
     <div class="mini-grid">
       <div class="mini c3"><span>체류 오더</span><b>${s.stay.length}<u>건</u></b></div>
       <div class="mini c1"><span>입고 예정</span><b>${s.expect.length}<u>건</u></b></div>
+      <div class="mini c6"><span>도착완료</span><b>${s.arrN}<u>건</u></b></div>
       <div class="mini c2"><span>누적 IN</span><b>${s.inN}<u>건</u></b></div>
       <div class="mini c5"><span>누적 OUT</span><b>${s.outN}<u>건</u></b></div>
       <div class="mini c4" title="IN → OUT 측정 ${s.dwN}건 평균"><span>평균 체류</span><b>${s.avgDwell == null ? '<u>데이터 없음</u>' : s.avgDwell + '<u>분</u>'}</b></div>
     </div>
     <div class="ord-chips"><b>체류</b> ${s.stay.length ? s.stay.map(o => ordChip(o, 'ylw')).join('') : '<span class="chip gry">없음</span>'}
       <b style="margin-left:8px">입고 예정</b> ${s.expect.length ? s.expect.map(m => ordChip(m.o, 'blue')).join('') : '<span class="chip gry">없음</span>'}</div>
+    ${s.expect.length ? `<div class="sub-ttl">📥 입고 예정 상세 <b>${s.expect.length}건</b></div><table class="dt"><thead><tr><th>오더</th><th>고객사</th><th>출발 거점</th><th>수단</th><th>출고</th><th>예정 도착</th><th>상태</th></tr></thead><tbody>${s.expect.map(m =>
+      `<tr><td><b>${DC.esc(m.o.no)}</b></td><td>${DC.esc(m.o.customer)}</td><td>${DC.esc(DC.shortName(m.from))}</td><td>${DC.MODE[m.mode][0]} ${DC.MODE[m.mode][1]}</td><td>${DC.hhmm(m.outTime)}</td><td>${m.eta || '-'}</td><td>${m.over ? `<span class="chip red">표준 +${m.elapsed - m.std}분</span>` : `<span class="chip blue">${DC.esc(m.o.status)}</span>`}</td></tr>`).join('')}</tbody></table>` : ''}
+    <div class="sub-ttl">🔁 IN/OUT 이력</div>
     ${rows.length ? `<table class="dt"><thead><tr><th>시각</th><th>오더</th><th>고객사</th><th>구분</th><th class="num">체류(분)</th><th>담당</th></tr></thead><tbody>${rows.map(e =>
       `<tr><td>${e.time.slice(5, 16)}</td><td>${DC.esc(e.orderNo)}</td><td>${DC.esc(e.customer)}</td><td><span class="chip ${e.event === 'IN' ? 'blue' : 'red'}">${e.event}</span></td><td class="num">${e.dwell != null && e.dwell >= 0 ? e.dwell : '-'}</td><td>${DC.esc(e.person || '-')}</td></tr>`).join('')}</tbody></table>`
       : '<div class="empty-n">이 거점의 IN/OUT 이력이 없습니다</div>'}`;
