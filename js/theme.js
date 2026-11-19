@@ -42,7 +42,9 @@
     nb.id = 'news-btn'; nb.className = 'theme-btn tool-ic nb-tg'; nb.type = 'button'; nb.textContent = '📰'; nb.title = '뉴스바 보이기 / 숨기기';
     // 우측 도구 묶음: [뉴스][테마][GitHub 상태] — 항상 오른쪽 끝에 고정
     const st = nav.querySelector('.nav-status'), tools = document.createElement('div'); tools.className = 'nav-tools';
-    tools.append(nb, btn); if (st) tools.append(st); nav.appendChild(tools);
+    const mb = document.createElement('a');   // 사용 설명서(PDF) 열기 — 새 탭
+    mb.id = 'manual-btn'; mb.className = 'theme-btn tool-ic'; mb.href = 'docs/LMTS_manual.pdf'; mb.target = '_blank'; mb.rel = 'noopener'; mb.textContent = '📖'; mb.title = '사용 설명서 보기 (PDF)'; mb.setAttribute('aria-label', '사용 설명서');
+    tools.append(mb, nb, btn); if (st) tools.append(st); nav.appendChild(tools);
     // 탭 그룹 구분선: 대시보드 | 업무 | 분석
     const tabs = nav.querySelector('.nav-tabs');
     if (tabs) { const sep = () => { const e = document.createElement('i'); e.className = 'nav-sep'; return e; };
