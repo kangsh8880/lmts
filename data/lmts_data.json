@@ -222,6 +222,13 @@
       "type": "도착(고객사)",
       "addr": "이천시 부발읍 SK하이닉스로 26",
       "mgr": "자재수령팀"
+    },
+    {
+      "code": "HUB-D04",
+      "name": "VINA VINHYEN",
+      "type": "도착(고객사)",
+      "addr": "VIET NAM VINH YEN",
+      "mgr": "KANG SH"
     }
   ],
   "orders": [
@@ -382,5 +389,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 14:41"
+  "lastUpdated": "2026-11-19 14:54"
 }
