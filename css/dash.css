@@ -199,3 +199,9 @@ body.dash .sync-bar{position:fixed;top:14px;right:170px;font-size:12px;margin:0 
 .mk span{display:block;font-size:var(--fs-sm);font-weight:700;}
 .mk b{font-size:26px;font-variant-numeric:tabular-nums;} .mk b u{text-decoration:none;font-size:var(--fs-xs);color:var(--d-sub);font-weight:500;margin-left:2px;}
 .sub-ttl .hint{font-weight:400;color:var(--d-sub);}
+
+.kbox[onclick]{cursor:pointer;}
+.pop-sub{font-size:var(--fs-sm);color:var(--d-sub);margin:0 0 8px;} .pop-sub b{color:#222;}
+.pop-go{text-align:right;margin-top:10px;} .pop-go a{text-decoration:none;display:inline-block;}
+#kpi-pop .dt td{white-space:normal;}
+#kpi-pop .dt td:first-child{white-space:nowrap;}
