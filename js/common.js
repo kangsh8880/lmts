@@ -1,6 +1,4 @@
-// ── 우클릭(소스보기) 방지 ──────────────────────────────────────────
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('selectstart', e => e.preventDefault());
+// (2026-11-19) 우클릭·텍스트 선택 차단 코드 제거 — 화면 글자 복사가 가능해야 함
 
 // ══ LMTS common.js ─ 공통 코드 ══
 
