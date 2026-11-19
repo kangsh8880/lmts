@@ -24,11 +24,13 @@ function holidays(d) {                    // 참고용 휴일 라벨(고정 양�
   }
   return out;
 }
+function originOut(o) { return S.events().filter(e => e.orderNo === o.no && e.event === 'OUT' && e.hub === (o.route && o.route.origin)).map(e => e.time).sort()[0] || null; }
 function dayCounts(ds) {
+  const ords = S.orders();
   return {
     inn: S.events().filter(e => e.time.startsWith(ds) && e.event === 'IN').length,
-    out: S.events().filter(e => e.time.startsWith(ds) && e.event === 'OUT').length,
-    ord: S.orders().filter(o => (o.date || '') === ds).length
+    out: ords.filter(o => { const t = originOut(o); return t && t.startsWith(ds); }).length,
+    ord: ords.filter(o => (o.date || '') === ds).length
   };
 }
 function renderCal() {
@@ -45,7 +47,7 @@ function renderCal() {
       const c = dayCounts(ds), hol = holidays(d), L = lunar(d), cur = d.getMonth() === calM;
       h += `<div class="day ${i === 0 || i === 6 ? 'we' : ''} ${cur ? '' : 'out'} ${ds === today ? 'today' : ''} ${ds === selD ? 'sel' : ''}" onclick="selDay('${ds}')">
         <div><div class="dn ${i === 0 ? 'sun' : i === 6 ? 'sat' : ''} ${hol.length ? 'hol' : ''}"><b>${d.getDate()}</b><em>${L.leap ? '윤' : ''}${L.m}.${L.d}</em></div><div class="hn">${DC.esc(hol.join(' · '))}</div></div>
-        <div class="cn"><div class="a" title="거점 IN 건수"><span>▲</span><span>${c.inn}</span></div><div class="b" title="거점 OUT 건수"><span>▼</span><span>${c.out}</span></div><div class="c" title="출하오더(그날 등록된 오더) 건수"><span>■</span><span>${c.ord}</span></div></div></div>`;
+        <div class="cn"><div class="a" title="거점 IN 건수"><span>▲</span><span>${c.inn}</span></div><div class="b" title="출하 실적: 출발 거점에서 OUT된 오더 수(오더당 1회)"><span>▼</span><span>${c.out}</span></div><div class="c" title="출하 목표: 출하예정일이 그날인 오더 수"><span>■</span><span>${c.ord}</span></div></div></div>`;
     }
   }
   el('cal').style.gridTemplateRows = `auto repeat(${rows},minmax(0,1fr))`;
@@ -57,8 +59,8 @@ function selDay(ds) {
   renderCal();
   el('day-ttl').textContent = `${ds} 작업 내역`;
   const os = S.orders().filter(o => (o.date || '') === ds), es = S.events().filter(e => e.time.startsWith(ds)).slice().sort((a, b) => a.time.localeCompare(b.time));
-  el('day-body').innerHTML = `<div class="pnl-h" style="border-radius:10px;margin-bottom:6px"><span>출하 예정 오더</span><span class="chip">${os.length}건</span></div>` +
-    (os.length ? `<table class="dt"><thead><tr><th>오더</th><th>고객사</th><th class="num">박스</th><th>상태</th></tr></thead><tbody>${os.map(o => `<tr><td>${DC.esc(o.no)}</td><td>${DC.esc(o.customer)}</td><td class="num">${o.boxes}</td><td><span class="chip ${o.status === '지연' ? 'red' : ''}">${DC.esc(o.status)}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty-n">예정 오더 없음</div>') +
+  el('day-body').innerHTML = `<div class="pnl-h" style="border-radius:10px;margin-bottom:6px"><span>출하 목표 ${os.length}건 중 출하 ${os.filter(o => originOut(o)).length}건 · 미출하 ${os.filter(o => !originOut(o)).length}건</span><span class="chip">${os.length}건</span></div>` +
+    (os.length ? `<table class="dt"><thead><tr><th>오더</th><th>고객사</th><th class="num">박스</th><th>출하</th><th>상태</th></tr></thead><tbody>${os.map(o => `<tr><td>${DC.esc(o.no)}</td><td>${DC.esc(o.customer)}</td><td class="num">${o.boxes}</td><td>${originOut(o) ? '<span class="chip blue">' + DC.hhmm(originOut(o)) + '</span>' : '<span class="chip red">미출하</span>'}</td><td><span class="chip ${o.status === '지연' ? 'red' : ''}">${DC.esc(o.status)}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty-n">예정 오더 없음</div>') +
     `<div class="pnl-h" style="border-radius:10px;margin:10px 0 6px"><span>거점 IN/OUT 이벤트</span><span class="chip">${es.length}건</span></div>` +
     (es.length ? `<table class="dt"><thead><tr><th>시각</th><th>오더</th><th>거점</th><th>구분</th></tr></thead><tbody>${es.map(e => `<tr><td>${DC.hhmm(e.time)}</td><td>${DC.esc(e.orderNo)}</td><td>${DC.esc(DC.shortName(e.hub))}</td><td><span class="chip ${e.event === 'IN' ? 'blue' : 'red'}">${e.event}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty-n">이벤트 없음</div>');
 }
