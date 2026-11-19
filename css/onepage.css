@@ -22,7 +22,7 @@
 }
 .page.op-page{display:block;padding:12px 16px;max-width:none;margin:0}
 @media (min-width:901px){
-  body.one .sync-bar{position:fixed;top:14px;right:170px;z-index:60;margin:0}
+  body.one .sync-bar{position:fixed;top:14px;right:280px;z-index:60;margin:0}
   body.one .op-page{display:flex}
 }
 @media (max-width:900px){
