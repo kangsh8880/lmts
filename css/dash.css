@@ -151,7 +151,7 @@ body.dash .sync-bar{position:fixed;top:14px;right:170px;font-size:12px;margin:0 
 
 /* ── CEO: 좌(거점) / 우(이동 중 운송) 구성 ── */
 .d-body.g-hub{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);}
-.col{display:grid;gap:10px;grid-template-rows:minmax(0,.9fr) minmax(0,1.1fr);min-height:0;min-width:0;}
+.col{display:grid;gap:10px;grid-template-rows:minmax(0,.78fr) minmax(0,1.22fr);min-height:0;min-width:0;}
 .pnl-h .sub{font-size:var(--fs-xs);font-weight:500;color:var(--d-sub);margin-left:6px;}
 .hubgrid-l{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
 .hubc{cursor:pointer;position:relative;transition:transform .12s,box-shadow .12s;}
@@ -163,9 +163,9 @@ body.dash .sync-bar{position:fixed;top:14px;right:170px;font-size:12px;margin:0 
 .hubc .hn1 b{flex:1;min-width:0;}
 .hubc .t b{display:inline;font-size:var(--fs-xs);color:var(--d-text);}
 .hd-info{font-size:var(--fs-xs);color:var(--d-sub);margin-bottom:6px;line-height:1.5;}
-.mini-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:6px;}
+.mini-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-bottom:6px;}
 .mini{border:1px solid var(--d-line);border-radius:10px;text-align:center;padding:4px 2px;background:var(--c6);min-width:0;}
-.mini.c1{background:var(--c1)}.mini.c2{background:var(--c2)}.mini.c3{background:var(--c3)}.mini.c4{background:var(--c4)}.mini.c5{background:var(--c5)}
+.mini.c1{background:var(--c1)}.mini.c2{background:var(--c2)}.mini.c3{background:var(--c3)}.mini.c4{background:var(--c4)}.mini.c5{background:var(--c5)}.mini.c6{background:var(--c6,#E3F4EA)}
 .mini span{display:block;font-size:var(--fs-xs);color:var(--d-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mini b{font-size:var(--fs-lg);font-variant-numeric:tabular-nums;}
 .mini b u{text-decoration:none;font-size:var(--fs-xs);color:var(--d-sub);font-weight:500;margin-left:1px;}
@@ -184,3 +184,6 @@ body.dash .sync-bar{position:fixed;top:14px;right:170px;font-size:12px;margin:0 
 @media (max-width:900px){ .d-body.g-hub{grid-template-columns:minmax(0,1fr);grid-template-rows:none;} .col{grid-template-rows:none;grid-template-columns:minmax(0,1fr);} .pnl-b{max-height:380px;} .mini-grid{grid-template-columns:repeat(3,1fr);} }
 .pnl{overflow:hidden;}
 @media (max-width:900px){ .pnl-h{flex-wrap:wrap;white-space:normal;} }
+
+.sub-ttl{font-size:var(--fs-sm);font-weight:700;margin:10px 0 4px;}
+.sub-ttl b{color:#2F5F9E;}
