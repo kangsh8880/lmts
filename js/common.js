@@ -131,6 +131,10 @@ const DB = {
   lastUpdated: ''
 };
 
+function saveSessionCache() {
+  try { sessionStorage.setItem('lmts_session_db', JSON.stringify(DB)); sessionStorage.setItem('lmts_session_ts', String(Date.now())); } catch(e) {}
+}
+
 const S = {
   get: k => DB[k] || [],
   set(k, v) {
@@ -139,6 +143,7 @@ const S = {
     GH.scheduleSave();  // GitHub에 자동 저장
     // localStorage에도 캐시 (오프라인 폴백)
     try { localStorage.setItem('lmts_' + k, JSON.stringify(v)); } catch(e) {}
+    saveSessionCache();   // 페이지 이동·새로고침 시 방금 입력한 내용이 사라지지 않도록 세션 캐시도 갱신
   },
   customers:  () => S.get('customers'),
   products:   () => S.get('products'),
@@ -210,7 +215,10 @@ async function testAndSaveToken() {
 // ══════════════════════════════════════════════════════════════════
 async function loadFromGitHub() {
   const SK = 'lmts_session_db';
-  const cached = sessionStorage.getItem(SK);
+  let cached = sessionStorage.getItem(SK);
+  // 세션 캐시는 마지막 갱신 후 3분 이내일 때만 사용 (다른 PC·탭에서 바뀐 데이터를 놓치지 않도록)
+  const ts = Number(sessionStorage.getItem('lmts_session_ts') || 0);
+  if (cached && GH.token() && (Date.now() - ts > 180000)) cached = null;
   if (cached) {
     try {
       const c = JSON.parse(cached);
@@ -226,7 +234,7 @@ async function loadFromGitHub() {
     loadFromLocalStorage();
     if (!DB.hubs.length) initSampleData();
     ensureDefaultHubs();
-    try { sessionStorage.setItem(SK, JSON.stringify(DB)); } catch(e) {}
+    saveSessionCache();
     return;
   }
   showOverlay('GitHub에서 데이터 불러오는 중...', GH.REPO + ' / ' + GH.DATA_PATH);
@@ -244,7 +252,7 @@ async function loadFromGitHub() {
       GH._connected = true;
       setSyncStatus('ok', '초기 데이터 저장 완료');
     }
-    try { sessionStorage.setItem(SK, JSON.stringify(DB)); } catch(e) {}
+    saveSessionCache();
   } catch(e) {
     console.error('GitHub load error:', e);
     if (e.message === 'TOKEN_INVALID') {
@@ -256,7 +264,7 @@ async function loadFromGitHub() {
     loadFromLocalStorage();
     if (!DB.hubs.length) initSampleData();
     ensureDefaultHubs();
-    try { sessionStorage.setItem(SK, JSON.stringify(DB)); } catch(e) {}
+    saveSessionCache();
   }
   hideOverlay();
 }
