@@ -95,133 +95,171 @@
       "name": "자사물류창고 (화성)",
       "type": "출발(자사창고)",
       "addr": "경기도 화성시 서신면 공업단지로 100",
-      "mgr": "창고팀장"
+      "mgr": "창고팀장",
+      "lat": 37.1995,
+      "lng": 126.8312
     },
     {
       "code": "HUB-T01",
       "name": "수도권물류센터 (용인)",
       "type": "경유지",
       "addr": "경기도 용인시 처인구 물류단지길 50",
-      "mgr": "물류담당"
+      "mgr": "물류담당",
+      "lat": 37.2411,
+      "lng": 127.1776
     },
     {
       "code": "HUB-T02",
       "name": "안성허브터미널",
       "type": "경유지",
       "addr": "경기도 안성시 공도읍 공단로 120",
-      "mgr": "터미널장"
+      "mgr": "터미널장",
+      "lat": 37.0078,
+      "lng": 127.2797
     },
     {
       "code": "HUB-T03",
       "name": "인천항 CY 창고",
       "type": "경유지",
       "addr": "인천시 연수구 인천신항대로 600",
-      "mgr": "CY담당"
+      "mgr": "CY담당",
+      "lat": 37.4563,
+      "lng": 126.6053
     },
     {
       "code": "HUB-T04",
       "name": "수원 중간집하장",
       "type": "경유지",
       "addr": "경기도 수원시 팔달구 팔달로 180",
-      "mgr": "집하장담당"
+      "mgr": "집하장담당",
+      "lat": 37.2636,
+      "lng": 127.0286
     },
     {
       "code": "HUB-T05",
       "name": "파주 물류단지",
       "type": "경유지",
       "addr": "경기도 파주시 탄현면 물류단지로 30",
-      "mgr": "단지관리"
+      "mgr": "단지관리",
+      "lat": 37.76,
+      "lng": 126.78
     },
     {
       "code": "HUB-AIR-KR01",
       "name": "인천국제공항 (ICN)",
       "type": "경유지",
       "addr": "인천시 중구 공항로 272",
-      "mgr": "항공화물팀"
+      "mgr": "항공화물팀",
+      "lat": 37.4602,
+      "lng": 126.4407
     },
     {
       "code": "HUB-AIR-KR02",
       "name": "김해국제공항 (PUS)",
       "type": "경유지",
       "addr": "부산시 강서구 공항진입로 108",
-      "mgr": "항공화물팀"
+      "mgr": "항공화물팀",
+      "lat": 35.1795,
+      "lng": 128.9382
     },
     {
       "code": "HUB-AIR-US01",
       "name": "LA국제공항 (LAX)",
       "type": "경유지",
       "addr": "1 World Way, Los Angeles, CA 90045",
-      "mgr": "Cargo Team"
+      "mgr": "Cargo Team",
+      "lat": 33.9416,
+      "lng": -118.4085
     },
     {
       "code": "HUB-AIR-US02",
       "name": "JFK국제공항 (JFK)",
       "type": "경유지",
       "addr": "Jamaica, Queens, New York, NY 11430",
-      "mgr": "Cargo Team"
+      "mgr": "Cargo Team",
+      "lat": 40.6413,
+      "lng": -73.7781
     },
     {
       "code": "HUB-AIR-MX01",
       "name": "멕시코시티국제공항 (MEX)",
       "type": "경유지",
       "addr": "Ciudad de Mexico, CDMX, Mexico",
-      "mgr": "Cargo Team"
+      "mgr": "Cargo Team",
+      "lat": 19.4361,
+      "lng": -99.0719
     },
     {
       "code": "HUB-AIR-MX02",
       "name": "몬테레이국제공항 (MTY)",
       "type": "경유지",
       "addr": "Apodaca, Nuevo Leon, Mexico",
-      "mgr": "Cargo Team"
+      "mgr": "Cargo Team",
+      "lat": 25.7785,
+      "lng": -100.1069
     },
     {
       "code": "HUB-PORT-KR01",
       "name": "부산항 (Busan Port)",
       "type": "경유지",
       "addr": "부산시 중구 중앙대로 89",
-      "mgr": "항만물류팀"
+      "mgr": "항만물류팀",
+      "lat": 35.1028,
+      "lng": 129.0403
     },
     {
       "code": "HUB-PORT-KR02",
       "name": "평택항 (Pyeongtaek Port)",
       "type": "경유지",
       "addr": "경기도 평택시 포승읍 평택항로 97",
-      "mgr": "항만물류팀"
+      "mgr": "항만물류팀",
+      "lat": 36.9667,
+      "lng": 126.8333
     },
     {
       "code": "HUB-PORT-US01",
       "name": "LA항 (Port of Los Angeles)",
       "type": "경유지",
       "addr": "425 S Palos Verdes St, San Pedro, CA 90731",
-      "mgr": "Cargo Team"
+      "mgr": "Cargo Team",
+      "lat": 33.729,
+      "lng": -118.262
     },
     {
       "code": "HUB-PORT-US02",
       "name": "롱비치항 (Port of Long Beach)",
       "type": "경유지",
       "addr": "415 W Ocean Blvd, Long Beach, CA 90802",
-      "mgr": "Cargo Team"
+      "mgr": "Cargo Team",
+      "lat": 33.754,
+      "lng": -118.216
     },
     {
       "code": "HUB-D01",
       "name": "Samsung Electronics 수원",
       "type": "도착(고객사)",
       "addr": "수원시 영통구 삼성로 129",
-      "mgr": "자재입고담당"
+      "mgr": "자재입고담당",
+      "lat": 37.2565,
+      "lng": 127.056
     },
     {
       "code": "HUB-D02",
       "name": "LG Display 파주공장",
       "type": "도착(고객사)",
       "addr": "파주시 월롱면 LG로 245",
-      "mgr": "입고팀"
+      "mgr": "입고팀",
+      "lat": 37.7633,
+      "lng": 126.7439
     },
     {
       "code": "HUB-D03",
       "name": "SK Hynix 이천캠퍼스",
       "type": "도착(고객사)",
       "addr": "이천시 부발읍 SK하이닉스로 26",
-      "mgr": "자재수령팀"
+      "mgr": "자재수령팀",
+      "lat": 37.2764,
+      "lng": 127.4437
     },
     {
       "code": "HUB-D04",
@@ -528,5 +566,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 17:00"
+  "lastUpdated": "2026-11-19 18:26"
 }
