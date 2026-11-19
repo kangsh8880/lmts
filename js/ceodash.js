@@ -3,7 +3,7 @@ let selHub = null;
 
 function renderCEO() {
   const K = DC.kpi(), tip = {
-    act: '진행 오더 = 상태가 도착완료가 아닌 출하오더', mv: '운송중 상태 오더 수',
+    act: '진행 오더 = 상태가 도착완료가 아닌 출하오더', mv: '운송 중 = 거점 이벤트 기준, 출발 거점 OUT 후 다음 거점 IN 전인 오더 수 (우측 이동 중 운송 현황과 동일 기준). 오더 상태값과 다를 수 있음',
     al: '지연 상태 오더 + 비지정 거점 이벤트(알람) 건수',
     ot: '(클릭: 목록) 정시납품율 = 도착완료 ÷ (도착완료 + 지연) × 100. 집계 대상이 없으면 표시하지 않음',
     pk: '패킹 미완료 = 진행 오더(도착완료 제외) 중 패킹 기록이 없는 오더 건수. 클릭하면 목록',
@@ -14,7 +14,7 @@ function renderCEO() {
   el('kpis').innerHTML = [
     kbox('c2', '정시납품율', kv(DC.fmtPct(K.onTime), '%', K.onTime != null && K.onTime < 95 ? 'bad' : 'good'), K.onTime == null ? '완료·지연 오더 없음' : `완료 ${K.done}건 · 지연 ${K.delay}건`, tip.ot, 'js:openKpi(\'ot\')'),
     kbox('c1', '진행 오더', kv(K.active, '건'), `전체 ${K.orders}건 중`, tip.act, 'js:openKpi(\'act\')'),
-    kbox('c3', '운송 중', kv(K.moving, '건'), '거점 이동 중', tip.mv, 'js:openKpi(\'mv\')'),
+    kbox('c3', '운송 중', kv(K.moving, '건'), 'OUT 후 다음 거점 IN 전', tip.mv, 'js:openKpi(\'mv\')'),
     kbox('c5', '지연 · 알람', kv(K.alarm, '건', K.alarm > 0 ? 'bad' : ''), `지연 ${K.delay} + 비지정 ${K.off}`, tip.al, 'js:openKpi(\'al\')'),
     kbox('c4', '패킹 미완료', kv(K.packPend, '건', K.packPend > 0 ? 'bad' : ''), `진행 ${K.active}건 중 패킹 기록 없음`, tip.pk, 'js:openKpi(\'pk\')'),
     kbox('c1', '배차 필요', kv(K.dispNeed, '건', K.dispNeed > 0 ? 'bad' : ''), `미배차 구간 ${K.dispNeedLegs}개`, tip.dp, 'js:openKpi(\'dp\')'),

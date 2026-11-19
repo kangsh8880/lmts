@@ -72,7 +72,7 @@ const DC = (() => {
     }).filter(x => x.miss.length);
     return {
       packPend: packPend.length, packPendList: packPend, dispNeed: dispNeed.length, dispNeedList: dispNeed, dispNeedLegs: dispNeed.reduce((a, x) => a + x.miss.length, 0),
-      orders: O.length, active: active.length, moving: O.filter(o => o.status === '운송중').length,
+      orders: O.length, active: active.length, moving: moving().length,   // 이벤트 기준(거점 OUT 후 다음 거점 IN 전) — 우측 '이동 중 운송 현황'과 동일 기준
       done, delay, off, alarm: delay + off,
       onTime: (done + delay) > 0 ? pct(done, done + delay) : null,
       packRate: pct(packed, O.length), packed,
