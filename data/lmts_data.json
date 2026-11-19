@@ -266,7 +266,9 @@
       "name": "VINA VINHYEN",
       "type": "도착(고객사)",
       "addr": "VIET NAM VINH YEN",
-      "mgr": "KANG SH"
+      "mgr": "KANG SH",
+      "lat": 21.2851468,
+      "lng": 105.5817573
     }
   ],
   "orders": [
@@ -566,5 +568,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 18:26"
+  "lastUpdated": "2026-11-19 18:59"
 }
