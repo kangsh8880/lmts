@@ -343,7 +343,15 @@
       }
     }
   ],
-  "packings": [],
+  "packings": [
+    {
+      "orderNo": "ORD-261119-004",
+      "customer": "K1 VINA",
+      "boxes": 2,
+      "doneAt": "2026-11-19 14:58",
+      "person": "창고담당"
+    }
+  ],
   "dispatches": [],
   "events": [
     {
@@ -420,5 +428,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 14:57"
+  "lastUpdated": "2026-11-19 14:58"
 }
