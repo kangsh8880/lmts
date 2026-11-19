@@ -201,7 +201,8 @@ const MP = (() => {
   function chips() {
     const act = S.orders().filter(o => o.status !== '도착완료'), mv = act.filter(o => ['운송중', '지연'].includes(o.status));
     el('mp-chips').innerHTML = (mv.length ? mv : act).map(o => `<span class="mp-chip ${S_.order && S_.order.no === o.no ? 'on' : ''} ${o.status === '지연' ? 'bad' : ''}" onclick="MP.pick('${o.no}')">${o.status === '운송중' ? '🚚 ' : ''}${esc(o.no)} · ${esc(o.customer)}</span>`).join('') || '<span style="font-size:12px;color:#666">진행 중인 오더가 없습니다</span>';
-    el('mp-list').innerHTML = S.orders().slice().sort((a, b) => (a.status === '도착완료') - (b.status === '도착완료')).map(o => `<option value="${esc(o.no)}">${esc(o.customer)} [${esc(o.status)}]</option>`).join('');
+    const cur = S_.order ? S_.order.no : '', opt = o => `<option value="${esc(o.no)}" ${o.no === cur ? 'selected' : ''}>${esc(o.no)} · ${esc(o.customer)} [${esc(o.status)}]</option>`;
+    el('mp-q').innerHTML = `<optgroup label="진행 중 오더">${act.map(opt).join('')}</optgroup><optgroup label="도착 완료 오더">${S.orders().filter(o => o.status === '도착완료').map(opt).join('')}</optgroup>`;
   }
   function warn(st) {
     const miss = st.D.stops.filter(s => !s.ll).map(s => s.name), w = el('mp-warn');
@@ -229,7 +230,7 @@ const MP = (() => {
     st.legs.forEach(L => { const p = old.find(x => x.i === L.i && x.from === L.from && x.to === L.to); if (p && p.road && L.mode === 'truck') { L.pts = p.pts; L.cum = p.cum; L.len = p.len; L.road = true; } else if (L.mode === 'truck' && L.a && L.b) { const c = roadCache()[roadKey(L.a, L.b)]; if (c) { setPts(L, c); L.road = true; } } });
     return st;
   }
-  function search() { const q = el('mp-q').value.trim(); if (q) pick(q); }
+  function search() { const q = el('mp-q').value; if (q) pick(q); }
   function replay() {
     const st = S_.st; if (!st || !S_.map || !S_.mk) return; const pts = [];
     st.legs.forEach(L => { if (!L.pts) return; if (L.i < st.leg || st.state === 'done') pts.push(...L.pts); else if (L.i === st.leg && st.state === 'move') pts.push(...split(L, st.prog)[0]); });
@@ -245,13 +246,12 @@ const MP = (() => {
     if (typeof L === 'undefined') { el('mp-map').innerHTML = '<div class="mp-empty">지도 라이브러리를 불러오지 못했습니다.<br>인터넷 연결을 확인한 뒤 새로고침(Ctrl+Shift+R) 하세요.</div>'; }
     else {
       L_ = L; S_.map = L_.map('mp-map', { zoomControl: true, worldCopyJump: false, minZoom: 2, attributionControl: true }).setView([36.5, 127.8], 6);
-      L_.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, subdomains: 'abcd', attribution: '© OpenStreetMap · © CARTO' }).addTo(S_.map);
+      L_.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap contributors' }).addTo(S_.map);
       S_.lg = L_.layerGroup().addTo(S_.map);
     }
     const q = new URLSearchParams(location.search).get('order');
     const first = (q && S.orders().find(o => o.no === q)) || S.orders().find(o => o.status === '운송중') || S.orders().find(o => o.status === '지연') || S.orders().find(o => o.status !== '도착완료') || S.orders()[0];
     if (first && S_.map) pick(first.no); else if (!first) el('mp-side').innerHTML = '<div class="empty">등록된 오더가 없습니다</div>';
-    el('mp-q').addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
     clearInterval(S_.timer); S_.timer = setInterval(() => { if (S_.order && !document.hidden) { chips(); refresh(true); } }, 20000);
     window.addEventListener('resize', () => S_.map && S_.map.invalidateSize());
   }

@@ -116,7 +116,7 @@ function renderMoving(mv) {
   el('moving').innerHTML = `<div class="mk-grid">${kp}</div>
     <div class="sub-ttl">${DC.MODE[mvSel][0]} ${DC.MODE[mvSel][1]} 이동 중 상세 <b>${list.length}건</b></div>` +
     (list.length ? list.map(x => `<div class="mv ${x.over ? 'hot' : ''}">
-        <div class="mv-top"><span><b>${DC.esc(x.o.no)}</b> · ${DC.esc(x.o.customer)} · ${DC.esc(x.o.product)} (수량 ${ordQty(x.o)})</span>${x.over ? `<span class="chip red">표준 +${x.elapsed - x.std}분</span>` : `<span class="chip blue">${DC.esc(x.o.status)}</span>`}</div>
+        <div class="mv-top"><span><b>${DC.esc(x.o.no)}</b> · ${DC.esc(x.o.customer)} · ${DC.esc(x.o.product)} (수량 ${ordQty(x.o)})</span><span style="display:flex;gap:6px;align-items:center;white-space:nowrap">${x.over ? `<span class="chip red">표준 +${x.elapsed - x.std}분</span>` : `<span class="chip blue">${DC.esc(x.o.status)}</span>`}<a class="btn btn-primary btn-sm" href="map.html?order=${encodeURIComponent(x.o.no)}">🗺️ 위치추적</a></span></div>
         <div class="mv-route"><span>${DC.esc(DC.shortName(x.from))}</span><i>➜</i><span>${DC.esc(DC.shortName(x.to))}</span></div>
         <div class="mv-meta"><span>${detail(x)}</span><span>출고 <b>${DC.hhmm(x.outTime)}</b></span><span>표준 <b>${x.std != null ? x.std + '분' : '미설정'}</b></span><span>예정 도착 <b>${x.eta || '-'}</b></span>${x.elapsed != null ? `<span>경과 <b>${x.elapsed}분</b></span>` : ''}</div></div>`).join('')
       : '<div class="mv-none">이동 중인 운송이 없습니다</div>') +
