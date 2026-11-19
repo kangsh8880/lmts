@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 구간별 차량배차</title>
-  <link rel="stylesheet" href="css/style.css?v=20260513">
+  <link rel="stylesheet" href="css/style.css?v=20260520">
+  <link rel="stylesheet" href="css/onepage.css?v=20260520">
 </head>
-<body>
+<body class="one">
 
 <!-- ══ LOADING OVERLAY ══ -->
 <div class="overlay hidden" id="overlay">
@@ -198,10 +199,11 @@
   </div>
 </div>
 
-<div class="page" style="display:block;padding:16px;max-width:1300px;margin:0 auto">
+<div class="page op-page">
 
   <div class="sec-title">구간별 배차 관리</div>
 
+  <div class="op-cols">
   <!-- 오더 선택 -->
   <div class="card"><div class="card-head">📋 오더 선택</div><div class="card-body">
     <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
@@ -224,9 +226,10 @@
       <tbody id="dispatch-table-body"></tbody>
     </table></div>
   </div></div>
+  </div>
 </div>
 
-<script src="js/common.js?v=20260511c"></script>
-<script src="js/dispatch.js"></script>
+<script src="js/common.js?v=20260520"></script>
+<script src="js/dispatch.js?v=20260520"></script>
 </body>
 </html>

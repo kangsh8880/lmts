@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 물류 성과 분석</title>
-  <link rel="stylesheet" href="css/style.css?v=20260513">
+  <link rel="stylesheet" href="css/style.css?v=20260520">
+  <link rel="stylesheet" href="css/onepage.css?v=20260520">
 </head>
-<body>
+<body class="one">
 
 <!-- ══ LOADING OVERLAY ══ -->
 <div class="overlay hidden" id="overlay">
@@ -69,12 +70,12 @@
   </div>
 </div>
 
-<div class="page" style="display:block;padding:16px;max-width:1300px;margin:0 auto">
+<div class="page op-page">
 
   <div class="sec-title">📊 물류 성과 분석 (BM 기반 고도화)</div>
 
   <!-- BM 개선 배너 -->
-  <div class="card" style="border-left:4px solid var(--accent);margin-bottom:14px">
+  <div class="card banner-card" style="border-left:4px solid var(--accent)">
     <div class="card-body" style="padding:10px 16px">
       <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
         <div style="font-size:11px;color:var(--gray)">🌐 <b style="color:var(--dk)">글로벌 BM 기반 개선 적용:</b></div>
@@ -87,14 +88,14 @@
   </div>
 
   <!-- KPI 요약 -->
-  <div class="grid4" style="margin-bottom:16px" id="ana-kpi-row">
+  <div class="grid4" id="ana-kpi-row">
     <div class="kpi-card" style="--kpi-color:#365C89"><div class="kpi-val" id="ana-kpi-ontime">--%</div><div class="kpi-label">정시납품율 (OTD)</div></div>
     <div class="kpi-card" style="--kpi-color:#27AE60"><div class="kpi-val" id="ana-kpi-tat">--h</div><div class="kpi-label">평균 TAT</div></div>
     <div class="kpi-card" style="--kpi-color:#E6A817"><div class="kpi-val" id="ana-kpi-risk">--</div><div class="kpi-label">위험 오더 수</div></div>
     <div class="kpi-card" style="--kpi-color:#C0392B"><div class="kpi-val" id="ana-kpi-delay">--건</div><div class="kpi-label">지연 예측 알람</div></div>
   </div>
 
-  <div class="grid2">
+  <div class="op-ana">
     <!-- 오더별 위험도 스코어 (FedEx Surround 벤치) -->
     <div class="card"><div class="card-head">🚨 오더별 지연 위험도 스코어 <span class="badge" style="background:#C0392B;color:#fff">FedEx Surround® BM</span></div><div class="card-body">
       <div style="font-size:11px;color:var(--gray);margin-bottom:10px">표준 이동시간 대비 실제 소요 비율로 지연 위험도를 자동 산출합니다</div>
@@ -111,7 +112,6 @@
       <div style="font-size:11px;color:var(--gray);margin-bottom:10px">구간별 표준시간과 실제 이벤트 간격을 비교하여 사전 경보를 생성합니다</div>
       <div id="ana-predict-list"><div class="empty">예측 경보 없음 ✅</div></div>
     </div></div>
-  </div>
 
   <!-- 구간별 TAT 분석 (DHL Resilience360 벤치) -->
   <div class="card"><div class="card-head">⏱ 구간별 TAT 분석 <span class="badge" style="background:#E6A817;color:#fff">DHL Resilience360 BM</span></div><div class="card-body">
@@ -120,7 +120,7 @@
   </div></div>
 
   <!-- 거점별 성과 히트맵 -->
-  <div class="card"><div class="card-head">🗺 거점별 처리 성과 <span class="badge" style="background:#6A1B9A;color:#fff">Amazon SCM BM</span></div><div class="card-body">
+  <div class="card op-span2"><div class="card-head">🗺 거점별 처리 성과 <span class="badge" style="background:#6A1B9A;color:#fff">Amazon SCM BM</span></div><div class="card-body">
     <div style="font-size:11px;color:var(--gray);margin-bottom:10px">거점별 In/Out 이벤트 빈도와 처리 현황입니다</div>
     <div id="ana-hub-perf"><div class="empty">거점 이벤트 없음</div></div>
   </div></div>
@@ -130,9 +130,10 @@
     <div style="font-size:11px;color:var(--gray);margin-bottom:10px">도착완료 처리된 오더의 디지털 인수 확인 내역입니다</div>
     <div id="ana-pod-list"><div class="empty">POD 기록 없음</div></div>
   </div></div>
+  </div>
 </div>
 
-<script src="js/common.js?v=20260511c"></script>
-<script src="js/analytics.js"></script>
+<script src="js/common.js?v=20260520"></script>
+<script src="js/analytics.js?v=20260520"></script>
 </body>
 </html>

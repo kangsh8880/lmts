@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 출하오더 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260513">
+  <link rel="stylesheet" href="css/style.css?v=20260520">
+  <link rel="stylesheet" href="css/onepage.css?v=20260520">
 </head>
-<body>
+<body class="one">
 
 <!-- ══ LOADING OVERLAY ══ -->
 <div class="overlay hidden" id="overlay">
@@ -121,9 +122,10 @@
   </div>
 </div>
 
-<div class="page" style="display:block;padding:16px;max-width:1300px;margin:0 auto">
+<div class="page op-page">
 
   <div class="sec-title">출하오더 관리</div>
+  <div class="op-cols">
   <div class="card"><div class="card-head">📋 신규 출하오더 생성</div><div class="card-body">
     <div class="form-row">
       <div class="form-group"><label>오더번호</label><input id="o-no" readonly></div>
@@ -181,9 +183,10 @@
       <tbody id="order-table-body"></tbody>
     </table></div>
   </div></div>
+  </div>
 </div>
 
-<script src="js/common.js?v=20260511c"></script>
-<script src="js/order.js"></script>
+<script src="js/common.js?v=20260520"></script>
+<script src="js/order.js?v=20260520"></script>
 </body>
 </html>
