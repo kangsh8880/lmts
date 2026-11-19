@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 운영관제</title>
-  <link rel="stylesheet" href="css/style.css?v=20260534">
-  <link rel="stylesheet" href="css/dash.css?v=20260534">
-  <link rel="stylesheet" href="css/theme.css?v=20260534">
-  <script src="js/theme.js?v=20260534"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260536">
+  <link rel="stylesheet" href="css/dash.css?v=20260536">
+  <link rel="stylesheet" href="css/theme.css?v=20260536">
+  <script src="js/theme.js?v=20260536"></script>
 </head>
 <body class="dash">
 <!-- ══ LOADING OVERLAY ══ -->
@@ -68,7 +68,7 @@
   <div class="d-head"><div class="d-title">운영관제<small>일정 · 작업 · 알람</small></div><div class="d-search"><input id="dash-q" placeholder="오더번호 · 제품코드 · 제품명 · 고객사 검색" onkeydown="if(event.key==='Enter')dashSearch()"><button class="pri" onclick="dashSearch()">조회</button><button onclick="dashSearchClear()">초기화</button></div><div class="d-asof" id="asof"></div></div>
   <div class="kpi-grid" id="kpis"></div>
   <div class="d-body g-ops">
-    <div class="pnl em"><div class="pnl-h"><span id="cal-ttl"></span><span class="cal-nav"><button onclick="calMove(-1)">◀</button><button onclick="calToday()" style="width:auto;padding:0 8px">기준일</button><button onclick="calMove(1)">▶</button></span></div>
+    <div class="pnl em"><div class="pnl-h"><span id="cal-ttl"></span><span class="cal-nav"><button onclick="calMove(-1)">◀</button><button onclick="calNow()" style="width:auto;padding:0 8px" title="오늘 날짜로 이동">오늘</button><button onclick="calToday()" style="width:auto;padding:0 8px" title="데이터 기준일로 이동">기준일</button><button onclick="calMove(1)">▶</button></span></div>
       <div class="pnl-b"><div class="cal" id="cal"></div></div></div>
     <div class="pnl"><div class="pnl-h"><span id="day-ttl">선택일</span></div>
       <div class="pnl-b"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px">
@@ -77,14 +77,14 @@
         <div id="day-body"></div></div></div>
     <div class="pnl"><div class="pnl-h"><span>알람 · 조치 목록</span><span class="chip red" id="act-n">0건</span></div><div class="pnl-b" id="acts"></div></div>
   </div>
-  <div class="d-foot"><span id="cover"></span><span>▲ IN · ▼ OUT · ■ 출하오더 건수 (칸 안 3줄)</span></div>
+  <div class="d-foot"><span id="cover"></span><span>▲ 거점 IN · ▼ 출하 실적(출발 거점 OUT 오더) · ■ 출하 목표(출하예정일 오더) — 칸 안 3줄</span></div>
 </div>
 <div class="abbr">※ KPI: Key Performance Indicator(핵심성과지표) · IN/OUT: 거점 입고/출고 이벤트 · 휴일 표시는 참고용(법정 공휴일 전체 아님)</div>
 <div class="modal-bg hidden" id="search-pop"><div class="modal" style="max-width:760px;max-height:80vh;overflow:auto">
   <div class="modal-title">🔍 오더 · 제품 조회 결과 <button class="btn btn-ghost" style="float:right" onclick="dashSearchClear()">닫기</button></div>
   <div id="search-pop-body"></div></div></div>
-<script src="js/common.js?v=20260534"></script>
-<script src="js/dash-core.js?v=20260534"></script>
-<script src="js/ops.js?v=20260534"></script>
+<script src="js/common.js?v=20260536"></script>
+<script src="js/dash-core.js?v=20260536"></script>
+<script src="js/ops.js?v=20260536"></script>
 </body>
 </html>
