@@ -51,55 +51,76 @@ function renderHubs() {
       <span class="t">${l ? `${l.event} ${l.time.slice(5, 16)}` : '이벤트 없음'}</span></div>`;
   }).join('') || '<div class="empty-n">등록된 거점이 없습니다</div>';
 }
-function pickHub(name) { selHub = name; renderHubs(); renderHubDetail(); }
 
-// ── 좌측 하단: 거점별 상세현황 ────────────────────────────────
+// ── 좌측 하단: 거점별 상세현황 (KPI 박스 클릭 → 해당 리스트) ─────
+let hdTab = null;
+function pickHub(name) { selHub = name; hdTab = null; renderHubs(); renderHubDetail(); }
+function pickHd(t) { hdTab = (hdTab === t) ? 'all' : t; renderHubDetail(); }
 function renderHubDetail() {
   const h = S.hubs().find(x => x.name === selHub);
   if (!h) { el('hub-detail').innerHTML = '<div class="empty-n">거점을 선택하세요</div>'; el('hd-ttl').textContent = '거점별 상세현황'; el('hd-type').textContent = ''; return; }
   const s = DC.hubStats(h.name);
   el('hd-ttl').textContent = `거점별 상세현황 · ${DC.shortName(h.name)}`;
   el('hd-type').textContent = h.type || '';
-  const ordChip = (o, cls) => `<span class="chip ${cls}" title="${DC.esc(o.customer)}">${DC.esc(o.no)}</span>`;
-  const rows = s.ev.slice().reverse();
+  const evs = s.ev.slice().reverse();
+  const L = {
+    stay: s.stay, exp: s.expect, arr: evs.filter(e => e.event === '도착완료'),
+    in: evs.filter(e => e.event === 'IN'), out: evs.filter(e => e.event === 'OUT'),
+    dwell: evs.filter(e => e.dwell != null && e.dwell >= 0), all: evs
+  };
+  if (!hdTab) hdTab = s.expect.length ? 'exp' : s.stay.length ? 'stay' : 'all';
+  const T = {
+    stay: '🏭 체류 오더', exp: '📥 입고 예정', arr: '✅ 도착완료 이력', in: '⬇️ 누적 IN 이력', out: '⬆️ 누적 OUT 이력', dwell: '⏱ 평균 체류 산출 이력 (IN→OUT)', all: '🔁 전체 IN/OUT 이력'
+  };
+  const box = (t, cls, name, val, unit, tip) => `<div class="mini ${cls} ${hdTab === t ? 'on' : ''}" onclick="pickHd('${t}')" title="${tip}"><span>${name}</span><b>${val}<u>${unit}</u></b></div>`;
+  const evTable = rows => `<table class="dt"><thead><tr><th>시각</th><th>오더</th><th>고객사</th><th>구분</th><th class="num">체류(분)</th><th>담당</th></tr></thead><tbody>${rows.map(e =>
+    `<tr><td>${e.time.slice(5, 16)}</td><td>${DC.esc(e.orderNo)}</td><td>${DC.esc(e.customer)}</td><td><span class="chip ${e.event === 'IN' ? 'blue' : e.event === 'OUT' ? 'red' : 'grn'}">${e.event}</span></td><td class="num">${e.dwell != null && e.dwell >= 0 ? e.dwell : '-'}</td><td>${DC.esc(e.person || '-')}</td></tr>`).join('')}</tbody></table>`;
+  let list;
+  const rows = L[hdTab];
+  if (!rows.length) list = '<div class="empty-n">해당 내역이 없습니다</div>';
+  else if (hdTab === 'stay') list = `<table class="dt"><thead><tr><th>오더</th><th>고객사</th><th>제품(박스)</th><th>상태</th><th>최근 이벤트</th></tr></thead><tbody>${rows.map(o => {
+    const last = s.ev.filter(e => e.orderNo === o.no).slice(-1)[0];
+    return `<tr><td><b>${DC.esc(o.no)}</b></td><td>${DC.esc(o.customer)}</td><td>${DC.esc(o.product)} (${o.boxes})</td><td><span class="chip blue">${DC.esc(o.status)}</span></td><td>${last ? last.event + ' ' + last.time.slice(5, 16) : '-'}</td></tr>`; }).join('')}</tbody></table>`;
+  else if (hdTab === 'exp') list = `<table class="dt"><thead><tr><th>오더</th><th>고객사</th><th>출발 거점</th><th>수단</th><th>출고</th><th>예정 도착</th><th>상태</th></tr></thead><tbody>${rows.map(m =>
+    `<tr><td><b>${DC.esc(m.o.no)}</b></td><td>${DC.esc(m.o.customer)}</td><td>${DC.esc(DC.shortName(m.from))}</td><td>${DC.MODE[m.mode][0]} ${DC.MODE[m.mode][1]}</td><td>${DC.hhmm(m.outTime)}</td><td>${m.eta || '-'}</td><td>${m.over ? `<span class="chip red">표준 +${m.elapsed - m.std}분</span>` : `<span class="chip blue">${DC.esc(m.o.status)}</span>`}</td></tr>`).join('')}</tbody></table>`;
+  else list = evTable(rows);
   el('hub-detail').innerHTML = `
     <div class="hd-info">${DC.esc(h.code || '')} · ${DC.esc(h.addr || '주소 미등록')} · 담당 ${DC.esc(h.mgr || '-')}</div>
     <div class="mini-grid">
-      <div class="mini c3"><span>체류 오더</span><b>${s.stay.length}<u>건</u></b></div>
-      <div class="mini c1"><span>입고 예정</span><b>${s.expect.length}<u>건</u></b></div>
-      <div class="mini c6"><span>도착완료</span><b>${s.arrN}<u>건</u></b></div>
-      <div class="mini c2"><span>누적 IN</span><b>${s.inN}<u>건</u></b></div>
-      <div class="mini c5"><span>누적 OUT</span><b>${s.outN}<u>건</u></b></div>
-      <div class="mini c4" title="IN → OUT 측정 ${s.dwN}건 평균"><span>평균 체류</span><b>${s.avgDwell == null ? '<u>데이터 없음</u>' : s.avgDwell + '<u>분</u>'}</b></div>
+      ${box('stay', 'c3', '체류 오더', s.stay.length, '건', '클릭: 체류 오더 리스트')}
+      ${box('exp', 'c1', '입고 예정', s.expect.length, '건', '클릭: 입고 예정 리스트')}
+      ${box('arr', 'c6', '도착완료', s.arrN, '건', '클릭: 도착완료 이력')}
+      ${box('in', 'c2', '누적 IN', s.inN, '건', '클릭: IN 이력')}
+      ${box('out', 'c5', '누적 OUT', s.outN, '건', '클릭: OUT 이력')}
+      ${box('dwell', 'c4', '평균 체류', s.avgDwell == null ? '<small>데이터 없음</small>' : s.avgDwell, s.avgDwell == null ? '' : '분', `IN → OUT 측정 ${s.dwN}건 평균 · 클릭: 산출 이력`)}
     </div>
-    <div class="ord-chips"><b>체류</b> ${s.stay.length ? s.stay.map(o => ordChip(o, 'ylw')).join('') : '<span class="chip gry">없음</span>'}
-      <b style="margin-left:8px">입고 예정</b> ${s.expect.length ? s.expect.map(m => ordChip(m.o, 'blue')).join('') : '<span class="chip gry">없음</span>'}</div>
-    ${s.expect.length ? `<div class="sub-ttl">📥 입고 예정 상세 <b>${s.expect.length}건</b></div><table class="dt"><thead><tr><th>오더</th><th>고객사</th><th>출발 거점</th><th>수단</th><th>출고</th><th>예정 도착</th><th>상태</th></tr></thead><tbody>${s.expect.map(m =>
-      `<tr><td><b>${DC.esc(m.o.no)}</b></td><td>${DC.esc(m.o.customer)}</td><td>${DC.esc(DC.shortName(m.from))}</td><td>${DC.MODE[m.mode][0]} ${DC.MODE[m.mode][1]}</td><td>${DC.hhmm(m.outTime)}</td><td>${m.eta || '-'}</td><td>${m.over ? `<span class="chip red">표준 +${m.elapsed - m.std}분</span>` : `<span class="chip blue">${DC.esc(m.o.status)}</span>`}</td></tr>`).join('')}</tbody></table>` : ''}
-    <div class="sub-ttl">🔁 IN/OUT 이력</div>
-    ${rows.length ? `<table class="dt"><thead><tr><th>시각</th><th>오더</th><th>고객사</th><th>구분</th><th class="num">체류(분)</th><th>담당</th></tr></thead><tbody>${rows.map(e =>
-      `<tr><td>${e.time.slice(5, 16)}</td><td>${DC.esc(e.orderNo)}</td><td>${DC.esc(e.customer)}</td><td><span class="chip ${e.event === 'IN' ? 'blue' : 'red'}">${e.event}</span></td><td class="num">${e.dwell != null && e.dwell >= 0 ? e.dwell : '-'}</td><td>${DC.esc(e.person || '-')}</td></tr>`).join('')}</tbody></table>`
-      : '<div class="empty-n">이 거점의 IN/OUT 이력이 없습니다</div>'}`;
+    <div class="sub-ttl">${T[hdTab]} <b>${rows.length}건</b> <small class="hint">· 같은 박스를 다시 누르면 전체 이력</small></div>
+    ${list}`;
 }
 
-// ── 우측: 이동 중 운송 현황 (차량 · 선박 · 항공) ───────────────
+// ── 우측: 이동 중 운송 현황 (차량 · 선박 · 항공 KPI 박스 클릭 → 상세) ──
+let mvSel = null;
+function pickMv(m) { mvSel = m; renderMoving(DC.moving()); }
 function renderMoving(mv) {
-  const live = DC.refNow().live;
-  el('mv-chips').innerHTML = ['truck', 'sea', 'air'].map(m => `<span class="chip ${mv.some(x => x.mode === m) ? 'blue' : 'gry'}">${DC.MODE[m][0]} ${DC.MODE[m][1]} ${mv.filter(x => x.mode === m).length}</span>`).join('');
+  const live = DC.refNow().live, modes = ['truck', 'sea', 'air'];
+  el('mv-chips').innerHTML = '';
+  if (!mvSel) mvSel = modes.find(m => mv.some(x => x.mode === m)) || 'truck';
+  const cls = { truck: 'c3', sea: 'c1', air: 'c4' };
   const detail = x => {
     const d = x.dp; if (!d) return '<span class="chip red">배차 미지정</span>';
     if (x.mode === 'truck') return `🚛 <b>${DC.esc(d.vehicleNo || '-')}</b> · ${DC.esc(d.driver || '-')}${d.dphone ? ' · ' + DC.esc(d.dphone) : ''}`;
     if (x.mode === 'air') return `✈️ <b>${DC.esc(((d.airline || '') + ' ' + (d.flightNo || '')).trim() || '-')}</b> · ${DC.esc(d.depAirport || '')}→${DC.esc(d.arrAirport || '')}`;
     return `🚢 <b>${DC.esc(((d.shippingCo || '') + ' ' + (d.vessel || '')).trim() || '-')}</b> · ${DC.esc(d.depPort || '')}→${DC.esc(d.arrPort || '')}`;
   };
-  el('moving').innerHTML = ['truck', 'sea', 'air'].map(m => {
-    const list = mv.filter(x => x.mode === m);
-    return `<div class="mv-sec ${m}"><span>${DC.MODE[m][0]} ${DC.MODE[m][1]}</span><span>${list.length}건</span></div>` +
-      (list.length ? list.map(x => `<div class="mv ${x.over ? 'hot' : ''}">
+  const list = mv.filter(x => x.mode === mvSel);
+  const kp = modes.map(m => `<div class="mk ${cls[m]} ${mvSel === m ? 'on' : ''}" onclick="pickMv('${m}')" title="클릭: ${DC.MODE[m][1]} 이동 중 상세"><span>${DC.MODE[m][0]} ${DC.MODE[m][1]}</span><b>${mv.filter(x => x.mode === m).length}<u>건</u></b></div>`).join('');
+  el('moving').innerHTML = `<div class="mk-grid">${kp}</div>
+    <div class="sub-ttl">${DC.MODE[mvSel][0]} ${DC.MODE[mvSel][1]} 이동 중 상세 <b>${list.length}건</b></div>` +
+    (list.length ? list.map(x => `<div class="mv ${x.over ? 'hot' : ''}">
         <div class="mv-top"><span><b>${DC.esc(x.o.no)}</b> · ${DC.esc(x.o.customer)} · ${DC.esc(x.o.product)} (${x.o.boxes}박스)</span>${x.over ? `<span class="chip red">표준 +${x.elapsed - x.std}분</span>` : `<span class="chip blue">${DC.esc(x.o.status)}</span>`}</div>
         <div class="mv-route"><span>${DC.esc(DC.shortName(x.from))}</span><i>➜</i><span>${DC.esc(DC.shortName(x.to))}</span></div>
         <div class="mv-meta"><span>${detail(x)}</span><span>출고 <b>${DC.hhmm(x.outTime)}</b></span><span>표준 <b>${x.std != null ? x.std + '분' : '미설정'}</b></span><span>예정 도착 <b>${x.eta || '-'}</b></span>${x.elapsed != null ? `<span>경과 <b>${x.elapsed}분</b></span>` : ''}</div></div>`).join('')
-        : '<div class="mv-none">이동 중인 운송이 없습니다</div>');
-  }).join('') + (live ? '' : `<div class="mv-none">※ 데이터가 최근 48시간 이내가 아니어서 경과 시간은 표시하지 않습니다 (기준일 ${DC.anchorDate()})</div>`);
+      : '<div class="mv-none">이동 중인 운송이 없습니다</div>') +
+    (live ? '' : `<div class="mv-none">※ 데이터가 최근 48시간 이내가 아니어서 경과 시간은 표시하지 않습니다 (기준일 ${DC.anchorDate()})</div>`);
 }
 window.lmtsReady = function () { initNav(); renderCEO(); };
