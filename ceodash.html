@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - CEO 대시보드</title>
-  <link rel="stylesheet" href="css/style.css?v=20260530">
-  <link rel="stylesheet" href="css/dash.css?v=20260530">
-  <link rel="stylesheet" href="css/theme.css?v=20260530">
-  <script src="js/theme.js?v=20260530"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260532">
+  <link rel="stylesheet" href="css/dash.css?v=20260532">
+  <link rel="stylesheet" href="css/theme.css?v=20260532">
+  <script src="js/theme.js?v=20260532"></script>
 </head>
 <body class="dash">
 <!-- ══ LOADING OVERLAY ══ -->
@@ -77,14 +77,14 @@
   <div class="d-foot"><span id="cover"></span><span id="foot-act"></span></div>
 </div>
 <div class="abbr">※ KPI: Key Performance Indicator(핵심성과지표) · IN/OUT: 거점 입고/출고 이벤트 · Hub: 물류 거점 · 표준시간: 구간(거점 간) 기준 소요시간</div>
-<div class="modal-bg hidden" id="kpi-pop" onclick="if(event.target===this)closePop()"><div class="modal" style="max-width:860px;max-height:82vh;overflow:auto">
+<div class="modal-bg hidden" id="kpi-pop" onmousedown="this._d=event.target===this" onclick="if(this._d&&event.target===this)closePop()"><div class="modal" style="max-width:860px;max-height:82vh;overflow:auto">
   <div class="modal-title"><span id="kpi-pop-ttl"></span> <button class="btn btn-ghost" style="float:right" onclick="closePop()">닫기 ✕</button></div>
   <div class="pop-sub" id="kpi-pop-sub"></div><div id="kpi-pop-body"></div><div class="pop-go" id="kpi-pop-go"></div></div></div>
 <div class="modal-bg hidden" id="search-pop"><div class="modal" style="max-width:760px;max-height:80vh;overflow:auto">
   <div class="modal-title">🔍 오더 · 제품 조회 결과 <button class="btn btn-ghost" style="float:right" onclick="dashSearchClear()">닫기</button></div>
   <div id="search-pop-body"></div></div></div>
-<script src="js/common.js?v=20260530"></script>
-<script src="js/dash-core.js?v=20260530"></script>
-<script src="js/ceodash.js?v=20260530"></script>
+<script src="js/common.js?v=20260532"></script>
+<script src="js/dash-core.js?v=20260532"></script>
+<script src="js/ceodash.js?v=20260532"></script>
 </body>
 </html>
