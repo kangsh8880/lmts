@@ -322,7 +322,7 @@ function clearSearch(prefix) { el(prefix+'-search').value=''; el(prefix+'-search
 function buildTrackerCard(o, ps) {
   const pcode=ordCodes(o,ps).join(', ')||'-';
   const events=S.events().filter(e=>e.orderNo===o.no).sort((a,b)=>a.time.localeCompare(b.time));
-  const stMap={'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
+  const stMap={'대기':'s-ready','패킹완료':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
 
   let trackerHtml='';
   if (o.route) {
@@ -522,6 +522,8 @@ const DEFAULT_NEW_HUBS = [
 
 // 로드 후 기존 데이터에 누락 거점 자동 추가
 function ensureDefaultHubs() {
+  // 구버전 상태명 이전: '패킹중'은 Packing 완료 시점에만 부여되던 값이므로 '패킹완료'로 통일
+  (DB.orders||[]).forEach(o => { if (o.status === '패킹중') o.status = '패킹완료'; });
   const hubs = S.hubs();
   const existCodes = new Set(hubs.map(h => h.code));
   const toAdd = DEFAULT_NEW_HUBS.filter(h => !existCodes.has(h.code));

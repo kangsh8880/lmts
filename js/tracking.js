@@ -3,7 +3,7 @@
 // ─── TRACKING ─────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
 function fillTrackingSelects() {
-  const active=S.orders().filter(o=>['운송중','패킹중','배차완료'].includes(o.status));
+  const active=S.orders().filter(o=>['운송중','패킹완료','배차완료'].includes(o.status));
   fillSel('tr-order', active.map(o=>({v:o.no, l:`${o.no} · ${o.customer}`})));
   fillSel('tr-track-order', S.orders().map(o=>({v:o.no, l:`${o.no} · ${o.customer} [${o.status}]`})));
   fillSel('tr-hub', S.hubs().map(h=>({v:h.name, l:`${h.name} (${h.type})`})));

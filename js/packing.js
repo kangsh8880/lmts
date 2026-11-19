@@ -79,7 +79,7 @@ function doPacking() {
   if (!pkNeed(o).every(n=>n.left===0)) return alert('출하 요구 수량을 모두 담아야 완료 처리할 수 있습니다');
   const arr=S.packings();
   arr.push({orderNo:no, customer:o.customer||'', boxes:new Set(pkLines.map(l=>l.packNo)).size, lines:pkLines.map(l=>({...l})), doneAt:now(), person:'창고담당'});
-  S.set('packings', arr); updateOrderStatus(no,'패킹중');
+  S.set('packings', arr); updateOrderStatus(no,'패킹완료');
   pkLines=[]; fillPackingSelects();
   el('pk-order').value=''; loadPackingOrder();
   const m=el('pk-msg'); if(m){ m.style.color='#1a4fa0'; m.textContent=`✅ [${no}] Packing 완료 — 오른쪽 "Packing 완료 현황"에 등록되었습니다`; }
@@ -94,7 +94,7 @@ function delPacking(i){
   if(!confirm(`[${p.orderNo}] Packing 완료 기록을 삭제할까요?\n삭제하면 꺼낸 보관 Box 수량이 복구되고, 다른 완료 기록이 없으면 오더가 '대기'로 돌아갑니다.`)) return;
   arr.splice(i,1); S.set('packings', arr);
   const o=S.orders().find(x=>x.no===p.orderNo);
-  if (o && o.status==='패킹중' && !arr.some(x=>x.orderNo===p.orderNo)) updateOrderStatus(p.orderNo,'대기');
+  if (o && o.status==='패킹완료' && !arr.some(x=>x.orderNo===p.orderNo)) updateOrderStatus(p.orderNo,'대기');
   fillPackingSelects();
 }
 function renderPackingDone() {

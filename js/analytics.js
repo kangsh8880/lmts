@@ -124,7 +124,7 @@ function renderAnalytics() {
   const hubs    = S.hubs();
   const done    = orders.filter(o => o.status === '도착완료');
   const delayed = orders.filter(o => o.status === '지연');
-  const active  = orders.filter(o => ['운송중','배차완료','패킹중'].includes(o.status));
+  const active  = orders.filter(o => ['운송중','배차완료','패킹완료'].includes(o.status));
 
   // ── KPI 계산 ──
   const total  = done.length + delayed.length;
@@ -147,7 +147,7 @@ function renderAnalytics() {
   if (!orders.length) {
     riskDiv.innerHTML = '<div class="empty">출하오더 없음 — 오더 생성 후 확인하세요</div>';
   } else {
-    const stMap = {'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
+    const stMap = {'대기':'s-ready','패킹완료':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
     riskDiv.innerHTML = orders.slice(-10).reverse().map(o => {
       const r   = calcRiskScore(o);
       const evc = events.filter(e => e.orderNo === o.no).length;

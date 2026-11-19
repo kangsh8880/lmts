@@ -72,7 +72,7 @@ function renderOps() {
   const K = DC.kpi(), n = s => K.stage.find(x => x[0] === s)[1], ac = DC.actions(), a = DC.anchorDate(), dc = dayCounts(a);
   el('kpis').innerHTML = [
     kbox('c6', '출하 대기', kv(n('대기'), '건'), '패킹 전', '상태가 대기인 오더', 'order.html'),
-    kbox('c3', '패킹 중', kv(n('패킹중'), '건'), '박스 작업', '상태가 패킹중인 오더', 'packing.html'),
+    kbox('c3', '패킹 완료', kv(n('패킹완료'), '건'), '배차 대기', '상태가 패킹완료인 오더', 'packing.html'),
     kbox('c4', '배차 완료', kv(n('배차완료'), '건'), '출발 대기', '배차 지정 후 미출발 오더', 'dispatch.html'),
     kbox('c1', '운송 중', kv(n('운송중'), '건'), '거점 이동', '상태가 운송중인 오더', 'tracking.html'),
     kbox('c5', '지연', kv(n('지연'), '건', n('지연') > 0 ? 'bad' : ''), '즉시 조치', '상태가 지연인 오더'),

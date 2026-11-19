@@ -41,7 +41,7 @@ function getLegDispatch(orderNo, legIdx) {
 
 // 배차 페이지 진입 시 셀렉트 채우기
 function fillDispatchSelects() {
-  // 패킹중·운송중·배차완료 + 대기도 포함 (초기 배차 가능)
+  // 패킹완료·운송중·배차완료 + 대기도 포함 (초기 배차 가능)
   const orders = S.orders().filter(o => !['도착완료'].includes(o.status));
   fillSel('dp-order', orders.map(o => ({v:o.no, l:`${o.no} · ${o.customer} [${o.status}]`})));
   renderDispatch();
@@ -62,7 +62,7 @@ function loadDispatchOrder() {
     return;
   }
 
-  const stMap = {'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done'};
+  const stMap = {'대기':'s-ready','패킹완료':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done'};
 
   let html = `<div style="font-size:11px;color:var(--gray);margin-bottom:10px">
     <b style="color:var(--dk)">${o.no}</b> | ${o.customer} | ${ordText(o)} |
@@ -229,7 +229,7 @@ function saveLegDispatch() {
   const leg  = legs[ldLegIdx];
 
   // Packing 완료 전에는 배차 등록 불가 (오더 상태가 '대기'이거나 Packing 완료 기록이 없는 대기 오더)
-  if (o?.status === '대기' || (!['패킹중','배차완료','운송중','지연','도착완료'].includes(o?.status))) {
+  if (o?.status === '대기' || (!['패킹완료','배차완료','운송중','지연','도착완료'].includes(o?.status))) {
     return alert('⚠️ Packing 후 등록하세요.\n\n[박스Packing] 화면에서 이 오더의 Packing을 완료한 뒤 배차를 등록할 수 있습니다.');
   }
 

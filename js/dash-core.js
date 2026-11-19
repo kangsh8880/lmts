@@ -82,7 +82,7 @@ const DC = (() => {
       inHub: inHub.size, hubs: H.length,
       avgWp: O.length ? Math.round(O.reduce((s, o) => s + (o.route?.waypoints?.length || 0), 0) / O.length * 10) / 10 : null,
       events: E.length,
-      stage: ['대기', '패킹중', '배차완료', '운송중', '도착완료', '지연'].map(s => [s, O.filter(o => o.status === s).length])
+      stage: ['대기', '패킹완료', '배차완료', '운송중', '도착완료', '지연'].map(s => [s, O.filter(o => o.status === s).length])
     };
   }
 

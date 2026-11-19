@@ -179,10 +179,10 @@ function createOrder() {
 function renderOrders() {
   const filter=v('o-filter-status');
   const rows=S.orders().filter(o=>!filter||o.status===filter);
-  const stMap={'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
+  const stMap={'대기':'s-ready','패킹완료':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
   el('order-table-body').innerHTML = rows.length ? rows.map(o=>{
     const gi=S.orders().findIndex(x=>x.no===o.no);
-    const canEdit = ['대기','패킹중'].includes(o.status);
+    const canEdit = ['대기','패킹완료'].includes(o.status);
     return `<tr><td><b>${o.no}</b></td><td>${o.date}</td><td>${o.customer}</td><td>${ordText(o)}</td><td>${ordQty(o)}</td>
     <td style="min-width:200px">${buildRouteChips(o)}</td>
     <td><span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span></td>
@@ -239,7 +239,7 @@ function openRouteEdit(orderNo) {
   el('re-customer').textContent = o.customer;
 
   // 상태 뱃지
-  const stMap = {'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
+  const stMap = {'대기':'s-ready','패킹완료':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
   el('re-status-badge').innerHTML = `<span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>`;
 
   // 운송중/도착완료 경고
