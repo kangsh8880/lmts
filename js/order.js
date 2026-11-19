@@ -352,10 +352,9 @@ function saveRouteEdit() {
   renderOrders();
 
   // 대시보드 갱신
-  if (el('page-dashboard').classList.contains('active')) renderDashboard();
 
   // 배차 페이지가 활성화 상태면 구간 카드도 즉시 갱신
-  if (el('page-dispatch').classList.contains('active')) {
+  if (el('page-dispatch')?.classList.contains('active')) {
     // dp-order에 현재 수정한 오더가 선택돼 있으면 구간 카드 갱신
     if (v('dp-order') === reOrderNo) {
       loadDispatchOrder();
