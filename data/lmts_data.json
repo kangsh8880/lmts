@@ -318,7 +318,7 @@
       "product": "Phone Glass",
       "boxes": 2,
       "note": "",
-      "status": "패킹중",
+      "status": "패킹완료",
       "created": "2026-11-19 14:57",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -340,6 +340,40 @@
           }
         ],
         "destination": "VINA VINHYEN"
+      }
+    },
+    {
+      "no": "ORD-261119-005",
+      "date": "2026-11-20",
+      "customer": "K1 VINA",
+      "items": [
+        {
+          "product": "LCD Panel B타입",
+          "qty": 1
+        },
+        {
+          "product": "Phone Glass",
+          "qty": 1
+        }
+      ],
+      "product": "LCD Panel B타입 / Phone Glass",
+      "boxes": 2,
+      "note": "",
+      "status": "대기",
+      "created": "2026-11-19 17:00",
+      "route": {
+        "origin": "자사물류창고 (화성)",
+        "originStdTime": "20",
+        "waypoints": [
+          {
+            "name": "안성허브터미널",
+            "stdTime": "30",
+            "transport": "truck",
+            "transportNo": "",
+            "destChange": ""
+          }
+        ],
+        "destination": "SK Hynix 이천캠퍼스"
       }
     }
   ],
@@ -494,5 +528,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 15:52"
+  "lastUpdated": "2026-11-19 17:00"
 }
