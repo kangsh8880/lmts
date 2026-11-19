@@ -1,7 +1,8 @@
 /* ══ 위치추적(지도) 화면 ══ */
 .mp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .mp-ctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.mp-ctl input{width:230px;padding:6px 10px;border:1px solid #aab2bd;border-radius:6px;font-size:13px}
+.mp-ctl select{min-width:300px;padding:6px 10px;border:1px solid #aab2bd;border-radius:6px;font-size:13px;background:#fff}
+.leaflet-tile-pane{filter:saturate(.55) brightness(1.06) contrast(.92)}
 .mp-chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 4px;flex:0 0 auto}
 .mp-chip{flex:0 0 auto;border:1px solid #aab2bd;border-radius:16px;background:#fff;padding:3px 11px;font-size:12px;cursor:pointer;white-space:nowrap}
 .mp-chip.on{border-color:#222;background:#e8eefb;font-weight:700}
