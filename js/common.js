@@ -55,6 +55,8 @@ const GH = {
       bytes.forEach(b => binary += String.fromCharCode(b));
       const content = btoa(binary);
 
+      // 저장 직전에 항상 최신 SHA 확보 (SHA 누락·오래됨 → 422/409 방지)
+      if (!this._sha) await this._refreshSha();
       const body = {
         message: `LMTS data update ${now()}`,
         content,
@@ -65,18 +67,18 @@ const GH = {
         headers: this.headers(),
         body: JSON.stringify(body)
       });
-      if (res.status === 409) {
+      if (res.status === 409 || res.status === 422) {
         // SHA 충돌 → SHA 다시 받아서 재시도
         await this._refreshSha();
         body.sha = this._sha;
         const res2 = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}`, {
           method: 'PUT', headers: this.headers(), body: JSON.stringify(body)
         });
-        if (!res2.ok) throw new Error(`Save failed: ${res2.status}`);
+        if (!res2.ok) throw new Error(`Save failed: ${res2.status} ${await this._errMsg(res2)} [sha:${this._sha?this._sha.slice(0,7):'없음'}]`);
         const r2 = await res2.json();
         this._sha = r2.content.sha;
       } else if (!res.ok) {
-        throw new Error(`Save failed: ${res.status}`);
+        throw new Error(`Save failed: ${res.status} ${await this._errMsg(res)}`);
       } else {
         const r = await res.json();
         this._sha = r.content.sha;
@@ -90,9 +92,15 @@ const GH = {
     }
   },
 
+  async _errMsg(res) {
+    try { const j = await res.clone().json(); console.error('GH error body:', j); return (j.message || '') + (j.errors ? ' ' + JSON.stringify(j.errors) : ''); }
+    catch(e) { return ''; }
+  },
+
   async _refreshSha() {
-    const res = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}`, {headers: this.headers()});
+    const res = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}?t=${Date.now()}`, {headers: this.headers(), cache: 'no-store'});
     if (res.ok) { const f = await res.json(); this._sha = f.sha; }
+    else if (res.status === 404) { this._sha = null; }   // 파일 없음 → 신규 생성
   },
 
   // 1초 디바운스 자동저장
