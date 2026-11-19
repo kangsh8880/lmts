@@ -5,7 +5,7 @@
 .nav-logo{color:#365C89 !important;border-right:1px solid #CBD5E1 !important;font-size:17px;padding:8px 16px 8px 8px;}
 .nav-logo span{color:#64748B !important;}
 .nav-tabs{gap:4px;align-items:center;padding:6px 4px;}
-.nav-tab{color:#475569 !important;border-bottom:none !important;border:1.5px solid transparent;border-radius:999px;padding:7px 14px !important;font-size:12.5px !important;font-weight:600 !important;background:transparent;}
+.nav-tab{color:#475569 !important;border-bottom:none !important;border:1.5px solid transparent;border-radius:999px;padding:7px 10px !important;font-size:16.3px !important;font-weight:600 !important;background:transparent;}
 .nav-tab:hover{background:#DCE8F6 !important;color:#1E3A5F !important;}
 .nav-tab.active{background:#D6E4F0 !important;color:#14284A !important;border-color:#334155 !important;box-shadow:0 1px 4px rgba(54,92,137,.18);}
 .nav-status{color:#475569 !important;}
