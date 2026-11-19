@@ -71,14 +71,14 @@ function calToday() { const d = DC.toDate(DC.anchorDate() + ' 00:00'); calY = d.
 function renderOps() {
   const K = DC.kpi(), n = s => K.stage.find(x => x[0] === s)[1], ac = DC.actions(), a = DC.anchorDate(), dc = dayCounts(a);
   el('kpis').innerHTML = [
-    kbox('c6', '출하 대기', kv(n('대기'), '건'), '패킹 전', '상태가 대기인 오더', 'order.html'),
-    kbox('c3', '패킹 완료', kv(n('패킹완료'), '건'), '배차 대기', '상태가 패킹완료인 오더', 'packing.html'),
-    kbox('c4', '배차 완료', kv(n('배차완료'), '건'), '출발 대기', '배차 지정 후 미출발 오더', 'dispatch.html'),
-    kbox('c1', '운송 중', kv(n('운송중'), '건'), '거점 이동', '상태가 운송중인 오더', 'tracking.html'),
-    kbox('c5', '지연', kv(n('지연'), '건', n('지연') > 0 ? 'bad' : ''), '즉시 조치', '상태가 지연인 오더'),
-    kbox('c5', '비지정 이벤트', kv(K.off, '건', K.off > 0 ? 'bad' : ''), '확인 필요', '지정 경로 외 거점 이벤트 알람'),
-    kbox('c2', '거점 체류', kv(K.inHub, '곳'), `전체 ${K.hubs}곳`, '진행 오더가 입고된 상태로 머무는 거점 수'),
-    kbox('c1', '기준일 이벤트', kv(dc.inn + dc.out, '건'), `IN ${dc.inn} · OUT ${dc.out}`, `데이터 기준일 ${a}의 IN/OUT 합계`)
+    kbox('c6', '출하 대기', kv(n('대기'), '건'), '패킹 전', '상태가 대기인 오더', 'js:openOpsKpi(\'wait\')'),
+    kbox('c3', '패킹 완료', kv(n('패킹완료'), '건'), '배차 대기', '상태가 패킹완료인 오더', 'js:openOpsKpi(\'pack\')'),
+    kbox('c4', '배차 완료', kv(n('배차완료'), '건'), '출발 대기', '배차 지정 후 미출발 오더', 'js:openOpsKpi(\'disp\')'),
+    kbox('c1', '운송 중', kv(n('운송중'), '건'), '거점 이동', '상태가 운송중인 오더', 'js:openOpsKpi(\'mv\')'),
+    kbox('c5', '지연', kv(n('지연'), '건', n('지연') > 0 ? 'bad' : ''), '즉시 조치', '상태가 지연인 오더', 'js:openOpsKpi(\'delay\')'),
+    kbox('c5', '비지정 이벤트', kv(K.off, '건', K.off > 0 ? 'bad' : ''), '확인 필요', '지정 경로 외 거점 이벤트 알람', 'js:openOpsKpi(\'off\')'),
+    kbox('c2', '거점 체류', kv(K.inHub, '곳'), `전체 ${K.hubs}곳`, '진행 오더가 입고된 상태로 머무는 거점 수', 'js:openOpsKpi(\'hub\')'),
+    kbox('c1', '기준일 이벤트', kv(dc.inn + dc.out, '건'), `IN ${dc.inn} · OUT ${dc.out}`, `데이터 기준일 ${a}의 IN/OUT 합계`, 'js:openOpsKpi(\'ev\')')
   ].join('');
   const ac2 = ac; el('act-n').textContent = ac2.length + '건';
   el('acts').innerHTML = ac2.length ? ac2.map(x => `<div class="al ${x.lv === 0 ? '' : x.lv === 1 ? 'warn' : 'info'}"><b>${DC.esc(x.t)}</b><p>사실: ${DC.esc(x.fact)}<br>원인 후보: ${DC.esc(x.cause)}<br><em>대안: ${DC.esc(x.act)}</em> · <a href="${x.go}">화면 이동</a></p></div>`).join('')
@@ -86,5 +86,41 @@ function renderOps() {
   el('asof').textContent = `데이터 기준일 ${a}`;
   el('cover').innerHTML = `<b>데이터 확보 현황</b> · 연계: 출하오더·패킹·배차·거점이벤트·알람 · <b>연계 예정</b>: 운송비 · 차량 위치`;
   calToday();
+}
+// ── KPI 클릭 → 해당 목록 보조창 ────────────────────────────
+function openPop(title, sub, html, go, goLabel) {
+  el('kpi-pop-ttl').textContent = title; el('kpi-pop-sub').innerHTML = sub || '';
+  el('kpi-pop-body').innerHTML = html;
+  el('kpi-pop-go').innerHTML = `<span class="pop-hint">제목줄을 끌어 이동 · 우측 아래 모서리를 끌어 크기 조절</span>` + (go ? `<a class="btn btn-primary" href="${go}">${goLabel} 열기 ›</a>` : '');
+  el('kpi-pop').classList.remove('hidden');
+}
+function closePop() { el('kpi-pop').classList.add('hidden'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
+function openOpsKpi(k) {
+  const O = S.orders(), E = DC.esc;
+  const tb = (heads, rows) => rows.length ? `<table class="dt"><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>` : '<div class="empty-n">해당 내역이 없습니다</div>';
+  const st = o => `<span class="chip ${o.status === '지연' ? 'red' : o.status === '도착완료' ? 'grn' : 'blue'}">${E(o.status)}</span>`;
+  const base = o => [`<b>${E(o.no)}</b>`, E(o.customer), E(ordText(o)), E(o.date || '-')];
+  const legN = o => Math.max(0, DC.nodes(o).length - 1);
+  const dpN = o => new Set(S.dispatches().filter(d => d.orderNo === o.no).map(d => d.legIdx)).size;
+  const where = o => { const p = DC.position(o); return p.last ? `${E(DC.shortName(p.last.hub))} ${p.last.event} ${p.last.time.slice(5, 16)}` : '이벤트 없음'; };
+  const by = s => O.filter(o => o.status === s);
+  if (k === 'wait') { const L = by('대기'); openPop('출하 대기 상세', `상태가 <b>대기</b>(Packing 전)인 오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '제품·수량', '출하예정일', '상태'], L.map(o => [...base(o), st(o)])), 'packing.html', '박스Packing'); }
+  else if (k === 'pack') { const L = by('패킹완료'); openPop('패킹 완료 상세', `Packing이 끝나고 <b>배차를 기다리는</b> 오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '제품·수량', '출하예정일', 'Packing 완료', '배차 진행'], L.map(o => { const p = S.packings().filter(x => x.orderNo === o.no).pop(); return [...base(o), p ? E(p.doneAt) : '-', `${dpN(o)}/${legN(o)}구간`]; })), 'dispatch.html', '차량배차'); }
+  else if (k === 'disp') { const L = by('배차완료'); openPop('배차 완료 상세', `배차를 지정했고 <b>출발을 기다리는</b> 오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '제품·수량', '출하예정일', '배차 진행', '첫 구간 출발예정'], L.map(o => { const d = S.dispatches().find(x => x.orderNo === o.no && x.legIdx === 0); return [...base(o), `${dpN(o)}/${legN(o)}구간`, d && d.departPlan ? E(d.departPlan.replace('T', ' ')) : '-']; })), 'dispatch.html', '차량배차'); }
+  else if (k === 'mv') { const L = by('운송중'); openPop('운송 중 상세', `상태가 <b>운송중</b>인 오더 <b>${L.length}</b>건 · 현재 위치는 마지막 거점 이벤트 기준`, tb(['오더', '고객사', '제품·수량', '출하예정일', '현재 위치(마지막 이벤트)'], L.map(o => [...base(o), where(o)])), 'tracking.html', '거점In/Out'); }
+  else if (k === 'delay') {
+    const L = by('지연'), ac = DC.actions().filter(a => /표준시간 초과/.test(a.t));
+    openPop('지연 상세', `상태가 <b>지연</b>인 오더 <b>${L.length}</b>건 · 아래에 표준시간 초과 알람 <b>${ac.length}</b>건`,
+      tb(['오더', '고객사', '제품·수량', '출하예정일', '현재 위치'], L.map(o => [...base(o), where(o)])) +
+      (ac.length ? `<div class="pop-sub" style="margin-top:10px"><b>표준시간 초과 알람</b></div>` + tb(['알람', '사실', '대안'], ac.map(a => [E(a.t), E(a.fact), E(a.act)])) : ''), 'tracking.html', '거점In/Out');
+  }
+  else if (k === 'off') { const L = S.alarms().filter(a => a.type === 'OFF_ROUTE'); openPop('비지정 이벤트 상세', `오더의 지정 경로에 없는 거점에서 등록된 이벤트 <b>${L.length}</b>건`, tb(['시각', '오더', '거점', '구분', '조치'], L.map(a => [DC.hhmm(a.time), `<b>${E(a.orderNo)}</b>`, E(a.hub), `<span class="chip red">${E(a.event)}</span>`, '경로 변경 또는 이벤트 정정'])), 'order.html', '출하오더'); }
+  else if (k === 'hub') {
+    const rows = []; O.filter(o => o.status !== '도착완료').forEach(o => { const p = DC.position(o); if (p.state === 'at') rows.push([E(DC.shortName(p.last.hub)), `<b>${E(o.no)}</b>`, E(o.customer), E(DC.hhmm(p.last.time) + ' (' + p.last.time.slice(5, 10) + ')')]); });
+    rows.sort((a, b) => a[0].localeCompare(b[0]));
+    openPop('거점 체류 상세', `진행 오더가 <b>입고(IN)된 채 머무는</b> 거점 · 오더 <b>${rows.length}</b>건`, tb(['거점', '오더', '고객사', '입고 시각'], rows), 'tracking.html', '거점In/Out');
+  }
+  else if (k === 'ev') { const a = DC.anchorDate(), L = S.events().filter(e => e.time.startsWith(a)).slice().sort((x, y) => x.time.localeCompare(y.time)); openPop('기준일 이벤트 상세', `데이터 기준일 <b>${a}</b>의 거점 IN/OUT 이벤트 <b>${L.length}</b>건`, tb(['시각', '오더', '고객사', '거점', '구분', '처리자'], L.map(e => [DC.hhmm(e.time), `<b>${E(e.orderNo)}</b>`, E(e.customer || ''), E(DC.shortName(e.hub)), `<span class="chip ${e.event === 'IN' ? 'blue' : 'red'}">${E(e.event)}</span>`, E(e.person || '-')])), 'tracking.html', '거점In/Out'); }
 }
 window.lmtsReady = function () { initNav(); renderOps(); };
