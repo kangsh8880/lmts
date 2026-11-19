@@ -482,8 +482,17 @@
       "event": "도착완료",
       "person": "박민준",
       "note": "[서명] 인수확인"
+    },
+    {
+      "time": "2026-11-19 15:51",
+      "orderNo": "ORD-261119-004",
+      "customer": "K1 VINA",
+      "hub": "자사물류창고 (화성)",
+      "event": "OUT",
+      "person": "Kang",
+      "note": ""
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 15:51"
+  "lastUpdated": "2026-11-19 15:52"
 }
