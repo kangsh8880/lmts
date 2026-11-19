@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 출하오더 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260550">
-  <link rel="stylesheet" href="css/onepage.css?v=20260550">
-  <link rel="stylesheet" href="css/theme.css?v=20260550">
-  <script src="js/theme.js?v=20260550"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260551">
+  <link rel="stylesheet" href="css/onepage.css?v=20260551">
+  <link rel="stylesheet" href="css/theme.css?v=20260551">
+  <script src="js/theme.js?v=20260551"></script>
 </head>
 <body class="one">
 
@@ -133,13 +133,14 @@
       <div class="form-group"><label>오더번호</label><input id="o-no" readonly></div>
       <div class="form-group"><label>출하예정일</label><input id="o-date" type="date"></div>
       <div class="form-group"><label>고객사</label><select id="o-customer"><option value="">-- 선택 --</option></select></div>
-      <div class="form-group" style="grid-column:1/-1"><label>출하 제품 (한 오더에 여러 제품 지정 가능)</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <select id="o-product" style="flex:2"><option value="">-- 제품 선택 --</option></select>
-          <input id="o-boxes" type="number" placeholder="수량" min="1" style="width:100px">
-          <button type="button" class="btn btn-yellow btn-sm" onclick="addOrderItem()">+ 제품 추가</button></div>
-        <div id="o-items" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:11px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span></div></div>
       <div class="form-group"><label>특이사항</label><input id="o-note"></div>
+      <div class="form-group" style="flex:1 1 100%;min-width:0;border:1px solid #ccc;border-radius:6px;padding:8px 10px;background:#fafcff"><label>출하 제품 (한 오더에 여러 제품 지정 가능)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="o-product" style="flex:1 1 auto;min-width:0"><option value="">-- 제품 선택 --</option></select>
+          <input id="o-boxes" type="number" placeholder="수량" min="1" style="width:100px;flex:0 0 100px">
+          <button type="button" class="btn btn-yellow btn-sm" style="flex:0 0 auto;white-space:nowrap" onclick="addOrderItem()">+ 제품 추가</button></div>
+        <div id="o-items" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:11px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span></div></div>
+      
     </div>
     <div class="route-builder">
       <div class="rb-title">🗺️ 운송 경로 설정 <span style="font-size:10px;color:var(--gray);font-weight:400;margin-left:6px">출발지 → 경유지(순서·표준시간 지정) → 도착지</span></div>
@@ -192,7 +193,7 @@
   </div>
 </div>
 
-<script src="js/common.js?v=20260550"></script>
-<script src="js/order.js?v=20260550"></script>
+<script src="js/common.js?v=20260551"></script>
+<script src="js/order.js?v=20260551"></script>
 </body>
 </html>
