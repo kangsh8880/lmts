@@ -45,7 +45,7 @@ function renderCal() {
       const c = dayCounts(ds), hol = holidays(d), L = lunar(d), cur = d.getMonth() === calM;
       h += `<div class="day ${i === 0 || i === 6 ? 'we' : ''} ${cur ? '' : 'out'} ${ds === today ? 'today' : ''} ${ds === selD ? 'sel' : ''}" onclick="selDay('${ds}')">
         <div><div class="dn ${i === 0 ? 'sun' : i === 6 ? 'sat' : ''} ${hol.length ? 'hol' : ''}"><b>${d.getDate()}</b><em>${L.leap ? '윤' : ''}${L.m}.${L.d}</em></div><div class="hn">${DC.esc(hol.join(' · '))}</div></div>
-        <div class="cn"><div class="a"><span>▲</span><span>${c.inn}</span></div><div class="b"><span>▼</span><span>${c.out}</span></div><div class="c"><span>■</span><span>${c.ord}</span></div></div></div>`;
+        <div class="cn"><div class="a" title="거점 IN 건수"><span>▲</span><span>${c.inn}</span></div><div class="b" title="거점 OUT 건수"><span>▼</span><span>${c.out}</span></div><div class="c" title="출하오더(그날 등록된 오더) 건수"><span>■</span><span>${c.ord}</span></div></div></div>`;
     }
   }
   el('cal').style.gridTemplateRows = `auto repeat(${rows},minmax(0,1fr))`;
@@ -63,6 +63,7 @@ function selDay(ds) {
     (es.length ? `<table class="dt"><thead><tr><th>시각</th><th>오더</th><th>거점</th><th>구분</th></tr></thead><tbody>${es.map(e => `<tr><td>${DC.hhmm(e.time)}</td><td>${DC.esc(e.orderNo)}</td><td>${DC.esc(DC.shortName(e.hub))}</td><td><span class="chip ${e.event === 'IN' ? 'blue' : 'red'}">${e.event}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty-n">이벤트 없음</div>');
 }
 function calMove(n) { const d = new Date(calY, calM + n, 1); calY = d.getFullYear(); calM = d.getMonth(); renderCal(); }
+function calNow() { const d = new Date(); calY = d.getFullYear(); calM = d.getMonth(); selDay(DC.dstr(d)); }
 function calToday() { const d = DC.toDate(DC.anchorDate() + ' 00:00'); calY = d.getFullYear(); calM = d.getMonth(); selDay(DC.anchorDate()); }
 
 function renderOps() {
