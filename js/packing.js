@@ -37,7 +37,7 @@ function pkRender(){
     return `<option value="${p.code}" ${p.code===cur?'selected':''}>${p.code} · ${p.name} (보관 잔량 ${left}${st.unlimited?'':'/'+st.total})</option>`;
   }).join('');
   pkBoxChange(true);
-  el('pk-lines').innerHTML = pkLines.length ? pkLines.map((l,i)=>`<tr><td><b>${l.boxNo}</b></td><td>${l.product}</td><td>${l.qty}</td><td><a href="#" onclick="pkDel(${i});return false" style="color:#c0392b;text-decoration:none">✕</a></td></tr>`).join('') : '<tr><td colspan="4" class="empty">담은 내역 없음</td></tr>';
+  el('pk-lines').innerHTML = pkLines.length ? pkLines.map((l,i)=>`<tr><td>${i+1}</td><td><b>${l.packNo}</b></td><td>${l.boxNo}</td><td>${l.product}</td><td>${l.qty}</td><td>${l.at}</td><td><a href="#" onclick="pkDel(${i});return false" style="color:#c0392b;text-decoration:none">✕</a></td></tr>`).join('') : '<tr><td colspan="7" class="empty">담은 내역 없음</td></tr>';
   const done=need.every(n=>n.left===0), rest=need.reduce((a,n)=>a+n.left,0);
   el('pk-count').textContent = done ? '모두 담았습니다' : `남은 수량 ${rest}`;
   const b=el('pk-done-btn'); b.disabled=!done; b.style.opacity=done?'1':'.45'; b.style.cursor=done?'pointer':'not-allowed';
@@ -59,8 +59,8 @@ function pkAdd(){
   const n=pkNeed(o).find(x=>x.product===p.name);
   if(!n || qty>n.left) return alert(`이 제품의 남은 출하 수량(${n?n.left:0})보다 많이 담을 수 없습니다`);
   if(!st.unlimited && qty>st.left-pkTaken(code)) return alert(`보관 Box 잔량(${st.left-pkTaken(code)})이 부족합니다`);
-  const ex=pkLines.find(l=>l.boxNo===code);
-  if(ex) ex.qty+=qty; else pkLines.push({boxNo:code, product:p.name, qty});
+  const packNo=(v('pk-pack')||'1').trim();
+  pkLines.push({seq:pkLines.length+1, packNo, boxNo:code, product:p.name, qty, at:now().slice(11,16)});   // 합치지 않고 담을 때마다 1건씩 이력 기록
   el('pk-qty').value=''; pkRender();
 }
 function pkDel(i){ pkLines.splice(i,1); pkRender(); }
@@ -71,17 +71,30 @@ function doPacking() {
   if (S.packings().some(p=>p.orderNo===no)) return alert('이미 Packing 완료된 오더입니다');
   if (!pkNeed(o).every(n=>n.left===0)) return alert('출하 요구 수량을 모두 담아야 완료 처리할 수 있습니다');
   const arr=S.packings();
-  arr.push({orderNo:no, customer:o.customer||'', boxes:pkLines.length, lines:pkLines.map(l=>({...l})), doneAt:now(), person:'창고담당'});
+  arr.push({orderNo:no, customer:o.customer||'', boxes:new Set(pkLines.map(l=>l.packNo)).size, lines:pkLines.map(l=>({...l})), doneAt:now(), person:'창고담당'});
   S.set('packings', arr); updateOrderStatus(no,'패킹중');
   pkLines=[]; fillPackingSelects();
   el('pk-order').value=''; loadPackingOrder();
   const m=el('pk-msg'); if(m){ m.style.color='#1a4fa0'; m.textContent=`✅ [${no}] Packing 완료 — 오른쪽 "Packing 완료 현황"에 등록되었습니다`; }
   setTimeout(()=>{ const m2=el('pk-msg'); if(m2) m2.textContent=''; }, 6000);
 }
+function packSummary(p){
+  const g={}; (p.lines||[]).forEach(l=>{ const k=l.packNo||'-'; (g[k]=g[k]||[]).push(`${l.boxNo}×${l.qty}`); });
+  return Object.keys(g).map(k=>`<b>상자 ${k}</b>: ${g[k].join(', ')}`).join('<br>')||'-';
+}
+function delPacking(i){
+  const arr=S.packings(), p=arr[i]; if(!p) return;
+  if(!confirm(`[${p.orderNo}] Packing 완료 기록을 삭제할까요?\n삭제하면 꺼낸 보관 Box 수량이 복구되고, 다른 완료 기록이 없으면 오더가 '대기'로 돌아갑니다.`)) return;
+  arr.splice(i,1); S.set('packings', arr);
+  const o=S.orders().find(x=>x.no===p.orderNo);
+  if (o && o.status==='패킹중' && !arr.some(x=>x.orderNo===p.orderNo)) updateOrderStatus(p.orderNo,'대기');
+  fillPackingSelects();
+}
 function renderPackingDone() {
-  el('packing-done-body').innerHTML = S.packings().slice().reverse().map(p=>
-    `<tr><td>${p.orderNo}</td><td>${p.customer}</td><td>${p.boxes}</td><td style="font-size:11px">${(p.lines||[]).map(l=>`${l.boxNo}×${l.qty}`).join(', ')||'-'}</td><td>${p.doneAt}</td><td>${p.person}</td></tr>`
-  ).join('') || '<tr><td colspan="6" class="empty">없음</td></tr>';
+  const all=S.packings();
+  el('packing-done-body').innerHTML = all.map((p,i)=>({p,i})).reverse().map(({p,i})=>
+    `<tr><td>${p.orderNo}</td><td>${p.customer}</td><td>${p.boxes}</td><td style="font-size:11px">${packSummary(p)}</td><td>${p.doneAt}</td><td>${p.person}</td><td><button class="btn btn-danger btn-xs" onclick="delPacking(${i})">삭제</button></td></tr>`
+  ).join('') || '<tr><td colspan="7" class="empty">없음</td></tr>';
 }
 
 // ── 페이지 초기화 ───────────────────────────────────────────────
