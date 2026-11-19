@@ -200,7 +200,6 @@ const MP = (() => {
   let L_ = null;
   function chips() {
     const act = S.orders().filter(o => o.status !== '도착완료'), mv = act.filter(o => ['운송중', '지연'].includes(o.status));
-    el('mp-chips').innerHTML = (mv.length ? mv : act).map(o => `<span class="mp-chip ${S_.order && S_.order.no === o.no ? 'on' : ''} ${o.status === '지연' ? 'bad' : ''}" onclick="MP.pick('${o.no}')">${o.status === '운송중' ? '🚚 ' : ''}${esc(o.no)} · ${esc(o.customer)}</span>`).join('') || '<span style="font-size:12px;color:#666">진행 중인 오더가 없습니다</span>';
     const cur = S_.order ? S_.order.no : '', opt = o => `<option value="${esc(o.no)}" ${o.no === cur ? 'selected' : ''}>${esc(o.no)} · ${esc(o.customer)} [${esc(o.status)}]</option>`;
     el('mp-q').innerHTML = `<optgroup label="진행 중 오더">${act.map(opt).join('')}</optgroup><optgroup label="도착 완료 오더">${S.orders().filter(o => o.status === '도착완료').map(opt).join('')}</optgroup>`;
   }
