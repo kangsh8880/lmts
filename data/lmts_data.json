@@ -375,17 +375,11 @@
         "waypoints": [
           {
             "name": "인천국제공항 (ICN)",
-            "stdTime": "10",
-            "transport": "air",
-            "transportNo": "KA852",
-            "destChange": ""
+            "stdTime": "10"
           },
           {
-            "name": "JFK국제공항 (JFK)",
-            "stdTime": "20",
-            "transport": "truck",
-            "transportNo": "88A-451213",
-            "destChange": ""
+            "name": "하노이공항",
+            "stdTime": "50"
           }
         ],
         "destination": "VINA VINHYEN"
@@ -577,5 +571,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 19:02"
+  "lastUpdated": "2026-11-19 19:03"
 }
