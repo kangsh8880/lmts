@@ -303,22 +303,6 @@ function renderAnalytics() {
 
 
 
-// ── saveTracking 패치: POD 시 확인방식 자동 기록 ────────────────
-const _origSaveTracking = saveTracking;
-saveTracking = function() {
-  // 도착완료 이벤트 시 확인방식 자동 비고에 추가
-  const orderNo   = v('tr-order');
-  const eventType = v('tr-event');
-  if (eventType === '도착완료') {
-    const order  = S.orders().find(x => x.no === orderNo);
-    const cust   = S.customers().find(c => c.name === order?.customer);
-    const confirm = cust?.confirm || '서명';
-    const noteEl = el('tr-note');
-    if (noteEl && !noteEl.value) noteEl.value = `[${confirm}] 인수확인`;
-  }
-  _origSaveTracking();
-};
-
 // ══════════════════════════════════════════════════════════════════
 
 
