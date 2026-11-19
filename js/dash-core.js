@@ -123,7 +123,47 @@ const DC = (() => {
     return out.sort((a, b) => a.lv - b.lv);
   }
 
-  return { esc, pad, dstr, toDate, mins, pct, fmtPct, hhmm, shortName, nodes, stds, evsOf, position, legs, dispatchDone, kpi, anchorDate, TREND, trend, actions };
+
+  // ── 거점·이동 중 운송 (CEO 대시보드용) ─────────────────────────
+  const hubMode = n => /공항|Airport/.test(n) ? 'air' : /항 |항\(|\bPort\b|CY/.test(n) ? 'sea' : 'land';
+  const MODE = { truck: ['🚛', '차량'], sea: ['🚢', '선박'], air: ['✈️', '항공'] };
+  const HUBMODE_ICON = { air: '✈️', sea: '🚢', land: '🏭' };
+  function refNow() {            // 데이터가 48시간 이내면 현재 시각, 아니면 마지막 이벤트 시각 기준
+    const lt = S.events().map(e => e.time).sort().pop(), ld = lt ? toDate(lt) : null, now = new Date();
+    return (ld && (now - ld) / 36e5 <= 48) ? { t: now, live: true } : { t: ld || now, live: false };
+  }
+  function moving() {
+    const R = refNow(), out = [];
+    S.orders().filter(o => o.status !== '도착완료').forEach(o => {
+      const p = position(o); if (p.state !== 'out') return;
+      const ns = nodes(o), i = p.idx, from = ns[i], to = ns[i + 1]; if (!to) return;
+      const dp = S.dispatches().find(x => x.orderNo === o.no && x.legIdx === i) || null;
+      const std = stds(o)[i] ?? null, tOut = toDate(p.last.time), el = R.live ? mins(tOut, R.t) : null;
+      let eta = null;
+      if (std != null) { const e = new Date(tOut.getTime() + std * 60000); eta = pad(e.getHours()) + ':' + pad(e.getMinutes()) + (dstr(e) !== dstr(tOut) ? ` (+${Math.round((toDate(dstr(e) + ' 00:00') - toDate(dstr(tOut) + ' 00:00')) / 864e5)}일)` : ''); }
+      else if (dp && dp.eta) eta = dp.eta.slice(11, 16);
+      let mode = (dp && dp.transportType) || 'truck'; if (!MODE[mode]) mode = 'truck';
+      out.push({ o, from, to, dp, mode, std, outTime: p.last.time, elapsed: el, eta, over: el != null && std != null && el > std });
+    });
+    return out;
+  }
+  function hubStats(name) {
+    const ev = S.events().filter(e => e.hub === name).slice().sort((a, b) => a.time.localeCompare(b.time));
+    const rows = ev.map((e, k) => {
+      let dwell = null;
+      if (e.event === 'OUT') { const inn = ev.slice(0, k).reverse().find(x => x.orderNo === e.orderNo && x.event === 'IN'); if (inn) dwell = mins(toDate(inn.time), toDate(e.time)); }
+      return { ...e, dwell };
+    });
+    const stay = S.orders().filter(o => { if (o.status === '도착완료') return false; const p = position(o); return p.state === 'at' && p.last.hub === name; });
+    const dw = rows.filter(r => r.dwell != null && r.dwell >= 0);
+    return {
+      ev: rows, stay, expect: moving().filter(m => m.to === name),
+      inN: ev.filter(e => e.event === 'IN').length, outN: ev.filter(e => e.event === 'OUT').length,
+      avgDwell: dw.length ? Math.round(dw.reduce((s, r) => s + r.dwell, 0) / dw.length) : null, dwN: dw.length, last: ev[ev.length - 1] || null
+    };
+  }
+
+  return { hubMode, MODE, HUBMODE_ICON, refNow, moving, hubStats, esc, pad, dstr, toDate, mins, pct, fmtPct, hhmm, shortName, nodes, stds, evsOf, position, legs, dispatchDone, kpi, anchorDate, TREND, trend, actions };
 })();
 
 // ── 공통 UI 조각 ───────────────────────────────────────────────
