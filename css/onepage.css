@@ -29,3 +29,7 @@
   .op-cols,.op-track,.op-ana{display:grid;gap:12px;grid-template-columns:1fr}
   .op-ana .op-span2,.op-track .op-wide{grid-column:auto}
 }
+/* 구간별 TAT 표: 구간 열이 한 글자씩 줄바꿈되지 않도록 최소 폭 확보 */
+#ana-tat-table table{min-width:600px}
+#ana-tat-table th:nth-child(3),#ana-tat-table td:nth-child(3){min-width:190px}
+#ana-tat-table th:nth-child(1),#ana-tat-table td:nth-child(1){white-space:nowrap}

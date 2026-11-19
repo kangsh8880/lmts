@@ -109,3 +109,5 @@ html[data-theme="dark"] .nav-sep,html[data-theme="dark"] .nav-tools{border-color
 .modal-bg .modal .modal-title{cursor:move;user-select:none;touch-action:none;}
 .modal-bg .modal .modal-title button{cursor:pointer;}
 .pop-hint{float:left;font-size:11px;color:#6B7280;padding-top:10px;} html[data-theme="dark"] .pop-hint{color:#94A3B8;}
+
+#manual-btn{text-decoration:none;}

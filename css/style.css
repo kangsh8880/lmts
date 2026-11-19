@@ -539,3 +539,26 @@ button[onclick*="add"], button[onclick*="submit"], button[onclick*="등록"] {
 .cv-green { color: #68D391 !important; }
 .cv-red   { color: #FC8181 !important; }
 .cv-gray  { color: rgba(255,255,255,.45) !important; }
+
+/* 경로 설정(경유지 줄·경로 미리보기) — 파일 분리 시 누락분 복구 */
+.route-builder{border:1px solid var(--border);border-radius:8px;background:#FAFCFF;padding:14px 16px;margin-top:10px;}
+.rb-title{font-size:12px;font-weight:700;color:var(--dk);margin-bottom:12px;}
+.rb-vline{width:2px;height:14px;background:var(--border);margin-left:14px;}
+.wp-item{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:7px;padding:6px 10px;margin:3px 0;}
+.wp-seq{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--yellow);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.wp-name{flex:1;font-size:12px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wp-time-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.wp-time-label{font-size:10px;color:var(--gray);white-space:nowrap;}
+.wp-time-input{width:58px;padding:3px 6px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center;}
+.wp-btn{flex-shrink:0;width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}
+.wp-up{background:#EBF5FF;color:var(--accent);} .wp-down{background:#EBF5FF;color:var(--accent);}
+.wp-del{background:#FFEBEE;color:var(--red);} .wp-disabled{opacity:.3;cursor:not-allowed;}
+.route-preview{margin-top:10px;padding:10px 12px;background:var(--pale);border-radius:6px;border:1px solid var(--border);}
+.rp-title{font-size:10px;color:var(--gray);font-weight:700;margin-bottom:6px;}
+.route-chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+.r-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+.r-chip-origin{background:var(--lt);color:var(--dk);}
+.r-chip-wp{background:#FFF3CD;color:#7B4F00;border:1px solid #FFE082;}
+.r-chip-dest{background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;}
+.r-chip-time{background:#F3F4F6;color:var(--gray);font-size:10px;border:1px solid #e5e7eb;padding:2px 6px;}
+.r-arrow{color:var(--border);font-size:12px;margin:0 1px;}
