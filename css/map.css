@@ -1,6 +1,10 @@
 /* ══ 위치추적(지도) 화면 ══ */
-.mp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.mp-ctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mp-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;flex:0 0 auto}
+.mp-top .mp-ttl{justify-self:start}
+.mp-sp{min-height:1px}
+body.one.mp-body > div[style*="max-width:1300px"]{padding:0 !important}
+body.one .mp-page{padding-top:8px !important;gap:8px !important}
+.mp-ctl{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:nowrap}
 .mp-ctl select{min-width:300px;padding:6px 10px;border:1px solid #aab2bd;border-radius:6px;font-size:13px;background:#fff}
 .leaflet-tile-pane{filter:saturate(.55) brightness(1.06) contrast(.92)}
 .mp-chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 4px;flex:0 0 auto}
@@ -62,4 +66,5 @@
 [data-theme=dark] #mp-map{background:#222a36}
 [data-theme=dark] .leaflet-tile-pane{filter:invert(.92) hue-rotate(180deg) brightness(.92) contrast(.9)}
 [data-theme=dark] .mp-legend,[data-theme=dark] .mp-warn{background:#1f2733;color:#e6e9ef}
+@media (max-width:1100px){.mp-top{grid-template-columns:1fr}.mp-ctl{flex-wrap:wrap}.mp-sp{display:none}}
 @media (max-width:900px){.mp-grid{grid-template-columns:1fr;grid-template-rows:auto}.mp-map-wrap{min-height:55vh}}
