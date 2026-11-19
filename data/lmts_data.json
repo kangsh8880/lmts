@@ -393,6 +393,21 @@
       "flightNo": "OZ8522",
       "depAirport": "ICN",
       "arrAirport": "HNI"
+    },
+    {
+      "orderNo": "ORD-261119-004",
+      "legIdx": 2,
+      "fromHub": "JFK국제공항 (JFK)",
+      "toHub": "VINA VINHYEN",
+      "transportType": "truck",
+      "departPlan": "2026-11-20T09:51",
+      "eta": "2026-11-20T15:51",
+      "savedAt": "2026-11-19 15:51",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "인천 3847나",
+      "driver": "김영수",
+      "dphone": "010-9876-5432"
     }
   ],
   "events": [
@@ -470,5 +485,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 15:50"
+  "lastUpdated": "2026-11-19 15:51"
 }
