@@ -213,7 +213,7 @@ const MP = (() => {
   }
   function pick(no) {
     const o = S.orders().find(x => x.no === no); if (!o) { alert('오더번호를 찾을 수 없습니다: ' + no); return; }
-    S_.order = o; S_.fitted = false; S_.mk && S_.map.removeLayer(S_.mk); S_.mk = null; S_.pos = null; S_.token = Math.random();
+    S_.touring = false; S_.order = o; S_.fitted = false; S_.mk && S_.map.removeLayer(S_.mk); S_.mk = null; S_.pos = null; S_.token = Math.random();
     el('mp-q').value = no; refresh(false); chips();
     const t = S_.token; S_.st.legs.filter(L => L.mode === 'truck' && L.a && L.b).forEach(L => loadRoad(L, t).then(ok => { if (ok && t === S_.token) { drawRoute(); placeMarker(0); if (!S_.fitted) fit(); } }));
     try { history.replaceState(null, '', '?order=' + encodeURIComponent(no)); } catch (e) {}
@@ -239,6 +239,18 @@ const MP = (() => {
       if (r < 1) S_.raf = requestAnimationFrame(step); else placeMarker(0); };
     S_.raf = requestAnimationFrame(step);
   }
+  function tour() {            // 전체 경로: 출발지 → 최종 도착지 이동을 처음부터 끝까지 보여줌
+    const st = S_.st; if (!st || !S_.map || !S_.mk) return; fit(); const pts = [];
+    st.legs.forEach(L => { if (L.pts) pts.push(...L.pts); }); if (pts.length < 2) return;
+    const cum = cumOf(pts), tot = cum[cum.length-1] || 1, t0 = performance.now(), ms = 10000, stopIdx = []; cancelAnimationFrame(S_.raf);
+    if (S_.trail) S_.map.removeLayer(S_.trail); S_.trail = L_.polyline([pts[0]], { color: '#c0392b', weight: 5, opacity: .85 }).addTo(S_.map); S_.touring = true;
+    const done = () => { S_.touring = false; if (S_.trail) { const t = S_.trail; setTimeout(() => S_.map && S_.map.removeLayer(t), 1500); S_.trail = null; } placeMarker(900); };
+    const step = t => { if (!S_.touring) return; const r = Math.min(1, (t - t0) / ms), tt = r * tot; let i = 1; while (i < cum.length - 1 && cum[i] < tt) i++;
+      const sg = (cum[i]-cum[i-1]) || 1e-9, q = Math.min(1, Math.max(0, (tt - cum[i-1]) / sg)), a = pts[i-1], b = pts[i], cur = [a[0] + (b[0]-a[0])*q, a[1] + (b[1]-a[1])*q];
+      S_.mk.setLatLng(cur); S_.trail.setLatLngs(pts.slice(0, i).concat([cur]));
+      if (r < 1) S_.raf = requestAnimationFrame(step); else done(); };
+    S_.mk.setLatLng(pts[0]); S_.raf = requestAnimationFrame(step);
+  }
   function focusNow() { if (S_.pos && S_.map) S_.map.setView(S_.pos, Math.max(S_.map.getZoom(), 7), { animate: true }); }
   function init() {
     initNav(); chips();
@@ -251,9 +263,9 @@ const MP = (() => {
     const q = new URLSearchParams(location.search).get('order');
     const first = (q && S.orders().find(o => o.no === q)) || S.orders().find(o => o.status === '운송중') || S.orders().find(o => o.status === '지연') || S.orders().find(o => o.status !== '도착완료') || S.orders()[0];
     if (first && S_.map) pick(first.no); else if (!first) el('mp-side').innerHTML = '<div class="empty">등록된 오더가 없습니다</div>';
-    clearInterval(S_.timer); S_.timer = setInterval(() => { if (S_.order && !document.hidden) { chips(); refresh(true); } }, 20000);
+    clearInterval(S_.timer); S_.timer = setInterval(() => { if (S_.order && !document.hidden && !S_.touring) { chips(); refresh(true); } }, 20000);
     window.addEventListener('resize', () => S_.map && S_.map.invalidateSize());
   }
-  return { init, pick, search, replay, fit: () => fit(), focusNow, _s: S_, _calc: calc };
+  return { init, pick, search, replay, tour, fit: () => fit(), focusNow, _s: S_, _calc: calc };
 })();
 window.lmtsReady = function () { MP.init(); };
