@@ -22,7 +22,7 @@ function saveCustomer() {
 }
 function saveProduct() {
   const code=v('p-code'), name=v('p-name');
-  if (!code||!name) return alert('코드와 제품명 필수');
+  if (!code||!name) return alert('Box No와 제품명 필수');
   const arr = S.products();
   arr.push({code, name, box:v('p-box'), qty:v('p-qty'), weight:v('p-weight')});
   S.set('products', arr);
