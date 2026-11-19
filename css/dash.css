@@ -111,7 +111,7 @@ body.dash{background:var(--d-bg);color:var(--d-text);display:flex;flex-direction
 .cal .dow{text-align:center;font-weight:800;padding:2px 0;}
 .cal .dow.sat{color:var(--d-blue)} .cal .dow.sun{color:var(--d-red)}
 .cal .wk{background:#EEF1F5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--d-sub);}
-.cal .day{border:1px solid var(--d-line);border-radius:12px;padding:3px 5px;min-height:56px;cursor:pointer;background:#fff;display:flex;flex-direction:column;justify-content:space-between;min-width:0;}
+.cal .day{border:1px solid var(--d-line);border-radius:12px;padding:3px 5px;min-height:56px;cursor:pointer;background:#fff;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;min-width:0;}
 .cal .day.we{background:#F3F5F8}
 .cal .day.out{opacity:.4}
 .cal .day.today{border:2px solid var(--d-line-dk)}
