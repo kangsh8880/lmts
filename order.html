@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 출하오더 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260541">
-  <link rel="stylesheet" href="css/onepage.css?v=20260541">
-  <link rel="stylesheet" href="css/theme.css?v=20260541">
-  <script src="js/theme.js?v=20260541"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260545">
+  <link rel="stylesheet" href="css/onepage.css?v=20260545">
+  <link rel="stylesheet" href="css/theme.css?v=20260545">
+  <script src="js/theme.js?v=20260545"></script>
 </head>
 <body class="one">
 
@@ -133,8 +133,12 @@
       <div class="form-group"><label>오더번호</label><input id="o-no" readonly></div>
       <div class="form-group"><label>출하예정일</label><input id="o-date" type="date"></div>
       <div class="form-group"><label>고객사</label><select id="o-customer"><option value="">-- 선택 --</option></select></div>
-      <div class="form-group"><label>제품</label><select id="o-product"><option value="">-- 선택 --</option></select></div>
-      <div class="form-group"><label>박스수량</label><input id="o-boxes" type="number" placeholder="1" min="1"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>출하 제품 (한 오더에 여러 제품 지정 가능)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="o-product" style="flex:2"><option value="">-- 제품 선택 --</option></select>
+          <input id="o-boxes" type="number" placeholder="수량" min="1" style="width:100px">
+          <button type="button" class="btn btn-yellow btn-sm" onclick="addOrderItem()">+ 제품 추가</button></div>
+        <div id="o-items" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:11px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span></div></div>
       <div class="form-group"><label>특이사항</label><input id="o-note"></div>
     </div>
     <div class="route-builder">
@@ -181,14 +185,14 @@
       </select>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>제품</th><th>박스수</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>경로변경</th><th>삭제</th></tr></thead>
+      <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>출하 제품·수량</th><th>총수량</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>경로변경</th><th>삭제</th></tr></thead>
       <tbody id="order-table-body"></tbody>
     </table></div>
   </div></div>
   </div>
 </div>
 
-<script src="js/common.js?v=20260541"></script>
-<script src="js/order.js?v=20260541"></script>
+<script src="js/common.js?v=20260545"></script>
+<script src="js/order.js?v=20260545"></script>
 </body>
 </html>

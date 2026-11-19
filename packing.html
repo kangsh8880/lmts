@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - Packing 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260541">
-  <link rel="stylesheet" href="css/theme.css?v=20260541">
-  <script src="js/theme.js?v=20260541"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260545">
+  <link rel="stylesheet" href="css/theme.css?v=20260545">
+  <script src="js/theme.js?v=20260545"></script>
 </head>
 <body>
 
@@ -76,24 +76,35 @@
   <div class="sec-title">박스 Packing 관리</div>
   <div class="grid2">
     <div class="card"><div class="card-head">📦 Packing 처리</div><div class="card-body">
-      <div class="form-group" style="margin-bottom:12px"><label>출하오더 선택 (대기)</label>
+      <div class="form-group" style="margin-bottom:12px"><label>① 출하오더 선택 (대기)</label>
         <select id="pk-order" onchange="loadPackingOrder()"><option value="">-- 선택 --</option></select></div>
       <div id="pk-info" style="display:none">
         <div class="alert alert-info" id="pk-detail"></div>
-        <div class="scan-box" onclick="doPacking()"><div class="scan-icon">📦</div>
-          <div class="scan-label">박스 스캔 / Packing 완료 처리</div>
-          <div style="font-size:11px;color:#888;margin-top:6px">클릭하여 완료 처리</div></div>
+        <div style="margin:10px 0 4px;font-size:13px"><b>② 출하 요구 수량 현황</b></div>
+        <table style="font-size:12px"><thead><tr><th>제품</th><th>출하 수량</th><th>담은 수량</th><th>남은 수량</th></tr></thead><tbody id="pk-need"></tbody></table>
+        <div style="margin:12px 0 4px;font-size:13px"><b>③ 보관 Box에서 꺼내 담기</b> <span style="font-size:11px;color:#666">(맨 앞 칸 = 담을 포장 상자 번호 · 보관 Box의 일부만 꺼내 Split 가능)</span></div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input id="pk-pack" type="text" value="1" title="포장 상자 번호" placeholder="상자" style="width:62px;text-align:center">
+          <select id="pk-box" onchange="pkBoxChange()" style="flex:2"></select>
+          <input id="pk-qty" type="number" min="1" placeholder="수량" style="width:90px">
+          <button type="button" class="btn btn-yellow btn-sm" onclick="pkAdd()">+ 담기</button></div>
+        <div id="pk-stock" style="font-size:11px;color:#666;margin-top:3px"></div>
+        <div style="margin:12px 0 4px;font-size:13px"><b>④ 담은 내역</b></div>
+        <div style="border:1px solid #aaa;border-radius:6px;background:#fff;max-height:170px;overflow:auto"><table style="font-size:12px"><thead><tr><th>#</th><th>포장 상자</th><th>보관 Box No</th><th>제품</th><th>수량</th><th>시각</th><th></th></tr></thead><tbody id="pk-lines"></tbody></table></div>
+        <div style="margin:12px 0 6px;font-size:13px"><b>⑤ 요구 수량을 모두 담은 뒤 완료 처리</b> <span id="pk-count" style="margin-left:8px;font-weight:700;color:#c0392b"></span></div>
+        <button type="button" id="pk-done-btn" onclick="doPacking()" disabled style="width:100%;padding:14px 12px;font-size:18px;font-weight:700;color:#1f3a63;background:#cfe0f5;border:2px solid #222;border-radius:8px;cursor:pointer">✅ Packing 완료 처리</button>
       </div>
+      <div id="pk-msg" style="margin-top:10px;font-size:14px;font-weight:700"></div>
       <div id="pk-empty" class="empty">대기 중인 오더를 선택하세요</div>
     </div></div>
     <div class="card"><div class="card-head">📦 Packing 완료 현황</div><div class="card-body">
-      <div class="tbl-wrap"><table><thead><tr><th>오더번호</th><th>고객사</th><th>박스수</th><th>완료시각</th><th>처리자</th></tr></thead>
+      <div class="tbl-wrap"><table><thead><tr><th>오더번호</th><th>고객사</th><th>포장 상자수</th><th>Packing 내역 (포장 상자별 Box No × 수량)</th><th>완료시각</th><th>처리자</th></tr></thead>
       <tbody id="packing-done-body"></tbody></table></div>
     </div></div>
   </div>
 </div>
 
-<script src="js/common.js?v=20260541"></script>
-<script src="js/packing.js?v=20260541"></script>
+<script src="js/common.js?v=20260545"></script>
+<script src="js/packing.js?v=20260545"></script>
 </body>
 </html>
