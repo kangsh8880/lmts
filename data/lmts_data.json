@@ -310,6 +310,37 @@
         ],
         "destination": "SK Hynix 이천캠퍼스"
       }
+    },
+    {
+      "no": "ORD-261119-004",
+      "date": "2026-11-20",
+      "customer": "K1 VINA",
+      "product": "Phone Glass",
+      "boxes": 2,
+      "note": "",
+      "status": "대기",
+      "created": "2026-11-19 14:57",
+      "route": {
+        "origin": "자사물류창고 (화성)",
+        "originStdTime": "20",
+        "waypoints": [
+          {
+            "name": "인천국제공항 (ICN)",
+            "stdTime": "10",
+            "transport": "air",
+            "transportNo": "KA852",
+            "destChange": ""
+          },
+          {
+            "name": "JFK국제공항 (JFK)",
+            "stdTime": "20",
+            "transport": "truck",
+            "transportNo": "88A-451213",
+            "destChange": ""
+          }
+        ],
+        "destination": "VINA VINHYEN"
+      }
     }
   ],
   "packings": [],
@@ -389,5 +420,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-19 14:54"
+  "lastUpdated": "2026-11-19 14:57"
 }
