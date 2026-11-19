@@ -103,3 +103,9 @@ html[data-theme="dark"] .nav-sep,html[data-theme="dark"] .nav-tools{border-color
 .nav-tabs{justify-content:center !important;}
 @media (min-width:1600px){ .nav-tab{padding:7px 16px !important;} .nav-sep{margin:0 12px;} }
 @media (min-width:1450px) and (max-width:1599px){ .nav-tab{padding:7px 11px !important;} .nav-sep{margin:0 8px;} }
+
+/* ── 보조창: 크기 조절 · 이동 (기본 적용) ── */
+.modal-bg .modal{resize:both;overflow:auto !important;min-width:340px;min-height:170px;box-sizing:border-box;}
+.modal-bg .modal .modal-title{cursor:move;user-select:none;touch-action:none;}
+.modal-bg .modal .modal-title button{cursor:pointer;}
+.pop-hint{float:left;font-size:11px;color:#6B7280;padding-top:10px;} html[data-theme="dark"] .pop-hint{color:#94A3B8;}
