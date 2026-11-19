@@ -2,12 +2,17 @@
 // 한 오더에 여러 제품 · 보관 Box를 Split(일부 수량만 꺼내) 담아 Packing
 let pkLines = [];   // 현재 오더에 담는 중인 내역 {boxNo, product, qty}
 
-function stockOf(code){            // 보관 Box 잔량 = 총수량 − 이미 Packing 완료로 꺼낸 수량
+function boxInfo(code){   // '@제품명' = 기준정보에 Box가 없는 제품을 직접 담는 경우
+  if (String(code).startsWith('@')) return {code:'미등록', name:String(code).slice(1)};
+  return S.products().find(x=>x.code===code) || {code, name:''};
+}
+function stockOf(code){
+  if (String(code).startsWith('@')) return {total:0, left:9e9, unlimited:true};            // 보관 Box 잔량 = 총수량 − 이미 Packing 완료로 꺼낸 수량
   const p=S.products().find(x=>x.code===code); const tot=parseInt(p?.qty)||0;
   const used=S.packings().reduce((a,pk)=>a+(pk.lines||[]).filter(l=>l.boxNo===code).reduce((s,l)=>s+(+l.qty||0),0),0);
   return {total:tot, left: tot? Math.max(0,tot-used) : 9e9, unlimited: !tot};
 }
-function pkTaken(code){ return pkLines.filter(l=>l.boxNo===code).reduce((a,l)=>a+l.qty,0); }
+function pkTaken(code){ const bn=String(code).startsWith('@')?'미등록':code; return pkLines.filter(l=>l.boxNo===bn).reduce((a,l)=>a+l.qty,0); }
 function pkNeed(o){
   return ordItems(o).map(i=>{ const got=pkLines.filter(l=>l.product===i.product).reduce((a,l)=>a+l.qty,0); return {product:i.product, need:+i.qty||0, got, left:Math.max(0,(+i.qty||0)-got)}; });
 }
@@ -16,6 +21,7 @@ function curOrder(){ return S.orders().find(x=>x.no===v('pk-order')); }
 function fillPackingSelects() {
   fillSel('pk-order', S.orders().filter(o=>o.status==='대기').map(o=>({v:o.no, l:`${o.no} · ${o.customer}`})));
   renderPackingDone();
+  loadPackingOrder();   // 브라우저가 선택값을 복원했거나 목록이 갱신된 경우에도 제품 목록을 바로 표시
 }
 function loadPackingOrder() {
   pkLines=[];
@@ -32,10 +38,11 @@ function pkRender(){
   // 보관 Box 선택지: 남은 수량이 있는 제품의 Box만
   const ps=S.products().filter(p=>need.some(n=>n.product===p.name && n.left>0));
   const cur=v('pk-box');
+  const direct=need.filter(n=>n.left>0 && !S.products().some(p=>p.name===n.product));   // 기준정보에 Box 미등록 제품
   el('pk-box').innerHTML = '<option value="">-- 보관 Box 선택 --</option>' + ps.map(p=>{
     const st=stockOf(p.code), left=st.unlimited?'∞':st.left-pkTaken(p.code);
     return `<option value="${p.code}" ${p.code===cur?'selected':''}>${p.code} · ${p.name} (보관 잔량 ${left}${st.unlimited?'':'/'+st.total})</option>`;
-  }).join('');
+  }).join('') + direct.map(n=>`<option value="@${n.product}" ${('@'+n.product)===cur?'selected':''}>(Box 미등록) ${n.product} — 직접 담기</option>`).join('');
   pkBoxChange(true);
   el('pk-lines').innerHTML = pkLines.length ? pkLines.map((l,i)=>`<tr><td>${i+1}</td><td><b>${l.packNo}</b></td><td>${l.boxNo}</td><td>${l.product}</td><td>${l.qty}</td><td>${l.at}</td><td><a href="#" onclick="pkDel(${i});return false" style="color:#c0392b;text-decoration:none">✕</a></td></tr>`).join('') : '<tr><td colspan="7" class="empty">담은 내역 없음</td></tr>';
   const done=need.every(n=>n.left===0), rest=need.reduce((a,n)=>a+n.left,0);
@@ -44,7 +51,7 @@ function pkRender(){
 }
 function pkBoxChange(keep){
   const code=v('pk-box'), o=curOrder(); if(!code||!o){ el('pk-stock').textContent=''; return; }
-  const p=S.products().find(x=>x.code===code), st=stockOf(code);
+  const p=boxInfo(code), st=stockOf(code);
   const n=pkNeed(o).find(x=>x.product===p.name), avail=st.unlimited?9e9:st.left-pkTaken(code);
   const max=Math.min(n?n.left:0, avail);
   el('pk-stock').textContent = `필요 ${n?n.left:0} · 보관 잔량 ${st.unlimited?'제한없음':avail} → 최대 ${max}개까지 담을 수 있습니다`;
@@ -55,12 +62,12 @@ function pkAdd(){
   if(!o) return alert('오더를 먼저 선택하세요');
   if(!code) return alert('보관 Box를 선택하세요');
   if(qty<1) return alert('수량을 입력하세요');
-  const p=S.products().find(x=>x.code===code), st=stockOf(code);
+  const p=boxInfo(code), st=stockOf(code);
   const n=pkNeed(o).find(x=>x.product===p.name);
   if(!n || qty>n.left) return alert(`이 제품의 남은 출하 수량(${n?n.left:0})보다 많이 담을 수 없습니다`);
   if(!st.unlimited && qty>st.left-pkTaken(code)) return alert(`보관 Box 잔량(${st.left-pkTaken(code)})이 부족합니다`);
   const packNo=(v('pk-pack')||'1').trim();
-  pkLines.push({seq:pkLines.length+1, packNo, boxNo:code, product:p.name, qty, at:now().slice(11,16)});   // 합치지 않고 담을 때마다 1건씩 이력 기록
+  pkLines.push({seq:pkLines.length+1, packNo, boxNo:p.code, product:p.name, qty, at:now().slice(11,16)});   // 합치지 않고 담을 때마다 1건씩 이력 기록
   el('pk-qty').value=''; pkRender();
 }
 function pkDel(i){ pkLines.splice(i,1); pkRender(); }

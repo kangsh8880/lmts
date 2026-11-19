@@ -131,6 +131,18 @@ const DB = {
   lastUpdated: ''
 };
 
+// ── 오더 제품 내역 공용 (한 오더에 여러 제품 가능, 구버전 오더는 제품 1개로 간주) ──
+function ordItems(o){ return (o.items && o.items.length) ? o.items : [{product:o.product, qty:parseInt(o.boxes)||0}]; }
+function ordQty(o){ return ordItems(o).reduce((a,i)=>a+(+i.qty||0),0); }
+function ordText(o){ return ordItems(o).map(i=>`${i.product} ${i.qty}`).join(' / '); }
+function ordCodes(o, ps){ return ordItems(o).map(i=>(ps.find(p=>p.name===i.product)||{}).code||'').filter(Boolean); }
+
+// 오더 상태 변경 — Packing·배차·거점 In/Out 화면 공용
+function updateOrderStatus(no, status) {
+  const arr=S.orders(), idx=arr.findIndex(o=>o.no===no);
+  if (idx>=0) { arr[idx].status=status; S.set('orders',arr); }
+}
+
 function saveSessionCache() {
   try { sessionStorage.setItem('lmts_session_db', JSON.stringify(DB)); sessionStorage.setItem('lmts_session_ts', String(Date.now())); } catch(e) {}
 }
@@ -299,7 +311,7 @@ function doSearch(prefix) {
   if (!q) { el(prefix+'-search-result').innerHTML='<div class="alert alert-warn">검색어를 입력하세요</div>'; return; }
   const ps=S.products();
   const matched=S.orders().filter(o=>{
-    const pcode=ps.find(p=>p.name===o.product)?.code||'';
+    const pcode=ordCodes(o,ps).join(' ');
     return o.no.toLowerCase().includes(q)||o.product.toLowerCase().includes(q)||pcode.toLowerCase().includes(q)||o.customer.toLowerCase().includes(q);
   });
   if (!matched.length) { el(prefix+'-search-result').innerHTML='<div class="alert alert-warn">검색 결과 없음</div>'; return; }
@@ -308,7 +320,7 @@ function doSearch(prefix) {
 function clearSearch(prefix) { el(prefix+'-search').value=''; el(prefix+'-search-result').innerHTML=''; }
 
 function buildTrackerCard(o, ps) {
-  const pcode=ps.find(p=>p.name===o.product)?.code||'-';
+  const pcode=ordCodes(o,ps).join(', ')||'-';
   const events=S.events().filter(e=>e.orderNo===o.no).sort((a,b)=>a.time.localeCompare(b.time));
   const stMap={'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
 
@@ -379,7 +391,7 @@ function buildTrackerCard(o, ps) {
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
       <div>
         <div style="font-size:15px;font-weight:800;color:var(--dk)">${o.no}</div>
-        <div style="font-size:12px;color:var(--gray);margin-top:2px">고객사: <b>${o.customer}</b> &nbsp;|&nbsp; 제품: <b>${o.product}</b> (코드: ${pcode}) &nbsp;|&nbsp; ${o.boxes}박스 &nbsp;|&nbsp; ${o.date}</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:2px">고객사: <b>${o.customer}</b> &nbsp;|&nbsp; 제품: <b>${ordText(o)}</b> (코드: ${pcode}) &nbsp;|&nbsp; 총 ${ordQty(o)} &nbsp;|&nbsp; ${o.date}</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>

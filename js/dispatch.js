@@ -65,7 +65,7 @@ function loadDispatchOrder() {
   const stMap = {'대기':'s-ready','패킹중':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done'};
 
   let html = `<div style="font-size:11px;color:var(--gray);margin-bottom:10px">
-    <b style="color:var(--dk)">${o.no}</b> | ${o.customer} | ${o.product} | ${o.boxes}박스 |
+    <b style="color:var(--dk)">${o.no}</b> | ${o.customer} | ${ordText(o)} |
     상태: <span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>
   </div>`;
 
@@ -227,6 +227,11 @@ function saveLegDispatch() {
   const o    = S.orders().find(x => x.no === ldOrderNo);
   const legs = getOrderLegs(o);
   const leg  = legs[ldLegIdx];
+
+  // Packing 완료 전에는 배차 등록 불가 (오더 상태가 '대기'이거나 Packing 완료 기록이 없는 대기 오더)
+  if (o?.status === '대기' || (!['패킹중','배차완료','운송중','지연','도착완료'].includes(o?.status))) {
+    return alert('⚠️ Packing 후 등록하세요.\n\n[박스Packing] 화면에서 이 오더의 Packing을 완료한 뒤 배차를 등록할 수 있습니다.');
+  }
 
   // 입력값 수집
   const base = {

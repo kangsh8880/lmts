@@ -119,10 +119,28 @@ function updateRoutePreview() {
   el('route-chips').innerHTML = parts.length ? parts.join('') : '<span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
 }
 
+let oItems = [];
+function renderOrderItems() {
+  el('o-items').innerHTML = oItems.length ? oItems.map((it,i)=>`<span style="display:inline-flex;gap:6px;align-items:center;border:1px solid #888;border-radius:14px;padding:3px 10px;background:#eef3fb;font-size:12px"><b>${it.product}</b> × ${it.qty}<a href="#" onclick="delOrderItem(${i});return false" style="color:#c0392b;text-decoration:none">✕</a></span>`).join('') : '<span style="font-size:11px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span>';
+}
+function addOrderItem() {
+  const product=v('o-product'), qty=parseInt(v('o-boxes'))||0;
+  if (!product) return alert('제품을 선택하세요');
+  if (qty<1) return alert('수량을 입력하세요');
+  const ex=oItems.find(i=>i.product===product);
+  if (ex) ex.qty+=qty; else oItems.push({product, qty});
+  el('o-product').value=''; el('o-boxes').value='';
+  renderOrderItems();
+}
+function delOrderItem(i){ oItems.splice(i,1); renderOrderItems(); }
+
 function createOrder() {
-  const no=v('o-no'), date=v('o-date'), customer=v('o-customer'), product=v('o-product'), boxes=v('o-boxes');
+  const no=v('o-no'), date=v('o-date'), customer=v('o-customer');
+  if (v('o-product') && (parseInt(v('o-boxes'))||0)>0) addOrderItem();   // 선택만 하고 추가를 안 누른 경우 자동 포함
+
   const origin=v('o-origin'), dest=v('o-dest');
-  if (!customer||!product||!boxes) return alert('고객사/제품/박스수량 필수');
+  if (!customer) return alert('고객사를 선택하세요');
+  if (!oItems.length) return alert('출하 제품과 수량을 추가하세요');
   if (!origin) return alert('출발 거점을 선택하세요');
   if (!dest)   return alert('도착 거점을 선택하세요');
 
@@ -138,7 +156,8 @@ function createOrder() {
   const finalDest = lastDestChange ? lastDestChange.destChange : dest;
 
   const arr = S.orders();
-  arr.push({no, date, customer, product, boxes:parseInt(boxes)||1, note:v('o-note'), status:'대기', created:now(),
+  const items=oItems.map(i=>({...i}));
+  arr.push({no, date, customer, items, product:items.map(i=>i.product).join(' / '), boxes:items.reduce((a,i)=>a+i.qty,0), note:v('o-note'), status:'대기', created:now(),
     route:{
       origin, originStdTime:v('o-origin-std')||'',
       waypoints: wpList.map(w=>({
@@ -152,6 +171,7 @@ function createOrder() {
     }
   });
   S.set('orders', arr);
+  oItems=[]; renderOrderItems();
   fillOrderSelects(); renderOrders();
   alert(`✅ 오더 [${no}] 생성 완료`);
 }
@@ -163,7 +183,7 @@ function renderOrders() {
   el('order-table-body').innerHTML = rows.length ? rows.map(o=>{
     const gi=S.orders().findIndex(x=>x.no===o.no);
     const canEdit = ['대기','패킹중'].includes(o.status);
-    return `<tr><td><b>${o.no}</b></td><td>${o.date}</td><td>${o.customer}</td><td>${o.product}</td><td>${o.boxes}박스</td>
+    return `<tr><td><b>${o.no}</b></td><td>${o.date}</td><td>${o.customer}</td><td>${ordText(o)}</td><td>${ordQty(o)}</td>
     <td style="min-width:200px">${buildRouteChips(o)}</td>
     <td><span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span></td>
     <td>${o.note||'-'}</td>
@@ -371,10 +391,7 @@ function saveRouteEdit() {
   alert(`✅ [${reOrderNo}] 경로 수정 완료`);
 }
 
-function updateOrderStatus(no, status) {
-  const arr=S.orders(), idx=arr.findIndex(o=>o.no===no);
-  if (idx>=0) { arr[idx].status=status; S.set('orders',arr); }
-}
+// updateOrderStatus 는 common.js 로 이동 (여러 화면 공용)
 
 // ══════════════════════════════════════════════════════════════════
 

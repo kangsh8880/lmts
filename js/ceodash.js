@@ -79,7 +79,7 @@ function renderHubDetail() {
   if (!rows.length) list = '<div class="empty-n">해당 내역이 없습니다</div>';
   else if (hdTab === 'stay') list = `<table class="dt"><thead><tr><th>오더</th><th>고객사</th><th>제품(박스)</th><th>상태</th><th>최근 이벤트</th></tr></thead><tbody>${rows.map(o => {
     const last = s.ev.filter(e => e.orderNo === o.no).slice(-1)[0];
-    return `<tr><td><b>${DC.esc(o.no)}</b></td><td>${DC.esc(o.customer)}</td><td>${DC.esc(o.product)} (${o.boxes})</td><td><span class="chip blue">${DC.esc(o.status)}</span></td><td>${last ? last.event + ' ' + last.time.slice(5, 16) : '-'}</td></tr>`; }).join('')}</tbody></table>`;
+    return `<tr><td><b>${DC.esc(o.no)}</b></td><td>${DC.esc(o.customer)}</td><td>${DC.esc(o.product)} (${ordQty(o)})</td><td><span class="chip blue">${DC.esc(o.status)}</span></td><td>${last ? last.event + ' ' + last.time.slice(5, 16) : '-'}</td></tr>`; }).join('')}</tbody></table>`;
   else if (hdTab === 'exp') list = `<table class="dt"><thead><tr><th>오더</th><th>고객사</th><th>출발 거점</th><th>수단</th><th>출고</th><th>예정 도착</th><th>상태</th></tr></thead><tbody>${rows.map(m =>
     `<tr><td><b>${DC.esc(m.o.no)}</b></td><td>${DC.esc(m.o.customer)}</td><td>${DC.esc(DC.shortName(m.from))}</td><td>${DC.MODE[m.mode][0]} ${DC.MODE[m.mode][1]}</td><td>${DC.hhmm(m.outTime)}</td><td>${m.eta || '-'}</td><td>${m.over ? `<span class="chip red">표준 +${m.elapsed - m.std}분</span>` : `<span class="chip blue">${DC.esc(m.o.status)}</span>`}</td></tr>`).join('')}</tbody></table>`;
   else list = evTable(rows);
@@ -116,7 +116,7 @@ function renderMoving(mv) {
   el('moving').innerHTML = `<div class="mk-grid">${kp}</div>
     <div class="sub-ttl">${DC.MODE[mvSel][0]} ${DC.MODE[mvSel][1]} 이동 중 상세 <b>${list.length}건</b></div>` +
     (list.length ? list.map(x => `<div class="mv ${x.over ? 'hot' : ''}">
-        <div class="mv-top"><span><b>${DC.esc(x.o.no)}</b> · ${DC.esc(x.o.customer)} · ${DC.esc(x.o.product)} (${x.o.boxes}박스)</span>${x.over ? `<span class="chip red">표준 +${x.elapsed - x.std}분</span>` : `<span class="chip blue">${DC.esc(x.o.status)}</span>`}</div>
+        <div class="mv-top"><span><b>${DC.esc(x.o.no)}</b> · ${DC.esc(x.o.customer)} · ${DC.esc(x.o.product)} (수량 ${ordQty(x.o)})</span>${x.over ? `<span class="chip red">표준 +${x.elapsed - x.std}분</span>` : `<span class="chip blue">${DC.esc(x.o.status)}</span>`}</div>
         <div class="mv-route"><span>${DC.esc(DC.shortName(x.from))}</span><i>➜</i><span>${DC.esc(DC.shortName(x.to))}</span></div>
         <div class="mv-meta"><span>${detail(x)}</span><span>출고 <b>${DC.hhmm(x.outTime)}</b></span><span>표준 <b>${x.std != null ? x.std + '분' : '미설정'}</b></span><span>예정 도착 <b>${x.eta || '-'}</b></span>${x.elapsed != null ? `<span>경과 <b>${x.elapsed}분</b></span>` : ''}</div></div>`).join('')
       : '<div class="mv-none">이동 중인 운송이 없습니다</div>') +
@@ -135,7 +135,7 @@ function openKpi(k) {
   const K = DC.kpi(), O = S.orders(), E = DC.esc;
   const tb = (heads, rows) => rows.length ? `<table class="dt"><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>` : '<div class="empty-n">해당 내역이 없습니다</div>';
   const st = o => `<span class="chip ${o.status === '지연' ? 'red' : o.status === '도착완료' ? 'grn' : 'blue'}">${E(o.status)}</span>`;
-  const base = o => [`<b>${E(o.no)}</b>`, E(o.customer), `${E(o.product)} (${o.boxes})`, st(o)];
+  const base = o => [`<b>${E(o.no)}</b>`, E(o.customer), `${E(o.product)} (${ordQty(o)})`, st(o)];
   const where = o => { const p = DC.position(o); return p.last ? `${E(DC.shortName(p.last.hub))} ${p.last.event} ${p.last.time.slice(5, 16)}` : '이벤트 없음'; };
   if (k === 'ot') {
     const L = O.filter(o => o.status === '도착완료' || o.status === '지연');

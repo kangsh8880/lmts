@@ -125,7 +125,7 @@ const DC = (() => {
         });
       }
       if (o.status === '대기' && !S.packings().some(p => p.orderNo === o.no))
-        out.push({ lv: 2, t: `패킹 미착수 · ${o.no}`, fact: `${o.customer} · ${o.boxes}박스 대기 중`, cause: '패킹 작업 미배정(가설)', act: '박스Packing 화면에서 패킹 착수', go: 'packing.html' });
+        out.push({ lv: 2, t: `패킹 미착수 · ${o.no}`, fact: `${o.customer} · 수량 ${ordQty(o)} 대기 중`, cause: '패킹 작업 미배정(가설)', act: '박스Packing 화면에서 패킹 착수', go: 'packing.html' });
       else if (o.status !== '도착완료' && S.packings().some(p => p.orderNo === o.no) && !dispatchDone(o))
         out.push({ lv: 2, t: `배차 미완료 · ${o.no}`, fact: `패킹 완료, 구간 배차 ${new Set(S.dispatches().filter(d => d.orderNo === o.no).map(d => d.legIdx)).size}/${Math.max(0, nodes(o).length - 1)}`, cause: '배차 담당 미지정(가설)', act: '차량배차 화면에서 미배차 구간 지정', go: 'dispatch.html' });
     });
@@ -190,7 +190,7 @@ function dashSearch() {
   if (!q) { box.classList.add('hidden'); return; }
   const ps = S.products();
   const m = S.orders().filter(o => {
-    const pc = ps.find(p => p.name === o.product)?.code || '';
+    const pc = ordCodes(o, ps).join(' ');
     return [o.no, o.product, pc, o.customer].some(x => String(x).toLowerCase().includes(q));
   });
   el('search-pop-body').innerHTML = m.length ? m.map(o => buildTrackerCard(o, ps)).join('') : '<div class="empty-n">검색 결과 없음</div>';
