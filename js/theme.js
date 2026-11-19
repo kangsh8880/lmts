@@ -3,7 +3,7 @@
   const KEY = 'lmts_theme';
   const get = () => { try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; } };
   const set = v => { try { localStorage.setItem(KEY, v); } catch (e) {} };
-  const apply = v => { document.documentElement.setAttribute('data-theme', v); const b = document.getElementById('theme-btn'); if (b) b.textContent = v === 'dark' ? '☀️ 라이트' : '🌙 다크'; };
+  const apply = v => { document.documentElement.setAttribute('data-theme', v); const b = document.getElementById('theme-btn'); if (b) b.textContent = v === 'dark' ? '☀️' : '🌙'; if (b) b.title = v === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'; };
   apply(get());                                   // 깜빡임 방지: 즉시 적용
 
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -36,11 +36,17 @@
     const nav = document.querySelector('nav.nav, .nav');
     if (!nav || document.getElementById('newsbar')) return;
     const btn = document.createElement('button');
-    btn.id = 'theme-btn'; btn.className = 'theme-btn'; btn.type = 'button'; btn.title = '라이트 / 다크 모드 전환';
+    btn.id = 'theme-btn'; btn.className = 'theme-btn tool-ic'; btn.type = 'button'; btn.title = '라이트 / 다크 모드 전환';
     btn.onclick = () => { const n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; set(n); apply(n); };
     const nb = document.createElement('button');   // 뉴스바 보이기/숨기기 (선택 기억)
-    nb.id = 'news-btn'; nb.className = 'theme-btn nb-tg'; nb.type = 'button'; nb.textContent = '📰'; nb.title = '뉴스바 보이기 / 숨기기';
-    const st = nav.querySelector('.nav-status'); st ? (nav.insertBefore(nb, st), nav.insertBefore(btn, st)) : (nav.appendChild(nb), nav.appendChild(btn));
+    nb.id = 'news-btn'; nb.className = 'theme-btn tool-ic nb-tg'; nb.type = 'button'; nb.textContent = '📰'; nb.title = '뉴스바 보이기 / 숨기기';
+    // 우측 도구 묶음: [뉴스][테마][GitHub 상태] — 항상 오른쪽 끝에 고정
+    const st = nav.querySelector('.nav-status'), tools = document.createElement('div'); tools.className = 'nav-tools';
+    tools.append(nb, btn); if (st) tools.append(st); nav.appendChild(tools);
+    // 탭 그룹 구분선: 대시보드 | 업무 | 분석
+    const tabs = nav.querySelector('.nav-tabs');
+    if (tabs) { const sep = () => { const e = document.createElement('i'); e.className = 'nav-sep'; return e; };
+      ['master.html', 'analytics.html'].forEach(pg => { const t = tabs.querySelector(`.nav-tab[data-page="${pg}"]`); if (t) tabs.insertBefore(sep(), t); }); }
     const bar = document.createElement('div'); bar.id = 'newsbar'; bar.className = 'newsbar';
     bar.innerHTML = '<div class="nb-label">📰 뉴스</div><div class="nb-view"></div><button class="nb-x" title="뉴스바 닫기" onclick="lmtsNews(false)">✕</button>';
     nav.after(bar); apply(get()); renderNews();
