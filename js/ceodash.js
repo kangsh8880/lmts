@@ -5,21 +5,20 @@ function renderCEO() {
   const K = DC.kpi(), tip = {
     act: '진행 오더 = 상태가 도착완료가 아닌 출하오더', mv: '운송중 상태 오더 수',
     al: '지연 상태 오더 + 비지정 거점 이벤트(알람) 건수',
-    ot: '정시납품율 = 도착완료 ÷ (도착완료 + 지연) × 100. 집계 대상이 없으면 표시하지 않음',
-    pk: '패킹 완료율 = 패킹 기록이 있는 오더 ÷ 전체 오더 × 100',
-    dp: '배차 완료율 = 모든 구간(경로 거점 수-1)에 배차가 지정된 오더 ÷ 전체 오더 × 100',
+    ot: '(클릭: 목록) 정시납품율 = 도착완료 ÷ (도착완료 + 지연) × 100. 집계 대상이 없으면 표시하지 않음',
+    pk: '패킹 미완료 = 진행 오더(도착완료 제외) 중 패킹 기록이 없는 오더 건수. 클릭하면 목록',
+    dp: '배차 필요 = 진행 오더 중 아직 이동하지 않은 구간에 배차(차량·선박·항공)가 지정되지 않은 오더 건수. 클릭하면 목록',
     ov: '표준초과율 = 실적이 표준시간을 넘은 구간 ÷ 표준시간이 있고 실적이 측정된 구간 × 100',
     lg: '평균 구간 소요 = 출발거점 OUT → 다음거점 IN 측정 구간의 평균(분)'
   };
   el('kpis').innerHTML = [
-    kbox('c1', '진행 오더', kv(K.active, '건'), `전체 ${K.orders}건 중`, tip.act),
-    kbox('c3', '운송 중', kv(K.moving, '건'), '거점 이동 중', tip.mv),
-    kbox('c5', '지연 · 알람', kv(K.alarm, '건', K.alarm > 0 ? 'bad' : ''), `지연 ${K.delay} + 비지정 ${K.off}`, tip.al),
-    kbox('c2', '정시납품율', kv(DC.fmtPct(K.onTime), '%', K.onTime != null && K.onTime < 95 ? 'bad' : 'good'), K.onTime == null ? '완료·지연 오더 없음' : `완료 ${K.done}건`, tip.ot),
-    kbox('c4', '패킹 완료율', kv(DC.fmtPct(K.packRate), '%'), `${K.packed}/${K.orders}건`, tip.pk, 'packing.html'),
-    kbox('c1', '배차 완료율', kv(DC.fmtPct(K.dispRate), '%'), `${K.dispatched}/${K.orders}건`, tip.dp, 'dispatch.html'),
-    kbox('c6', '구간 표준초과율', kv(DC.fmtPct(K.overRate), '%', K.overRate > 0 ? 'bad' : ''), K.measStd ? `측정 ${K.measStd}구간` : '표준시간·실적 부족', tip.ov),
-    kbox('c3', '평균 구간 소요', kv(K.avgLeg, '분'), K.measN ? `측정 ${K.measN}구간` : '실적 부족', tip.lg)
+    kbox('c2', '정시납품율', kv(DC.fmtPct(K.onTime), '%', K.onTime != null && K.onTime < 95 ? 'bad' : 'good'), K.onTime == null ? '완료·지연 오더 없음' : `완료 ${K.done}건 · 지연 ${K.delay}건`, tip.ot, 'js:openKpi(\'ot\')'),
+    kbox('c1', '진행 오더', kv(K.active, '건'), `전체 ${K.orders}건 중`, tip.act, 'js:openKpi(\'act\')'),
+    kbox('c3', '운송 중', kv(K.moving, '건'), '거점 이동 중', tip.mv, 'js:openKpi(\'mv\')'),
+    kbox('c5', '지연 · 알람', kv(K.alarm, '건', K.alarm > 0 ? 'bad' : ''), `지연 ${K.delay} + 비지정 ${K.off}`, tip.al, 'js:openKpi(\'al\')'),
+    kbox('c4', '패킹 미완료', kv(K.packPend, '건', K.packPend > 0 ? 'bad' : ''), `진행 ${K.active}건 중 패킹 기록 없음`, tip.pk, 'js:openKpi(\'pk\')'),
+    kbox('c1', '배차 필요', kv(K.dispNeed, '건', K.dispNeed > 0 ? 'bad' : ''), `미배차 구간 ${K.dispNeedLegs}개`, tip.dp, 'js:openKpi(\'dp\')'),
+    kbox('c6', '구간 표준초과율', kv(DC.fmtPct(K.overRate), '%', K.overRate > 0 ? 'bad' : ''), K.measStd ? `측정 ${K.measStd}구간` : '표준시간·실적 부족', tip.ov, 'js:openKpi(\'ov\')')
   ].join('');
 
   const hubs = S.hubs(), mv = DC.moving();
@@ -122,5 +121,45 @@ function renderMoving(mv) {
         <div class="mv-meta"><span>${detail(x)}</span><span>출고 <b>${DC.hhmm(x.outTime)}</b></span><span>표준 <b>${x.std != null ? x.std + '분' : '미설정'}</b></span><span>예정 도착 <b>${x.eta || '-'}</b></span>${x.elapsed != null ? `<span>경과 <b>${x.elapsed}분</b></span>` : ''}</div></div>`).join('')
       : '<div class="mv-none">이동 중인 운송이 없습니다</div>') +
     (live ? '' : `<div class="mv-none">※ 데이터가 최근 48시간 이내가 아니어서 경과 시간은 표시하지 않습니다 (기준일 ${DC.anchorDate()})</div>`);
+}
+// ── KPI 클릭 → 상세 팝업 ─────────────────────────────────────
+function openPop(title, sub, html, go, goLabel) {
+  el('kpi-pop-ttl').textContent = title; el('kpi-pop-sub').innerHTML = sub || '';
+  el('kpi-pop-body').innerHTML = html;
+  el('kpi-pop-go').innerHTML = go ? `<a class="btn btn-primary" href="${go}">${goLabel} 열기 ›</a>` : '';
+  el('kpi-pop').classList.remove('hidden');
+}
+function closePop() { el('kpi-pop').classList.add('hidden'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
+function openKpi(k) {
+  const K = DC.kpi(), O = S.orders(), E = DC.esc;
+  const tb = (heads, rows) => rows.length ? `<table class="dt"><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>` : '<div class="empty-n">해당 내역이 없습니다</div>';
+  const st = o => `<span class="chip ${o.status === '지연' ? 'red' : o.status === '도착완료' ? 'grn' : 'blue'}">${E(o.status)}</span>`;
+  const base = o => [`<b>${E(o.no)}</b>`, E(o.customer), `${E(o.product)} (${o.boxes})`, st(o)];
+  const where = o => { const p = DC.position(o); return p.last ? `${E(DC.shortName(p.last.hub))} ${p.last.event} ${p.last.time.slice(5, 16)}` : '이벤트 없음'; };
+  if (k === 'ot') {
+    const L = O.filter(o => o.status === '도착완료' || o.status === '지연');
+    openPop('정시납품율 상세', `정시납품율 = 도착완료 ÷ (도착완료 + 지연) × 100 · 완료 <b>${K.done}</b>건 · 지연 <b>${K.delay}</b>건`,
+      tb(['오더', '고객사', '제품(박스)', '상태', '출하예정일'], L.map(o => [...base(o), E(o.date || '-')])), 'order.html', '출하오더');
+  } else if (k === 'act') {
+    const L = O.filter(o => o.status !== '도착완료');
+    openPop('진행 오더 상세', `도착완료가 아닌 출하오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '제품(박스)', '상태', '현재 위치'], L.map(o => [...base(o), where(o)])), 'order.html', '출하오더');
+  } else if (k === 'mv') {
+    const L = DC.moving();
+    openPop('운송 중 상세', `거점 간 이동 중인 오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '구간', '수단', '출고', '예정 도착', '배차'], L.map(m => [`<b>${E(m.o.no)}</b>`, E(m.o.customer), `${E(DC.shortName(m.from))} ➜ ${E(DC.shortName(m.to))}`, `${DC.MODE[m.mode][0]} ${DC.MODE[m.mode][1]}`, DC.hhmm(m.outTime), m.eta || '-', m.dp ? '지정' : '<span class="chip red">미지정</span>'])), 'tracking.html', '거점In/Out');
+  } else if (k === 'al') {
+    const dl = O.filter(o => o.status === '지연'), al = S.alarms().filter(a => a.type === 'OFF_ROUTE');
+    openPop('지연 · 알람 상세', `지연 오더 <b>${dl.length}</b>건 + 비지정 거점 이벤트 <b>${al.length}</b>건`,
+      tb(['구분', '오더', '내용', '현재 위치'], [...dl.map(o => ['<span class="chip red">지연</span>', `<b>${E(o.no)}</b>`, `${E(o.customer)} · ${E(o.product)}`, where(o)]), ...al.map(a => ['<span class="chip ylw">비지정 거점</span>', `<b>${E(a.orderNo)}</b>`, `${E(a.hub)} ${E(a.event)} (${DC.hhmm(a.time)}) — 경로 외 거점`, E(a.hub)])]), 'order.html', '출하오더');
+  } else if (k === 'pk') {
+    openPop('패킹 미완료 상세', `진행 오더 중 패킹 기록이 없는 오더 <b>${K.packPend}</b>건`, tb(['오더', '고객사', '제품(박스)', '상태', '출하예정일'], K.packPendList.map(o => [...base(o), E(o.date || '-')])), 'packing.html', '박스Packing');
+  } else if (k === 'dp') {
+    openPop('배차 필요 상세', `아직 이동하지 않은 구간에 배차가 없는 오더 <b>${K.dispNeed}</b>건 · 미배차 구간 <b>${K.dispNeedLegs}</b>개`,
+      tb(['오더', '고객사', '상태', '배차 현황', '배차 필요 구간'], K.dispNeedList.map(x => [`<b>${E(x.o.no)}</b>`, E(x.o.customer), st(x.o), `${x.got}/${x.total}구간`, x.miss.map(l => `<span class="chip red">${E(DC.shortName(l.from))} ➜ ${E(DC.shortName(l.to))}</span>`).join(' ')])), 'dispatch.html', '차량배차');
+  } else if (k === 'ov') {
+    const L = O.flatMap(o => DC.legs(o).filter(l => l.over).map(l => ({ o, l })));
+    openPop('구간 표준초과 상세', `표준초과율 = 표준시간 초과 구간 ÷ (표준시간 있고 실적 측정된 구간) × 100 · 측정 <b>${K.measStd}</b>구간 중 초과 <b>${L.length}</b>구간`,
+      tb(['오더', '고객사', '구간', '표준(분)', '실적(분)', '초과(분)'], L.map(({ o, l }) => [`<b>${E(o.no)}</b>`, E(o.customer), `${E(DC.shortName(l.from))} ➜ ${E(DC.shortName(l.to))}`, l.std, l.act, `<b style="color:#C0392B">+${l.act - l.std}</b>`])), 'dispatch.html', '차량배차');
+  }
 }
 window.lmtsReady = function () { initNav(); renderCEO(); };

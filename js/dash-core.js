@@ -62,7 +62,16 @@ const DC = (() => {
     O.filter(o => o.status !== '도착완료').forEach(o => { const p = position(o); if (p.state === 'at') inHub.add(p.last.hub); });
     const packed = O.filter(o => P.some(p => p.orderNo === o.no)).length;
     const dispatched = O.filter(o => dispatchDone(o)).length;
+    // 패킹 미완료: 진행 오더 중 패킹 기록이 없는 오더
+    const packPend = active.filter(o => !P.some(p => p.orderNo === o.no));
+    // 배차 필요: 진행 오더 중 아직 지나가지 않은 구간(실적 없음)에 배차가 지정되지 않은 오더
+    const dispNeed = active.map(o => {
+      const got = new Set(S.dispatches().filter(d => d.orderNo === o.no && d.legIdx != null).map(d => d.legIdx));
+      const miss = legs(o).filter(l => l.act == null && !got.has(l.i));
+      return { o, miss, total: Math.max(0, nodes(o).length - 1), got: got.size };
+    }).filter(x => x.miss.length);
     return {
+      packPend: packPend.length, packPendList: packPend, dispNeed: dispNeed.length, dispNeedList: dispNeed, dispNeedLegs: dispNeed.reduce((a, x) => a + x.miss.length, 0),
       orders: O.length, active: active.length, moving: O.filter(o => o.status === '운송중').length,
       done, delay, off, alarm: delay + off,
       onTime: (done + delay) > 0 ? pct(done, done + delay) : null,
@@ -168,7 +177,7 @@ const DC = (() => {
 
 // ── 공통 UI 조각 ───────────────────────────────────────────────
 function kbox(cls, title, valHtml, sub, tip, href) {
-  return `<div class="kbox ${cls}" title="${DC.esc(tip || '')}" ${href ? `onclick="location.href='${href}'"` : ''}>
+  return `<div class="kbox ${cls}" title="${DC.esc(tip || '')}" ${href ? (href.startsWith('js:') ? `onclick="${href.slice(3)}"` : `onclick="location.href='${href}'"`) : ''}>
     <div class="k-ttl">${title}</div>${valHtml}<div class="k-sub">${sub || '&nbsp;'}</div></div>`;
 }
 const kv = (v, unit, cls) => v == null
