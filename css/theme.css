@@ -2,10 +2,10 @@
 
 /* ── 상단 메뉴: 파스텔 라이트 + 알약형 탭 ─────────────────────── */
 .nav{background:linear-gradient(180deg,#FAFCFF 0%,#E9F1FA 100%) !important;color:#1E293B !important;border-bottom:1px solid #CBD5E1;box-shadow:0 2px 8px rgba(54,92,137,.10) !important;min-height:56px;padding:0 10px;gap:6px;}
-.nav-logo{color:#365C89 !important;border-right:1px solid #CBD5E1 !important;font-size:17px;padding:8px 16px 8px 8px;}
+.nav-logo{color:#365C89 !important;border-right:1px solid #CBD5E1 !important;font-size:16px;padding:8px 10px 8px 4px;}
 .nav-logo span{color:#64748B !important;}
-.nav-tabs{gap:4px;align-items:center;padding:6px 4px;}
-.nav-tab{color:#475569 !important;border-bottom:none !important;border:1.5px solid transparent;border-radius:999px;padding:7px 10px !important;font-size:16.3px !important;font-weight:600 !important;background:transparent;}
+.nav-tabs{gap:1px;align-items:center;padding:6px 4px;}
+.nav-tab{color:#475569 !important;border-bottom:none !important;border:1.5px solid transparent;border-radius:999px;padding:7px 7px !important;font-size:18px !important;font-weight:600 !important;background:transparent;}
 .nav-tab:hover{background:#DCE8F6 !important;color:#1E3A5F !important;}
 .nav-tab.active{background:#D6E4F0 !important;color:#14284A !important;border-color:#334155 !important;box-shadow:0 1px 4px rgba(54,92,137,.18);}
 .nav-status{color:#475569 !important;}
@@ -85,3 +85,10 @@ html[data-theme="dark"] .empty,html[data-theme="dark"] .empty-n,html[data-theme=
 html[data-theme="dark"] .abbr{color:#94A3B8;}
 html[data-theme="dark"] a{color:#8AB4FF;} html[data-theme="dark"] .nav-tab,html[data-theme="dark"] .pop-go a{color:inherit;}
 html[data-theme="dark"] .overlay{background:rgba(8,12,24,.94);}
+
+.newsbar.off{display:none;}
+.theme-btn.nb-tg{padding:5px 9px;margin-right:4px;}
+.theme-btn{padding:5px 8px;margin-right:2px;font-size:11.5px;}
+.nav-status{padding:0 6px !important;font-size:10px !important;}
+.nav-tab{padding:7px 6px !important;}
+@media (max-width:1500px){ .theme-btn:not(.nb-tg){font-size:0;padding:5px 8px;} .theme-btn:not(.nb-tg)::before{content:"🌓";font-size:14px;} }
