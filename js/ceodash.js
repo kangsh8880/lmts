@@ -126,7 +126,7 @@ function renderMoving(mv) {
 function openPop(title, sub, html, go, goLabel) {
   el('kpi-pop-ttl').textContent = title; el('kpi-pop-sub').innerHTML = sub || '';
   el('kpi-pop-body').innerHTML = html;
-  el('kpi-pop-go').innerHTML = go ? `<a class="btn btn-primary" href="${go}">${goLabel} 열기 ›</a>` : '';
+  el('kpi-pop-go').innerHTML = `<span class="pop-hint">제목줄을 끌어 이동 · 우측 아래 모서리를 끌어 크기 조절</span>` + (go ? `<a class="btn btn-primary" href="${go}">${goLabel} 열기 ›</a>` : '');
   el('kpi-pop').classList.remove('hidden');
 }
 function closePop() { el('kpi-pop').classList.add('hidden'); }

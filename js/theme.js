@@ -63,4 +63,38 @@
   try {
     Object.defineProperty(window, 'lmtsReady', { configurable: true, set(f) { _f = f; }, get() { return function () { if (_f) _f.apply(this, arguments); renderNews(); }; } });
   } catch (e) {}
+
+  // ── 보조창(모달) 공통: 제목줄 드래그 이동 + 모서리 크기 조절 + 크기 기억 ──
+  (function () {
+    const SZ = 'lmts_popsize';
+    const rd = () => { try { return JSON.parse(localStorage.getItem(SZ) || '{}'); } catch (e) { return {}; } };
+    const wr = (k, v) => { try { const o = rd(); o[k] = v; localStorage.setItem(SZ, JSON.stringify(o)); } catch (e) {} };
+    const key = bg => bg.id || 'modal';
+    function place(bg) {
+      const m = bg.querySelector('.modal'); if (!m) return;
+      const sv = rd()[key(bg)];
+      if (!m.dataset.mw) m.dataset.mw = parseFloat(getComputedStyle(m).maxWidth) || 800;   // 원래 최대폭을 기본 폭으로 사용
+      m.style.position = 'fixed'; m.style.transform = 'none'; m.style.margin = '0'; m.style.maxWidth = '96vw'; m.style.maxHeight = '94vh';
+      m.style.width = (sv ? Math.min(sv.w, innerWidth * .96) : Math.min(+m.dataset.mw, innerWidth * .94)) + 'px'; m.style.height = sv ? Math.min(sv.h, innerHeight * .94) + 'px' : '';
+      const r = m.getBoundingClientRect();
+      m.style.left = Math.max(8, (innerWidth - r.width) / 2) + 'px';
+      m.style.top = Math.max(8, (innerHeight - r.height) / 2) + 'px';
+    }
+    new MutationObserver(ms => ms.forEach(x => { const t = x.target; if (t.classList && t.classList.contains('modal-bg') && !t.classList.contains('hidden')) place(t); }))
+      .observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    // 이동
+    document.addEventListener('pointerdown', e => {
+      const ttl = e.target.closest && e.target.closest('.modal-bg .modal-title'); if (!ttl || e.target.closest('button,a,input,select')) return;
+      const m = ttl.closest('.modal'), r = m.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+      const mv = ev => { m.style.left = Math.min(Math.max(-r.width + 80, ev.clientX - dx), innerWidth - 80) + 'px'; m.style.top = Math.min(Math.max(0, ev.clientY - dy), innerHeight - 40) + 'px'; };
+      const up = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up); };
+      document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up); e.preventDefault();
+    });
+    // 크기 조절 후 크기 저장
+    document.addEventListener('pointerup', e => {
+      const bg = document.querySelector('.modal-bg:not(.hidden)'); if (!bg) return; const m = bg.querySelector('.modal'); if (!m) return;
+      const r = m.getBoundingClientRect(); if (m.style.width || m.style.height) wr(key(bg), { w: Math.round(r.width), h: Math.round(r.height) });
+    });
+    window.addEventListener('resize', () => { const bg = document.querySelector('.modal-bg:not(.hidden)'); if (bg) place(bg); });
+  })();
 })();
