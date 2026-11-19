@@ -111,3 +111,5 @@ html[data-theme="dark"] .nav-sep,html[data-theme="dark"] .nav-tools{border-color
 .pop-hint{float:left;font-size:11px;color:#6B7280;padding-top:10px;} html[data-theme="dark"] .pop-hint{color:#94A3B8;}
 
 #manual-btn{text-decoration:none;}
+/* 탭 9개: 1450px 미만 화면에서는 이모지를 숨겨 한 줄(18px)로 표시 */
+@media (max-width:1449px){ .nav-tab .ti{display:none} .nav-tab{padding:7px 9px !important} }
