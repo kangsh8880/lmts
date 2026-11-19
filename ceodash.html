@@ -65,16 +65,14 @@
 <div class="dash-wrap">
   <div class="d-head"><div class="d-title">CEO 대시보드<small>물류 출하 경영 현황</small></div><div class="d-search"><input id="dash-q" placeholder="오더번호 · 제품코드 · 제품명 · 고객사 검색" onkeydown="if(event.key==='Enter')dashSearch()"><button class="pri" onclick="dashSearch()">조회</button><button onclick="dashSearchClear()">초기화</button></div><div class="d-asof" id="asof"></div></div>
   <div class="kpi-grid" id="kpis"></div>
-  <div class="d-body g-ceo">
-    <div class="pnl em span-r2"><div class="pnl-h"><span>진행 중 출하 · 경로 위치</span><span class="chip" id="ship-n">0건</span></div><div class="pnl-b" id="ships"></div></div>
-    <div class="pnl"><div class="pnl-h"><span>오더 단계 현황</span></div><div class="pnl-b"><div class="pipe" id="pipe"></div></div></div>
-    <div class="pnl"><div class="pnl-h"><span id="trend-ttl">추이</span>
-      <span class="tools"><select id="tr-m" onchange="renderTrend()"></select><select id="tr-d" onchange="renderTrend()"><option value="7">7일</option><option value="14" selected>14일</option><option value="30">30일</option></select></span></div>
-      <div class="pnl-b" style="display:flex;flex-direction:column;gap:4px"><div class="legend" id="tr-lg"></div><div id="tr-host" style="flex:1;min-height:0"></div></div></div>
-    <div class="pnl"><div class="pnl-h"><span>조치 필요 · 의사결정 제안</span><span class="chip red" id="act-n">0건</span></div><div class="pnl-b" id="acts"></div></div>
-    <div class="pnl"><div class="pnl-h"><span>거점 현황</span><span class="chip" id="hub-n"></span></div><div class="pnl-b"><div class="hubgrid" id="hubs"></div></div></div>
+  <div class="d-body g-hub">
+    <div class="col">
+      <div class="pnl em"><div class="pnl-h"><span>거점별 현황</span><span class="chip" id="hub-n"></span></div><div class="pnl-b"><div class="hubgrid hubgrid-l" id="hubs"></div></div></div>
+      <div class="pnl em"><div class="pnl-h"><span id="hd-ttl">거점별 상세현황</span><span class="chip" id="hd-type"></span></div><div class="pnl-b" id="hub-detail"></div></div>
+    </div>
+    <div class="pnl em"><div class="pnl-h"><span>이동 중 운송 현황 <small class="sub">차량 · 선박 · 항공</small></span><span class="tools" id="mv-chips"></span></div><div class="pnl-b" id="moving"></div></div>
   </div>
-  <div class="d-foot"><span id="cover"></span><span>KPI 산식은 각 박스에 마우스를 올리면 표시됩니다</span></div>
+  <div class="d-foot"><span id="cover"></span><span id="foot-act"></span></div>
 </div>
 <div class="abbr">※ KPI: Key Performance Indicator(핵심성과지표) · IN/OUT: 거점 입고/출고 이벤트 · Hub: 물류 거점 · 표준시간: 구간(거점 간) 기준 소요시간</div>
 <div class="modal-bg hidden" id="search-pop"><div class="modal" style="max-width:760px;max-height:80vh;overflow:auto">
