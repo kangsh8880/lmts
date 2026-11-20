@@ -137,3 +137,13 @@ table th,table td{padding:8px 9px}
 .form-group:has(input[type=datetime-local]){flex:1.6 1 230px}
 input[type=datetime-local],input[type=date]{padding-left:8px;padding-right:6px}
 #kpi-pop .dt td a,.dt td a{white-space:nowrap}
+
+/* ══ 기준정보: 제목줄 + 탭 박스 한 줄 배치 ══ */
+.mst-head{display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin:0 0 12px}
+.mst-head .sec-title{margin:0;padding:6px 0 6px 14px;white-space:nowrap}
+.mst-tabs{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.mst-tabs .btn{font-size:28px !important;font-weight:700;line-height:1.2;padding:6px 20px !important;border:1.5px solid #9CA3AF !important;border-radius:12px;background:#F4F7FB !important;color:#334155 !important;box-shadow:none;white-space:nowrap}
+.mst-tabs .btn.btn-primary{border:2.5px solid #111827 !important;background:#DCE8F5 !important;color:#111827 !important}
+.mst-tabs .btn:hover{background:#E8F0F9 !important}
+html[data-theme="dark"] .mst-tabs .btn{background:#1E293B !important;color:#CBD5E1 !important;border-color:#64748B !important}
+html[data-theme="dark"] .mst-tabs .btn.btn-primary{background:#334155 !important;color:#fff !important;border-color:#E2E8F0 !important}
