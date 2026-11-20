@@ -37,7 +37,7 @@
       <input id="token-input" type="password" placeholder="github_pat_xxxxx...">
       <button class="btn btn-primary" onclick="testAndSaveToken()">연결 테스트</button>
     </div>
-    <div id="token-status" style="font-size:12px;color:var(--gray);margin-bottom:12px"></div>
+    <div id="token-status" style="font-size:14.5px;color:var(--gray);margin-bottom:12px"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="closeTokenModal()">나중에 설정</button>
     </div>
@@ -75,27 +75,27 @@
 <div class="page" style="display:block;padding:16px 20px;max-width:none;margin:0">
 
   <div class="sec-title">박스 Packing 관리</div>
-  <div class="grid2">
+  <div class="grid2" style="grid-template-columns:minmax(0,3.5fr) minmax(0,8.5fr)">
     <div class="card"><div class="card-head">📦 Packing 처리</div><div class="card-body">
       <div class="form-group" style="margin-bottom:12px"><label>① 출하오더 선택 (대기)</label>
         <select id="pk-order" onchange="loadPackingOrder()"><option value="">-- 선택 --</option></select></div>
       <div id="pk-info" style="display:none">
         <div class="alert alert-info" id="pk-detail"></div>
-        <div style="margin:10px 0 4px;font-size:13px"><b>② 출하 요구 수량 현황</b></div>
-        <table style="font-size:12px"><thead><tr><th>제품</th><th>출하 수량</th><th>담은 수량</th><th>남은 수량</th></tr></thead><tbody id="pk-need"></tbody></table>
-        <div style="margin:12px 0 4px;font-size:13px"><b>③ 보관 Box에서 꺼내 담기</b> <span style="font-size:11px;color:#666">(맨 앞 칸 = 담을 포장 상자 번호 · 보관 Box의 일부만 꺼내 Split 가능)</span></div>
+        <div style="margin:10px 0 4px;font-size:15.5px"><b>② 출하 요구 수량 현황</b></div>
+        <table style="font-size:14.5px"><thead><tr><th>제품</th><th>출하 수량</th><th>담은 수량</th><th>남은 수량</th></tr></thead><tbody id="pk-need"></tbody></table>
+        <div style="margin:12px 0 4px;font-size:15.5px"><b>③ 보관 Box에서 꺼내 담기</b> <span style="font-size:13px;color:#666">(맨 앞 칸 = 담을 포장 상자 번호 · 보관 Box의 일부만 꺼내 Split 가능)</span></div>
         <div style="display:flex;gap:6px;align-items:center">
           <input id="pk-pack" type="text" value="1" title="포장 상자 번호" placeholder="상자" style="width:62px;text-align:center">
           <select id="pk-box" onchange="pkBoxChange()" style="flex:2"></select>
           <input id="pk-qty" type="number" min="1" placeholder="수량" style="width:90px">
           <button type="button" class="btn btn-yellow btn-sm" onclick="pkAdd()">+ 담기</button></div>
-        <div id="pk-stock" style="font-size:11px;color:#666;margin-top:3px"></div>
-        <div style="margin:12px 0 4px;font-size:13px"><b>④ 담은 내역</b></div>
-        <div style="border:1px solid #aaa;border-radius:6px;background:#fff;max-height:170px;overflow:auto"><table style="font-size:12px"><thead><tr><th>#</th><th>포장 상자</th><th>보관 Box No</th><th>제품</th><th>수량</th><th>시각</th><th></th></tr></thead><tbody id="pk-lines"></tbody></table></div>
-        <div style="margin:12px 0 6px;font-size:13px"><b>⑤ 요구 수량을 모두 담은 뒤 완료 처리</b> <span id="pk-count" style="margin-left:8px;font-weight:700;color:#c0392b"></span></div>
-        <button type="button" id="pk-done-btn" onclick="doPacking()" disabled style="width:100%;padding:14px 12px;font-size:18px;font-weight:700;color:#1f3a63;background:#cfe0f5;border:2px solid #222;border-radius:8px;cursor:pointer">✅ Packing 완료 처리</button>
+        <div id="pk-stock" style="font-size:13px;color:#666;margin-top:3px"></div>
+        <div style="margin:12px 0 4px;font-size:15.5px"><b>④ 담은 내역</b></div>
+        <div style="border:1px solid #aaa;border-radius:6px;background:#fff;max-height:170px;overflow:auto"><table style="font-size:14.5px"><thead><tr><th>#</th><th>포장 상자</th><th>보관 Box No</th><th>제품</th><th>수량</th><th>시각</th><th></th></tr></thead><tbody id="pk-lines"></tbody></table></div>
+        <div style="margin:12px 0 6px;font-size:15.5px"><b>⑤ 요구 수량을 모두 담은 뒤 완료 처리</b> <span id="pk-count" style="margin-left:8px;font-weight:700;color:#c0392b"></span></div>
+        <button type="button" id="pk-done-btn" onclick="doPacking()" disabled style="width:100%;padding:14px 12px;font-size:21.5px;font-weight:700;color:#1f3a63;background:#cfe0f5;border:2px solid #222;border-radius:8px;cursor:pointer">✅ Packing 완료 처리</button>
       </div>
-      <div id="pk-msg" style="margin-top:10px;font-size:14px;font-weight:700"></div>
+      <div id="pk-msg" style="margin-top:10px;font-size:17px;font-weight:700"></div>
       <div id="pk-empty" class="empty">대기 중인 오더를 선택하세요</div>
     </div></div>
     <div class="card"><div class="card-head">📦 Packing 완료 현황</div><div class="card-body">

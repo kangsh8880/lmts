@@ -38,7 +38,7 @@
       <input id="token-input" type="password" placeholder="github_pat_xxxxx...">
       <button class="btn btn-primary" onclick="testAndSaveToken()">연결 테스트</button>
     </div>
-    <div id="token-status" style="font-size:12px;color:var(--gray);margin-bottom:12px"></div>
+    <div id="token-status" style="font-size:14.5px;color:var(--gray);margin-bottom:12px"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="closeTokenModal()">나중에 설정</button>
     </div>
@@ -81,11 +81,11 @@
   <div class="card banner-card" style="border-left:4px solid var(--accent)">
     <div class="card-body" style="padding:10px 16px">
       <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
-        <div style="font-size:11px;color:var(--gray)">🌐 <b style="color:var(--dk)">글로벌 BM 기반 개선 적용:</b></div>
-        <span style="font-size:10px;background:#EBF5FF;color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:700">FedEx Surround® — 위험도 스코어링</span>
-        <span style="font-size:10px;background:#E8F5E9;color:#2E7D32;padding:2px 8px;border-radius:10px;font-weight:700">Maersk Captain Peter — 지연 예측 경보</span>
-        <span style="font-size:10px;background:#FFF3CD;color:#7B4F00;padding:2px 8px;border-radius:10px;font-weight:700">DHL Resilience360 — 구간 성과 분석</span>
-        <span style="font-size:10px;background:#F3E5F5;color:#6A1B9A;padding:2px 8px;border-radius:10px;font-weight:700">Amazon SCM — KPI 자동 모니터링</span>
+        <div style="font-size:13px;color:var(--gray)">🌐 <b style="color:var(--dk)">글로벌 BM 기반 개선 적용:</b></div>
+        <span style="font-size:12px;background:#EBF5FF;color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:700">FedEx Surround® — 위험도 스코어링</span>
+        <span style="font-size:12px;background:#E8F5E9;color:#2E7D32;padding:2px 8px;border-radius:10px;font-weight:700">Maersk Captain Peter — 지연 예측 경보</span>
+        <span style="font-size:12px;background:#FFF3CD;color:#7B4F00;padding:2px 8px;border-radius:10px;font-weight:700">DHL Resilience360 — 구간 성과 분석</span>
+        <span style="font-size:12px;background:#F3E5F5;color:#6A1B9A;padding:2px 8px;border-radius:10px;font-weight:700">Amazon SCM — KPI 자동 모니터링</span>
       </div>
     </div>
   </div>
@@ -101,36 +101,36 @@
   <div class="op-ana">
     <!-- 오더별 위험도 스코어 (FedEx Surround 벤치) -->
     <div class="card"><div class="card-head">🚨 오더별 지연 위험도 스코어 <span class="badge" style="background:#C0392B;color:#fff">FedEx Surround® BM</span></div><div class="card-body">
-      <div style="font-size:11px;color:var(--gray);margin-bottom:10px">표준 이동시간 대비 실제 소요 비율로 지연 위험도를 자동 산출합니다</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:10px">표준 이동시간 대비 실제 소요 비율로 지연 위험도를 자동 산출합니다</div>
       <div id="ana-risk-list"><div class="empty">진행중 오더 없음</div></div>
       <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
-        <span style="font-size:10px">🔴 <b>고위험</b> 표준시간 120%↑</span>
-        <span style="font-size:10px">🟡 <b>중위험</b> 표준시간 90~120%</span>
-        <span style="font-size:10px">🟢 <b>정상</b> 표준시간 90%↓</span>
+        <span style="font-size:12px">🔴 <b>고위험</b> 표준시간 120%↑</span>
+        <span style="font-size:12px">🟡 <b>중위험</b> 표준시간 90~120%</span>
+        <span style="font-size:12px">🟢 <b>정상</b> 표준시간 90%↓</span>
       </div>
     </div></div>
 
     <!-- 지연 예측 경보 (Maersk Captain Peter 벤치) -->
     <div class="card"><div class="card-head">🔮 지연 예측 경보 <span class="badge" style="background:#27AE60;color:#fff">Maersk Captain Peter BM</span></div><div class="card-body">
-      <div style="font-size:11px;color:var(--gray);margin-bottom:10px">구간별 표준시간과 실제 이벤트 간격을 비교하여 사전 경보를 생성합니다</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:10px">구간별 표준시간과 실제 이벤트 간격을 비교하여 사전 경보를 생성합니다</div>
       <div id="ana-predict-list"><div class="empty">예측 경보 없음 ✅</div></div>
     </div></div>
 
   <!-- 구간별 TAT 분석 (DHL Resilience360 벤치) -->
   <div class="card"><div class="card-head">⏱ 구간별 TAT 분석 <span class="badge" style="background:#E6A817;color:#fff">DHL Resilience360 BM</span></div><div class="card-body">
-    <div style="font-size:11px;color:var(--gray);margin-bottom:12px">각 구간의 표준 이동시간 대비 실제 소요시간을 분석합니다 (이벤트 등록 기준)</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:12px">각 구간의 표준 이동시간 대비 실제 소요시간을 분석합니다 (이벤트 등록 기준)</div>
     <div id="ana-tat-table"><div class="empty">이벤트 데이터 없음</div></div>
   </div></div>
 
   <!-- 거점별 성과 히트맵 -->
   <div class="card op-span2"><div class="card-head">🗺 거점별 처리 성과 <span class="badge" style="background:#6A1B9A;color:#fff">Amazon SCM BM</span></div><div class="card-body">
-    <div style="font-size:11px;color:var(--gray);margin-bottom:10px">거점별 In/Out 이벤트 빈도와 처리 현황입니다</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:10px">거점별 In/Out 이벤트 빈도와 처리 현황입니다</div>
     <div id="ana-hub-perf"><div class="empty">거점 이벤트 없음</div></div>
   </div></div>
 
   <!-- 디지털 POD (Amazon 벤치) -->
   <div class="card"><div class="card-head">✍️ 디지털 POD 현황 <span class="badge" style="background:#365C89;color:#fff">Amazon Signature BM</span></div><div class="card-body">
-    <div style="font-size:11px;color:var(--gray);margin-bottom:10px">도착완료 처리된 오더의 디지털 인수 확인 내역입니다</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:10px">도착완료 처리된 오더의 디지털 인수 확인 내역입니다</div>
     <div id="ana-pod-list"><div class="empty">POD 기록 없음</div></div>
   </div></div>
   </div>

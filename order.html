@@ -38,7 +38,7 @@
       <input id="token-input" type="password" placeholder="github_pat_xxxxx...">
       <button class="btn btn-primary" onclick="testAndSaveToken()">연결 테스트</button>
     </div>
-    <div id="token-status" style="font-size:12px;color:var(--gray);margin-bottom:12px"></div>
+    <div id="token-status" style="font-size:14.5px;color:var(--gray);margin-bottom:12px"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="closeTokenModal()">나중에 설정</button>
     </div>
@@ -49,47 +49,47 @@
 <div class="modal-bg hidden" id="route-edit-modal">
   <div class="modal" style="max-width:640px;max-height:90vh;overflow-y:auto;">
     <div class="modal-title">🗺️ 운송 경로 수정</div>
-    <div style="font-size:12px;color:var(--gray);margin-bottom:16px">
+    <div style="font-size:14.5px;color:var(--gray);margin-bottom:16px">
       오더번호: <b id="re-order-no" style="color:var(--dk)"></b>
       &nbsp;|&nbsp; 고객사: <b id="re-customer"></b>
       &nbsp;|&nbsp; 상태: <span id="re-status-badge"></span>
     </div>
     <div style="margin-bottom:12px">
-      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:4px">출발 거점</label>
+      <label style="font-size:13px;color:var(--gray);font-weight:600;display:block;margin-bottom:4px">출발 거점</label>
       <div style="display:flex;align-items:center;gap:8px">
         <div class="rb-badge rb-origin" style="flex-shrink:0">출발</div>
-        <select id="re-origin" onchange="reUpdatePreview()" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;"></select>
+        <select id="re-origin" onchange="reUpdatePreview()" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:15.5px;"></select>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <span style="font-size:10px;color:var(--gray)">→표준</span>
-          <input id="re-origin-std" type="number" min="0" placeholder="분" oninput="reUpdatePreview()" style="width:60px;padding:5px 6px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center">
-          <span style="font-size:10px;color:var(--gray)">분</span>
+          <span style="font-size:12px;color:var(--gray)">→표준</span>
+          <input id="re-origin-std" type="number" min="0" placeholder="분" oninput="reUpdatePreview()" style="width:60px;padding:5px 6px;font-size:13px;border:1px solid var(--border);border-radius:4px;text-align:center">
+          <span style="font-size:12px;color:var(--gray)">분</span>
         </div>
       </div>
     </div>
     <div style="margin-bottom:10px">
-      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:6px">경유지 목록</label>
+      <label style="font-size:13px;color:var(--gray);font-weight:600;display:block;margin-bottom:6px">경유지 목록</label>
       <div id="re-wp-list" style="border:1px solid var(--border);border-radius:6px;background:#FAFCFF;padding:8px;min-height:44px"></div>
     </div>
     <div style="display:flex;gap:7px;align-items:center;padding:8px;background:#F5F8FF;border:1px dashed var(--border);border-radius:6px;margin-bottom:12px;flex-wrap:wrap">
-      <div class="rb-badge rb-wp" style="width:22px;height:22px;font-size:12px;flex-shrink:0">+</div>
-      <select id="re-wp-add" style="flex:2;min-width:140px;border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:12px;"></select>
+      <div class="rb-badge rb-wp" style="width:22px;height:22px;font-size:14.5px;flex-shrink:0">+</div>
+      <select id="re-wp-add" style="flex:2;min-width:140px;border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:14.5px;"></select>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-        <span style="font-size:10px;color:var(--gray)">→표준</span>
-        <input id="re-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:4px 5px;font-size:11px;border:1px solid var(--border);border-radius:4px;text-align:center">
-        <span style="font-size:10px;color:var(--gray)">분</span>
+        <span style="font-size:12px;color:var(--gray)">→표준</span>
+        <input id="re-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:4px 5px;font-size:13px;border:1px solid var(--border);border-radius:4px;text-align:center">
+        <span style="font-size:12px;color:var(--gray)">분</span>
       </div>
       <button class="btn btn-yellow btn-sm" onclick="reAddWaypoint()">경유지 추가</button>
     </div>
     <div style="margin-bottom:16px">
-      <label style="font-size:11px;color:var(--gray);font-weight:600;display:block;margin-bottom:4px">도착 거점</label>
+      <label style="font-size:13px;color:var(--gray);font-weight:600;display:block;margin-bottom:4px">도착 거점</label>
       <div style="display:flex;align-items:center;gap:8px">
         <div class="rb-badge rb-dest" style="flex-shrink:0">도착</div>
-        <select id="re-dest" onchange="reUpdatePreview()" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;"></select>
+        <select id="re-dest" onchange="reUpdatePreview()" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:15.5px;"></select>
       </div>
     </div>
     <div style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:16px">
-      <div style="font-size:10px;color:var(--gray);font-weight:700;margin-bottom:6px">📋 변경 후 경로 미리보기</div>
-      <div class="route-chips" id="re-route-preview"><span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span></div>
+      <div style="font-size:12px;color:var(--gray);font-weight:700;margin-bottom:6px">📋 변경 후 경로 미리보기</div>
+      <div class="route-chips" id="re-route-preview"><span style="font-size:13px;color:var(--gray)">출발지와 도착지를 선택하세요</span></div>
     </div>
     <div id="re-status-warn" class="alert alert-warn" style="display:none;margin-bottom:12px"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -140,29 +140,29 @@
           <select id="o-product" style="flex:1 1 auto;min-width:0"><option value="">-- 제품 선택 --</option></select>
           <input id="o-boxes" type="number" placeholder="수량" min="1" style="width:100px;flex:0 0 100px">
           <button type="button" class="btn btn-yellow btn-sm" style="flex:0 0 auto;white-space:nowrap" onclick="addOrderItem()">+ 제품 추가</button></div>
-        <div id="o-items" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:11px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span></div></div>
+        <div id="o-items" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:13px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span></div></div>
       
     </div>
     <div class="route-builder">
-      <div class="rb-title">🗺️ 운송 경로 설정 <span style="font-size:10px;color:var(--gray);font-weight:400;margin-left:6px">출발지 → 경유지(순서·표준시간 지정) → 도착지</span></div>
+      <div class="rb-title">🗺️ 운송 경로 설정 <span style="font-size:12px;color:var(--gray);font-weight:400;margin-left:6px">출발지 → 경유지(순서·표준시간 지정) → 도착지</span></div>
       <div class="rb-row">
         <div class="rb-badge rb-origin">출발</div>
         <div style="flex:1"><select id="o-origin" onchange="onOriginChange()"><option value="">-- 출발 거점 선택 --</option></select></div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <span style="font-size:10px;color:var(--gray);white-space:nowrap">→다음거점<br>표준시간</span>
-          <input id="o-origin-std" type="number" min="0" placeholder="분" style="width:60px;padding:5px 6px;font-size:11px;text-align:center">
-          <span style="font-size:10px;color:var(--gray)">분</span>
+          <span style="font-size:12px;color:var(--gray);white-space:nowrap">→다음거점<br>표준시간</span>
+          <input id="o-origin-std" type="number" min="0" placeholder="분" style="width:60px;padding:5px 6px;font-size:13px;text-align:center">
+          <span style="font-size:12px;color:var(--gray)">분</span>
         </div>
       </div>
       <div class="rb-vline"></div>
       <div id="waypoint-list"></div>
       <div class="rb-add-row">
-        <div class="rb-badge rb-wp" style="width:24px;height:24px;font-size:13px;flex-shrink:0">+</div>
+        <div class="rb-badge rb-wp" style="width:24px;height:24px;font-size:15.5px;flex-shrink:0">+</div>
         <select id="o-wp-add" style="flex:2;min-width:140px"><option value="">-- 경유지 선택 --</option></select>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <span style="font-size:10px;color:var(--gray);white-space:nowrap">→다음까지<br>표준시간</span>
-          <input id="o-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:5px 6px;font-size:11px;border:1px solid var(--border);border-radius:5px;text-align:center">
-          <span style="font-size:10px;color:var(--gray)">분</span>
+          <span style="font-size:12px;color:var(--gray);white-space:nowrap">→다음까지<br>표준시간</span>
+          <input id="o-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:5px 6px;font-size:13px;border:1px solid var(--border);border-radius:5px;text-align:center">
+          <span style="font-size:12px;color:var(--gray)">분</span>
         </div>
         <button class="btn btn-yellow btn-sm" onclick="addWaypoint()" style="flex-shrink:0">경유지 추가</button>
       </div>
@@ -172,7 +172,7 @@
         <div style="flex:1"><select id="o-dest" onchange="updateRoutePreview()"><option value="">-- 도착 거점 선택 --</option></select></div>
       </div>
       <div class="route-preview"><div class="rp-title">📋 설정된 경로 미리보기</div>
-        <div class="route-chips" id="route-chips"><span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span></div>
+        <div class="route-chips" id="route-chips"><span style="font-size:13px;color:var(--gray)">출발지와 도착지를 선택하세요</span></div>
       </div>
     </div>
     <div style="margin-top:14px;text-align:right"><button class="btn btn-primary" onclick="createOrder()">+ 오더 생성</button></div>
@@ -187,7 +187,7 @@
       </select>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>출하 제품·수량</th><th>총수량</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>경로변경</th><th>삭제</th></tr></thead>
+      <thead><tr><th>오더번호</th><th>출하예정일</th><th>고객사</th><th>제품·수량</th><th>수량</th><th>운송 경로</th><th>상태</th><th>특이사항</th><th>경로변경</th><th>삭제</th></tr></thead>
       <tbody id="order-table-body"></tbody>
     </table></div>
   </div></div>
