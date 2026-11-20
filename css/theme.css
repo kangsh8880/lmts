@@ -168,3 +168,9 @@ table th, .tbl-wrap th, .dt th, th.num-col, td.num-col-h, thead th{text-align:ce
 
 .lock-chip{display:inline-block;padding:2px 10px;border:1px solid #9CA3AF;border-radius:10px;background:#F3F4F6;color:#555;font-size:14px;white-space:nowrap}
 html[data-theme="dark"] .lock-chip{background:#26334A;color:#CBD5E1;border-color:#64748B}
+/* 엑셀 다운로드 버튼 */
+.xl-btn{font:600 14px/1 inherit;font-family:inherit;padding:5px 12px;border:1px solid #9CA3AF;border-radius:8px;background:#EAF4FB;color:#1F2937;cursor:pointer;white-space:nowrap}
+.xl-btn:hover{border-color:#111827;background:#DCE8F5}
+.card-head .xl-head{margin-left:auto}
+.xl-bar{display:flex;justify-content:flex-end;margin:0 0 6px;flex:0 0 auto}
+html[data-theme="dark"] .xl-btn{background:#26334A;color:#E2E8F0;border-color:#64748B}
