@@ -579,12 +579,12 @@
       "transportType": "truck",
       "departPlan": "",
       "eta": "",
-      "savedAt": "2026-11-20 13:51",
+      "savedAt": "2026-11-20 13:52",
       "note": "",
       "status": "배차완료",
-      "vehicleNo": "경기 4521가",
-      "driver": "홍길동",
-      "dphone": "010-1234-5678"
+      "vehicleNo": "서울 9012다",
+      "driver": "이재훈",
+      "dphone": "010-5555-7777"
     },
     {
       "orderNo": "ORD-260420-002",
