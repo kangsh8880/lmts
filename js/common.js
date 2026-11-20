@@ -395,7 +395,7 @@ function buildTrackerCard(o, ps) {
     // 상단 요약 한 줄
     if (isAtDest) trackerHtml+=`<div class="trk-sum ok">✅ <b>배송 완료</b><span>${finalDest} 수령 확인</span></div>`;
     else if (currentHub) trackerHtml+=`<div class="trk-sum"><div><em>현재 위치</em><b>${currentHub}</b></div><div><em>다음 거점</em><b>${nextHub||'-'}</b></div><div><em>최종 도착지</em><b class="dst">${finalDest}</b></div></div>`;
-    else trackerHtml+=`<div class="trk-sum wait"><div><em>상태</em><b>출발 전</b></div><div><em>최종 도착지</em><b class="dst">${finalDest}</b></div></div>`;
+    else trackerHtml+=`<div class="trk-sum wait"><div><em>현재 위치</em><b>출발 전</b></div><div><em>다음 거점</em><b>${allHubs[0]||'-'}</b></div><div><em>최종 도착지</em><b class="dst">${finalDest}</b></div></div>`;
 
     // 세로 단계
     trackerHtml+='<ol class="trk-steps">';
