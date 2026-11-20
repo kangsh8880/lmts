@@ -54,6 +54,8 @@ function saveTracking() {
     if (nx.done) return alert(`⛔ ${orderNo} 는 모든 거점 처리가 완료된 오더입니다.`);
     if ((nx.hub!==hub||nx.event!==eventType) && !confirm(`처리 순서가 다릅니다.\n\n다음 처리 순서: ${nx.hub} ${nx.event}\n선택한 이벤트: ${hub} ${eventType}\n\n그래도 등록할까요?`)) return;
   }
+  const last=events.filter(e=>e.orderNo===orderNo).map(e=>e.time).sort().pop();
+  if (last && t < last && !confirm(`입력한 시각(${t})이 이 오더의 마지막 이벤트(${last})보다 과거입니다.\n\n시각이 맞습니까?`)) return;
   events.push({time:t, orderNo, customer:o?.customer||'', hub, event:eventType, person:v('tr-person'), note:v('tr-note')});
   S.set('events', events);
   if (eventType==='도착완료') updateOrderStatus(orderNo,'도착완료');

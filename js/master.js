@@ -104,8 +104,17 @@ function renderMasterTable(tab) {
 }
 
 function delItem(key, idx) {
+  const arr = S.get(key), it = arr[idx]; if (!it) return;
+  // 참조 무결성: 오더·배차·Packing에서 사용 중인 기준정보는 삭제 불가
+  const O = S.orders(), D = S.dispatches();
+  let used = 0, what = '';
+  if (key==='customers') { used = O.filter(o=>o.customer===it.name).length; what='오더'; }
+  if (key==='products')  { used = O.filter(o=>(o.items||[]).some(i=>i.product===it.name||i.product===it.code)||o.product===it.name).length; what='오더'; }
+  if (key==='hubs')      { used = O.filter(o=>o.route&&[o.route.origin,o.route.destination,...(o.route.waypoints||[]).map(w=>w.name)].includes(it.name)).length; what='오더 경로'; }
+  if (key==='vehicles')  { used = D.filter(d=>d.vehicleNo===it.no||d.vehicle===it.no).length; what='배차'; }
+  if (used) return alert('⛔ 삭제할 수 없습니다.\n\n"'+(it.name||it.no||it.code)+'" 은(는) '+used+'건의 '+what+'에서 사용 중입니다.\n사용 중인 기준정보를 지우면 이력이 깨집니다.');
   if (!confirm('삭제하시겠습니까?')) return;
-  const arr = S.get(key); arr.splice(idx,1); S.set(key, arr);
+  arr.splice(idx,1); S.set(key, arr);
   const m={customers:'customer',products:'product',vehicles:'vehicle',hubs:'hub'};
   if (m[key] && EDIT[m[key]] >= 0) mstReset(m[key]);
   if (m[key]) renderMasterTable(m[key]);

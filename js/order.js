@@ -139,6 +139,9 @@ function createOrder() {
   if (v('o-product') && (parseInt(v('o-boxes'))||0)>0) addOrderItem();   // 선택만 하고 추가를 안 누른 경우 자동 포함
 
   const origin=v('o-origin'), dest=v('o-dest');
+  if (!no) return alert('오더번호를 입력하세요');
+  if (S.orders().some(x=>x.no===no)) return alert('⛔ 이미 등록된 오더번호입니다: '+no+'\n다른 번호를 사용하세요.');
+  if (!date) return alert('출하예정일을 입력하세요');
   if (!customer) return alert('고객사를 선택하세요');
   if (!oItems.length) return alert('출하 제품과 수량을 추가하세요');
   if (!origin) return alert('출발 거점을 선택하세요');
@@ -220,8 +223,13 @@ function getRouteShort(o) {
 }
 
 function delOrder(idx) {
-  if (!confirm('삭제하시겠습니까?')) return;
-  const arr=S.orders(); arr.splice(idx,1); S.set('orders',arr); renderOrders();
+  const arr=S.orders(), o=arr[idx]; if (!o) return;
+  if (!['대기','패킹완료'].includes(o.status)) return alert('⛔ 삭제할 수 없습니다.\n\n상태가 "'+o.status+'"인 오더는 배차·운송 이력이 있어 삭제할 수 없습니다.\n(대기/패킹완료 상태의 오더만 삭제 가능)');
+  if (!confirm('오더 '+o.no+' 를 삭제하시겠습니까?'+(o.status==='패킹완료'?'\n※ 이 오더의 Packing 내역도 함께 삭제되며, 제품 보관 잔량이 복원됩니다.':''))) return;
+  arr.splice(idx,1); S.set('orders',arr);
+  S.set('packings', S.packings().filter(x=>x.orderNo!==o.no));
+  S.set('dispatches', S.dispatches().filter(x=>x.orderNo!==o.no));
+  renderOrders();
 }
 
 // ══════════════════════════════════════════════════════════════════

@@ -74,7 +74,7 @@ function renderOps() {
     kbox('c6', '출하 대기', kv(n('대기'), '건'), '패킹 전', '상태가 대기인 오더', 'js:openOpsKpi(\'wait\')'),
     kbox('c3', '패킹 완료', kv(n('패킹완료'), '건'), '배차 대기', '상태가 패킹완료인 오더', 'js:openOpsKpi(\'pack\')'),
     kbox('c4', '배차 완료', kv(n('배차완료'), '건'), '출발 대기', '배차 지정 후 미출발 오더', 'js:openOpsKpi(\'disp\')'),
-    kbox('c1', '운송 중', kv(n('운송중'), '건'), '거점 이동', '상태가 운송중인 오더', 'js:openOpsKpi(\'mv\')'),
+    kbox('c1', '운송 중', kv(DC.moving().length, '건'), '거점 이동', '거점 OUT 후 다음 거점 IN 전 오더', 'js:openOpsKpi(\'mv\')'),
     kbox('c5', '지연', kv(n('지연'), '건', n('지연') > 0 ? 'bad' : ''), '즉시 조치', '상태가 지연인 오더', 'js:openOpsKpi(\'delay\')'),
     kbox('c5', '비지정 이벤트', kv(K.off, '건', K.off > 0 ? 'bad' : ''), '확인 필요', '지정 경로 외 거점 이벤트 알람', 'js:openOpsKpi(\'off\')'),
     kbox('c2', '거점 체류', kv(K.inHub, '곳'), `전체 ${K.hubs}곳`, '진행 오더가 입고된 상태로 머무는 거점 수', 'js:openOpsKpi(\'hub\')'),
@@ -108,7 +108,7 @@ function openOpsKpi(k) {
   if (k === 'wait') { const L = by('대기'); openPop('출하 대기 상세', `상태가 <b>대기</b>(Packing 전)인 오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '제품·수량', '출하예정일', '상태'], L.map(o => [...base(o), st(o)])), 'packing.html', '박스Packing'); }
   else if (k === 'pack') { const L = by('패킹완료'); openPop('패킹 완료 상세', `Packing이 끝나고 <b>배차를 기다리는</b> 오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '제품·수량', '출하예정일', 'Packing 완료', '배차 진행'], L.map(o => { const p = S.packings().filter(x => x.orderNo === o.no).pop(); return [...base(o), p ? E(p.doneAt) : '-', `${dpN(o)}/${legN(o)}구간`]; })), 'dispatch.html', '차량배차'); }
   else if (k === 'disp') { const L = by('배차완료'); openPop('배차 완료 상세', `배차를 지정했고 <b>출발을 기다리는</b> 오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '제품·수량', '출하예정일', '배차 진행', '첫 구간 출발예정'], L.map(o => { const d = S.dispatches().find(x => x.orderNo === o.no && x.legIdx === 0); return [...base(o), `${dpN(o)}/${legN(o)}구간`, d && d.departPlan ? E(d.departPlan.replace('T', ' ')) : '-']; })), 'dispatch.html', '차량배차'); }
-  else if (k === 'mv') { const L = by('운송중'); openPop('운송 중 상세', `상태가 <b>운송중</b>인 오더 <b>${L.length}</b>건 · 현재 위치는 마지막 거점 이벤트 기준`, tb(['오더', '고객사', '제품·수량', '출하예정일', '현재 위치(마지막 이벤트)', '지도'], L.map(o => [...base(o), where(o), `<a href="map.html?order=${encodeURIComponent(o.no)}">🗺️ 위치추적</a>`])), 'map.html', '위치추적'); }
+  else if (k === 'mv') { const mv = DC.moving().map(m=>m.o.no), L = S.orders().filter(o=>mv.includes(o.no)); openPop('운송 중 상세', `거점 OUT 후 다음 거점 IN 전 오더 <b>${L.length}</b>건 · 현재 위치는 마지막 거점 이벤트 기준`, tb(['오더', '고객사', '제품·수량', '출하예정일', '현재 위치(마지막 이벤트)', '지도'], L.map(o => [...base(o), where(o), `<a href="map.html?order=${encodeURIComponent(o.no)}">🗺️ 위치추적</a>`])), 'map.html', '위치추적'); }
   else if (k === 'delay') {
     const L = by('지연'), ac = DC.actions().filter(a => /표준시간 초과/.test(a.t));
     openPop('지연 상세', `상태가 <b>지연</b>인 오더 <b>${L.length}</b>건 · 아래에 표준시간 초과 알람 <b>${ac.length}</b>건`,

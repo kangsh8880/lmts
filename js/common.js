@@ -13,6 +13,8 @@ const GH = {
   _saveTimer: null,
   _saving: false,
   _connected: false,
+  _synced: false,   // 서버 최신 데이터를 정상 로드한 뒤에만 true — 오래된 캐시로 서버를 덮어쓰는 사고 방지
+  _again: false,
 
   token() { return localStorage.getItem('lmts_gh_token') || ''; },
   saveToken(t) { localStorage.setItem('lmts_gh_token', t); },
@@ -35,6 +37,12 @@ const GH = {
     if (!res.ok) throw new Error(`GitHub API ${res.status}`);
     const file = await res.json();
     this._sha = file.sha;
+    // 데이터 파일이 1MB를 넘으면 content가 비어 오므로 raw 방식으로 다시 읽음
+    if (!file.content || file.encoding === 'none') {
+      const r2 = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}`, { headers: { ...this.headers(), 'Accept': 'application/vnd.github.raw' } });
+      if (!r2.ok) throw new Error(`GitHub API ${r2.status}`);
+      return JSON.parse(await r2.text());
+    }
     // base64 → UTF-8 디코딩
     const binary = atob(file.content.replace(/\n/g, ''));
     const bytes = new Uint8Array([...binary].map(c => c.charCodeAt(0)));
@@ -44,7 +52,8 @@ const GH = {
 
   // 데이터 파일 저장 (Create or Update)
   async save(dataObj) {
-    if (this._saving) return;
+    if (!this._synced) { setSyncStatus('err', '저장 보류: 서버 데이터를 아직 읽지 못했습니다. 새로고침(Ctrl+Shift+R) 후 다시 시도하세요. (서버 데이터 덮어쓰기 방지)'); return; }
+    if (this._saving) { this._again = true; return; }   // 저장 중 추가 변경 → 끝난 뒤 한 번 더 저장
     this._saving = true;
     setSyncStatus('sync', '저장 중...');
     try {
@@ -68,8 +77,13 @@ const GH = {
         body: JSON.stringify(body)
       });
       if (res.status === 409 || res.status === 422) {
-        // SHA 충돌 → SHA 다시 받아서 재시도
-        await this._refreshSha();
+        // 다른 사용자가 먼저 저장함 → 서버 최신본을 읽어 내 변경과 병합한 뒤 재시도 (남의 변경을 덮어쓰지 않음)
+        try {
+          const remote = await this.load();
+          if (remote) { const n = mergeRemote(remote); if (n) setSyncStatus('warn', `다른 사용자의 변경 ${n}건을 병합했습니다`); }
+        } catch(e) { await this._refreshSha(); }
+        const j2 = JSON.stringify(DB, null, 2), b2 = new TextEncoder().encode(j2); let bin2 = ''; b2.forEach(b => bin2 += String.fromCharCode(b));
+        body.content = btoa(bin2);
         body.sha = this._sha;
         const res2 = await fetch(`${this.API}/repos/${this.REPO}/contents/${this.DATA_PATH}`, {
           method: 'PUT', headers: this.headers(), body: JSON.stringify(body)
@@ -84,11 +98,13 @@ const GH = {
         this._sha = r.content.sha;
       }
       setSyncStatus('ok', `저장완료 ${now().slice(11,16)}`);
+      try { sessionStorage.setItem('lmts_synced','1'); } catch(e) {}
     } catch(e) {
       setSyncStatus('err', `저장실패: ${e.message}`);
       console.error('GH save error:', e);
     } finally {
       this._saving = false;
+      if (this._again) { this._again = false; this.scheduleSave(); }
     }
   },
 
@@ -131,6 +147,31 @@ const DB = {
   lastUpdated: ''
 };
 
+// ── 입력값 정제: 화면(innerHTML·onclick)에 그대로 들어가도 코드로 실행되지 않도록 특수문자를 안전한 문자로 치환 ──
+const _SAFE = {'<':'＜','>':'＞','"':'”',"'":'’','`':'’','\\':'＼'};
+function cleanStr(x){ return String(x).replace(/[<>"'`\\]/g, c=>_SAFE[c]); }
+function cleanDeep(o){
+  if (typeof o === 'string') return cleanStr(o);
+  if (Array.isArray(o)) { for (let i=0;i<o.length;i++) o[i] = cleanDeep(o[i]); return o; }
+  if (o && typeof o === 'object') { for (const k in o) o[k] = cleanDeep(o[k]); return o; }
+  return o;
+}
+// 컬렉션별 식별 키 — 동시 저장 병합·삭제 추적용
+const KEYFN = {
+  customers:r=>r.code, products:r=>r.code, vehicles:r=>r.no, hubs:r=>r.code||r.name, orders:r=>r.no, packings:r=>r.orderNo,
+  dispatches:r=>r.orderNo+'#'+r.legIdx, events:r=>[r.time,r.orderNo,r.hub,r.event].join('|'), alarms:r=>r.id
+};
+const _KS = {}, _DEL = {};     // 마지막 확인 시점의 키 목록 / 이 세션에서 지운 키
+function snapKeys(){ Object.keys(KEYFN).forEach(k=>{ _KS[k] = new Set((DB[k]||[]).map(KEYFN[k])); _DEL[k] = _DEL[k] || new Set(); }); }
+function mergeRemote(remote){     // 서버에만 있고 내가 지우지 않은 항목을 가져와 합침, 같은 항목은 내 값 우선
+  let added = 0;
+  Object.keys(KEYFN).forEach(k=>{
+    const have = new Set((DB[k]||[]).map(KEYFN[k]));
+    (remote[k]||[]).forEach(r=>{ const key = KEYFN[k](r); if (!have.has(key) && !(_DEL[k] && _DEL[k].has(key))) { DB[k].push(cleanDeep(r)); have.add(key); added++; } });
+  });
+  snapKeys(); saveSessionCache(); return added;
+}
+
 // ── 오더 제품 내역 공용 (한 오더에 여러 제품 가능, 구버전 오더는 제품 1개로 간주) ──
 function ordItems(o){ return (o.items && o.items.length) ? o.items : [{product:o.product, qty:parseInt(o.boxes)||0}]; }
 function ordQty(o){ return ordItems(o).reduce((a,i)=>a+(+i.qty||0),0); }
@@ -150,6 +191,8 @@ function saveSessionCache() {
 const S = {
   get: k => DB[k] || [],
   set(k, v) {
+    cleanDeep(v);
+    if (KEYFN[k]) { const cur = new Set((v||[]).map(KEYFN[k])); (_KS[k]||new Set()).forEach(x=>{ if (!cur.has(x)) { (_DEL[k] = _DEL[k] || new Set()).add(x); } }); _KS[k] = cur; }
     DB[k] = v;
     DB.lastUpdated = now();
     GH.scheduleSave();  // GitHub에 자동 저장
@@ -235,7 +278,8 @@ async function loadFromGitHub() {
     try {
       const c = JSON.parse(cached);
       Object.keys(DB).forEach(k => { if (c[k] !== undefined) DB[k] = c[k]; });
-      GH._connected = !!GH.token();
+      cleanDeep(DB); snapKeys();
+      GH._connected = !!GH.token(); GH._synced = GH._connected && sessionStorage.getItem('lmts_synced') === '1';
       ensureDefaultHubs();
       setSyncStatus(GH._connected ? 'ok' : 'warn', '', true); // 세션캐시: silent
       return;
@@ -254,12 +298,14 @@ async function loadFromGitHub() {
     const data = await GH.load();
     if (data) {
       Object.keys(DB).forEach(k => { if (data[k] !== undefined) DB[k] = data[k]; });
-      GH._connected = true;
+      cleanDeep(DB); snapKeys();
+      GH._connected = true; GH._synced = true; try { sessionStorage.setItem('lmts_synced','1'); } catch(e) {}
       ensureDefaultHubs();
       setSyncStatus('ok', '데이터 로드 완료 (' + now().slice(11,16) + ')');
     } else {
       showOverlay('최초 실행: 샘플 데이터 저장 중...');
-      initSampleData();
+      initSampleData(); snapKeys();
+      GH._synced = true;
       await GH.save(DB);
       GH._connected = true;
       setSyncStatus('ok', '초기 데이터 저장 완료');
@@ -271,9 +317,11 @@ async function loadFromGitHub() {
       GH.saveToken('');
       setSyncStatus('err', '토큰 오류 — 우상단 클릭하여 재설정');
     } else {
-      setSyncStatus('warn', 'GitHub 연결 실패 — 캐시 사용 중');
+      setSyncStatus('warn', 'GitHub 연결 실패 — 읽기 전용(저장 보류). 연결 확인 후 새로고침하세요');
     }
-    loadFromLocalStorage();
+    try { sessionStorage.removeItem('lmts_synced'); } catch(_) {}
+    GH._synced = false;
+    loadFromLocalStorage(); cleanDeep(DB); snapKeys();
     if (!DB.hubs.length) initSampleData();
     ensureDefaultHubs();
     saveSessionCache();
@@ -601,3 +649,18 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded',()=>{ run(); new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true}); });
   window.alignNumCols=align;
 })();
+
+
+// ── 데이터 백업(JSON 다운로드) — 설정창(우상단 연결 상태 클릭)에 버튼 추가 ──
+function downloadBackup(){
+  const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'LMTS_backup_' + now().replace(/[: ]/g,'').replace(/-/g,'') + '.json'; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  const m = document.querySelector('#token-modal .modal'); if (!m || m.querySelector('#bk-btn')) return;
+  const d = document.createElement('div'); d.style.cssText = 'margin-top:14px;padding-top:12px;border-top:1px dashed #cbd5e1;display:flex;gap:10px;align-items:center';
+  d.innerHTML = '<button id="bk-btn" class="btn btn-ghost btn-sm" onclick="downloadBackup()">💾 데이터 백업 받기 (JSON)</button><span style="font-size:13px;color:#6b7280">전체 데이터를 내 PC에 저장합니다. 정기적으로 보관하세요.</span>';
+  m.appendChild(d);
+});
