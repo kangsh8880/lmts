@@ -211,9 +211,28 @@ html[data-theme="dark"] .trk-log th{background:#26334A;color:#E2E8F0;border-colo
 html[data-theme="dark"] .trk-log td{border-color:#475569}
 html[data-theme="dark"] .trk-hub{color:#CBD5E1}
 /* 거점In/Out: 오더 추적 현황 영역을 더 높게 */
-body.one .op-track{grid-template-rows:minmax(0,1.9fr) minmax(0,1fr)}
-body.one .op-track .card:nth-child(2) .card-body{padding-top:8px}
 #order-track-display .tracker-card{margin-top:0;box-shadow:none}
 #tr-track-order{margin-bottom:0}
 .trk-step{padding:1px 0}.trk-leg{min-height:20px}.trk-dot{width:26px;height:26px;font-size:14px}
 .trk-sum{margin:6px 0 8px;padding:6px 12px}
+
+/* ===== 거점In/Out: 등록 + 오더 추적이 화면을 가득 채우고, 이벤트 로그는 보조창 ===== */
+body.one .op-track{grid-template-rows:minmax(0,1fr)}
+.lg-titlebar{display:flex;align-items:center;gap:14px}
+.lg-tab{font:700 15px/1 inherit;font-family:inherit;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #9CA3AF;border-radius:999px;background:#EAF2FB;color:#111827;cursor:pointer}
+.lg-tab:hover{border-color:#111827;background:#DCE8F5}
+.lg-tab b{font-weight:700;color:#1D4ED8}
+.lg-dup{background:#FDE8E8;border:1px solid #E5A3A3;color:#B42318;border-radius:999px;padding:1px 8px;font-size:13px}
+.lg-dup.hidden{display:none}
+#log-modal .modal{max-width:1100px;height:80vh;display:flex;flex-direction:column}
+#log-modal .modal>*{flex:0 0 auto}
+#log-modal .tbl-wrap{flex:1 1 auto;min-height:0;overflow:auto}
+#log-modal .lg-close{float:right}
+.lg-filter{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:8px}
+.lg-filter .form-group{min-width:130px;margin:0}
+.lg-bar{display:flex;justify-content:space-between;align-items:center;margin:2px 0 6px;font-size:14px;color:#4B5563}
+#lg-table thead th{position:sticky;top:0;z-index:3;background:#CFE0F1;box-shadow:0 1px 0 #9CA3AF}
+.lg-row{cursor:pointer}.lg-row:hover td{background:#EEF4FB}
+html[data-theme="dark"] #lg-table thead th{background:#26334A}
+html[data-theme="dark"] .lg-tab{background:#26334A;color:#E2E8F0;border-color:#64748B}
+html[data-theme="dark"] .lg-row:hover td{background:#2B3A55}
