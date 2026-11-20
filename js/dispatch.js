@@ -328,7 +328,7 @@ function renderDispatch() {
       <td style="font-size:13px">${(d.departPlan||'-').replace('T',' ')}</td>
       <td style="font-size:13px">${(d.eta||'-').replace('T',' ')}</td>
       <td><span class="status ${STAT_CLS[d.status]||'s-dispatch'}">${d.status||'배차완료'}</span></td>
-      <td>${ (()=>{ const _l=getOrderLegs(o); const _g=_l&&_l[d.legIdx]; const _p=_g&&isLegPassed(d.orderNo,_g); return _p ? '<button class="btn btn-xs" disabled style="background:#F5F5F5;color:#BDBDBD;border:1px solid #E0E0E0;cursor:not-allowed;" title="통과완료">🔒</button>' : '<button class="btn btn-xs" style="background:#EBF5FF;color:var(--accent);border:1px solid var(--border);" onclick=\'openLegDispatch(\'' + d.orderNo + '\',' + d.legIdx + ')\'>✏️</button>'; })() }</td>
+      <td>${ (()=>{ const _l=getOrderLegs(o); const _g=_l&&_l[d.legIdx]; const _p=_g&&isLegPassed(d.orderNo,_g); return _p ? '<button class="btn btn-xs" disabled style="background:#F5F5F5;color:#BDBDBD;border:1px solid #E0E0E0;cursor:not-allowed;" title="통과완료">🔒</button>' : '<button class="btn btn-xs" style="background:#EBF5FF;color:var(--accent);border:1px solid var(--border);" onclick="openLegDispatch(\'' + d.orderNo + '\',' + d.legIdx + ')">✏️</button>'; })() }</td>
     </tr>`;
   }).join('') || '<tr><td colspan="10" class="empty">배차 이력 없음</td></tr>';
 }
