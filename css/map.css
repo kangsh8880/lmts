@@ -68,3 +68,12 @@ body.one .mp-page{padding-top:8px !important;gap:8px !important}
 [data-theme=dark] .mp-legend,[data-theme=dark] .mp-warn{background:#1f2733;color:#e6e9ef}
 @media (max-width:1100px){.mp-top{grid-template-columns:1fr}.mp-ctl{flex-wrap:wrap}.mp-sp{display:none}}
 @media (max-width:900px){.mp-grid{grid-template-columns:1fr;grid-template-rows:auto}.mp-map-wrap{min-height:55vh}}
+
+/* 운송 중 오더 전체 보기 */
+.mp-mk-no{position:absolute;left:50%;top:41px;transform:translateX(-50%);font-style:normal;font-size:12.5px;font-weight:700;color:#1f3b5c;background:#fff;border:1px solid #9aa7b8;border-radius:8px;padding:0 6px;white-space:nowrap;line-height:17px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.mp-mk.bad .mp-mk-no{color:#c0392b;border-color:#c0392b}
+.mp-ovc{border:1px solid #cfd6e0;border-radius:10px;padding:9px 12px;margin:8px 0;cursor:pointer;background:#fff}
+.mp-ovc:hover{border-color:#222;background:#f6f8fb}
+.mp-ovc.bad{border-color:#d9a3a0}
+.mp-ovc .mp-sub{margin:2px 0 4px}
+.mp-ovr{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14.5px;color:#333}
