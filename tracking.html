@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 거점 In/Out</title>
-  <link rel="stylesheet" href="css/style.css?v=20260580">
-  <link rel="stylesheet" href="css/onepage.css?v=20260580">
-  <link rel="stylesheet" href="css/theme.css?v=20260580">
-  <script src="js/theme.js?v=20260580"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260583">
+  <link rel="stylesheet" href="css/onepage.css?v=20260583">
+  <link rel="stylesheet" href="css/theme.css?v=20260583">
+  <script src="js/theme.js?v=20260583"></script>
 </head>
 <body class="one">
 
@@ -114,8 +114,8 @@
         <div class="form-group"><label>처리일시</label><input id="tr-time" type="datetime-local"></div>
         <div class="form-group"><label>처리자</label><input id="tr-person" placeholder="담당자명"></div>
       </div>
-      <div class="form-group" style="margin-bottom:12px"><label>비고</label><input id="tr-note"></div>
-      <button class="btn btn-primary" onclick="saveTracking()" style="width:100%">📍 이벤트 등록</button>
+      <div class="form-row tr-noterow"><div class="form-group" style="flex:1"><label>비고</label><input id="tr-note"></div>
+        <button type="button" class="btn-save" onclick="saveTracking()">💾 저장</button></div>
       <div class="hp-box">
         <div class="trk-log-t">🏢 거점 중심 처리 <span class="hp-sub">— 거점을 먼저 고르고, 그 거점에서 처리할 오더를 한 번에 처리</span></div>
         <div class="form-row hp-row">
@@ -124,19 +124,19 @@
           <div class="form-group"><label>처리자</label><input id="hp-person" placeholder="담당자명"></div>
         </div>
         <table class="trk-log hp-tbl" data-xl="skip"><thead><tr><th style="width:34px"><input type="checkbox" id="hp-all" onchange="hpToggleAll(this.checked)"></th><th>오더번호</th><th>고객사</th><th>현재 상태</th><th>처리할 이벤트</th></tr></thead><tbody id="hp-body"></tbody></table>
-        <button class="btn btn-primary hp-go" onclick="processHubBatch()" style="width:100%;margin-top:8px">✅ 선택한 오더 처리</button>
+        <div class="hp-foot"><span id="hp-sel" class="hp-selcnt"></span><button type="button" class="btn-save" onclick="processHubBatch()">💾 저장</button></div>
       </div>
     </div></div>
-    <div class="card"><div class="card-head">🗺️ 오더 추적 현황</div><div class="card-body">
+    <div class="card"><div class="card-head">🗺️ 오더 추적 현황<button type="button" class="xl-btn xl-head" onclick="exportTrackHist()" title="선택한 오더의 이벤트 이력을 엑셀로 저장">⬇ 엑셀</button></div><div class="card-body">
       <div class="trk-pick" id="trk-pick"></div>
       <div id="order-track-display"><div class="empty">출하오더를 선택하세요</div></div>
     </div></div>
   </div>
 </div>
 
-<script src="js/common.js?v=20260580"></script>
+<script src="js/common.js?v=20260583"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260580"></script>
-<script src="js/tracking.js?v=20260580"></script>
+<script src="js/export.js?v=20260583"></script>
+<script src="js/tracking.js?v=20260583"></script>
 </body>
 </html>
