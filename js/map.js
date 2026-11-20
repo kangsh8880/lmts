@@ -130,7 +130,7 @@ const MP = (() => {
       else L.layers = [L_.polyline(L.pts, styleOf(L.mode, false))];
       L.layers.forEach(x => x.addTo(S_.lg));
       // 구간 수단 아이콘(구간 중앙)
-      const mid = pointAt(L, 0.5), ic = L_.marker(mid, { icon: L_.divIcon({ className: '', html: `<div style="font-size:15px;background:#fff;border:1px solid #888;border-radius:10px;padding:0 3px;line-height:18px">${ICON[L.mode]}</div>`, iconSize: [26, 20], iconAnchor: [13, 10] }), interactive: false, keyboard: false }); ic.addTo(S_.lg);
+      const mid = pointAt(L, 0.5), ic = L_.marker(mid, { icon: L_.divIcon({ className: '', html: `<div style="font-size:18px;background:#fff;border:1px solid #888;border-radius:10px;padding:0 3px;line-height:18px">${ICON[L.mode]}</div>`, iconSize: [26, 20], iconAnchor: [13, 10] }), interactive: false, keyboard: false }); ic.addTo(S_.lg);
     });
     st.D.stops.forEach((s, i) => {
       if (!s.ll) return;
@@ -185,7 +185,7 @@ const MP = (() => {
       }
     });
     el('mp-head').textContent = `📍 ${o.no} 위치 현황`;
-    el('mp-side').innerHTML = `<div class="mp-ord">${esc(o.no)} <span class="status" style="font-size:11px">${esc(o.status)}</span></div>
+    el('mp-side').innerHTML = `<div class="mp-ord">${esc(o.no)} <span class="status" style="font-size:13px">${esc(o.status)}</span></div>
       <div class="mp-sub">${esc(o.customer)} · ${esc(ordText(o))}</div>
       <div class="mp-kpis"><div class="mp-kpi"><small>진행률</small><b>${st.pct.toFixed(1)}%</b></div>
         <div class="mp-kpi ${bad ? 'bad' : 'ok'}"><small>${st.state === 'done' ? '도착 시각' : '도착 예상(ETA)'}</small><b>${fmt(st.eta)}</b></div>

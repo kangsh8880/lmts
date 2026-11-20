@@ -64,7 +64,7 @@ function loadDispatchOrder() {
 
   const stMap = {'대기':'s-ready','패킹완료':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done'};
 
-  let html = `<div style="font-size:11px;color:var(--gray);margin-bottom:10px">
+  let html = `<div style="font-size:13px;color:var(--gray);margin-bottom:10px">
     <b style="color:var(--dk)">${o.no}</b> | ${o.customer} | ${ordText(o)} |
     상태: <span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>
   </div>`;
@@ -95,18 +95,18 @@ function loadDispatchOrder() {
 
     html += `
     <div style="background:#fff;border:1px solid ${d?'var(--green)':'var(--border)'};border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:${isFirst?'var(--dk)':'var(--yellow)'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">
+      <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:${isFirst?'var(--dk)':'var(--yellow)'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">
         ${i+1}
       </div>
       <div style="flex:1;min-width:180px">
-        <div style="font-size:12px;font-weight:700;color:var(--dk)">
+        <div style="font-size:14.5px;font-weight:700;color:var(--dk)">
           구간 ${i+1}: ${leg.fromHub} → ${leg.toHub}
         </div>
-        ${d ? `<div style="font-size:11px;color:var(--gray);margin-top:3px">
+        ${d ? `<div style="font-size:13px;color:var(--gray);margin-top:3px">
           ${tIcon} ${transportSummary}
           ${d.departPlan ? ` | 출발예정: ${d.departPlan.replace('T',' ')}` : ''}
           ${d.eta ? ` | ETA: ${d.eta.replace('T',' ')}` : ''}
-        </div>` : '<div style="font-size:11px;color:#999;margin-top:2px">배차 미등록</div>'}
+        </div>` : '<div style="font-size:13px;color:#999;margin-top:2px">배차 미등록</div>'}
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
         ${statusBadge}
@@ -321,12 +321,12 @@ function renderDispatch() {
     return `<tr>
       <td><b>${d.orderNo}</b></td>
       <td>${o?.customer||'-'}</td>
-      <td style="font-size:11px;white-space:nowrap">${d.fromHub||'-'} → ${d.toHub||'-'}</td>
+      <td style="font-size:13px;white-space:normal;min-width:150px">${d.fromHub||'-'} → ${d.toHub||'-'}</td>
       <td>${tIcon} ${tLabel}</td>
-      <td style="font-size:11px">${detail}</td>
-      <td style="font-size:11px">${person}</td>
-      <td style="font-size:11px">${(d.departPlan||'-').replace('T',' ')}</td>
-      <td style="font-size:11px">${(d.eta||'-').replace('T',' ')}</td>
+      <td style="font-size:13px">${detail}</td>
+      <td style="font-size:13px">${person}</td>
+      <td style="font-size:13px">${(d.departPlan||'-').replace('T',' ')}</td>
+      <td style="font-size:13px">${(d.eta||'-').replace('T',' ')}</td>
       <td><span class="status ${STAT_CLS[d.status]||'s-dispatch'}">${d.status||'배차완료'}</span></td>
       <td>${ (()=>{ const _l=getOrderLegs(o); const _g=_l&&_l[d.legIdx]; const _p=_g&&isLegPassed(d.orderNo,_g); return _p ? '<button class="btn btn-xs" disabled style="background:#F5F5F5;color:#BDBDBD;border:1px solid #E0E0E0;cursor:not-allowed;" title="통과완료">🔒</button>' : '<button class="btn btn-xs" style="background:#EBF5FF;color:var(--accent);border:1px solid var(--border);" onclick=\'openLegDispatch(\'' + d.orderNo + '\',' + d.legIdx + ')\'>✏️</button>'; })() }</td>
     </tr>`;

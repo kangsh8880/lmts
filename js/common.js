@@ -366,7 +366,7 @@ function buildTrackerCard(o, ps) {
         const wdc=typeof wpObj==='object'?wpObj.destChange:'';
         if (wdc) {
           trackerHtml+=`</div></div><div style="display:flex;align-items:center;gap:4px;margin:2px 0 4px 4px;flex-shrink:0;">
-            <span style="font-size:9px;background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;border-radius:8px;padding:1px 6px;font-weight:700;white-space:nowrap;">🔀 도착지변경→🏢 ${wdc}</span>
+            <span style="font-size:11px;background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;border-radius:8px;padding:1px 6px;font-weight:700;white-space:nowrap;">🔀 도착지변경→🏢 ${wdc}</span>
           </div><div class="tracker-route" style="margin:0;">`;
         }
       }
@@ -390,15 +390,15 @@ function buildTrackerCard(o, ps) {
   return `<div class="tracker-card">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
       <div>
-        <div style="font-size:15px;font-weight:800;color:var(--dk)">${o.no}</div>
-        <div style="font-size:12px;color:var(--gray);margin-top:2px">고객사: <b>${o.customer}</b> &nbsp;|&nbsp; 제품: <b>${ordText(o)}</b> (코드: ${pcode}) &nbsp;|&nbsp; 총 ${ordQty(o)} &nbsp;|&nbsp; ${o.date}</div>
+        <div style="font-size:18px;font-weight:800;color:var(--dk)">${o.no}</div>
+        <div style="font-size:14.5px;color:var(--gray);margin-top:2px">고객사: <b>${o.customer}</b> &nbsp;|&nbsp; 제품: <b>${ordText(o)}</b> (코드: ${pcode}) &nbsp;|&nbsp; 총 ${ordQty(o)} &nbsp;|&nbsp; ${o.date}</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>
-        ${lastEvt?`<span style="font-size:11px;color:var(--gray)">최근: ${lastEvt.hub} ${lastEvt.event} ${lastEvt.time.slice(11,16)}</span>`:''}
+        ${lastEvt?`<span style="font-size:13px;color:var(--gray)">최근: ${lastEvt.hub} ${lastEvt.event} ${lastEvt.time.slice(11,16)}</span>`:''}
       </div>
     </div>
-    ${trackerHtml||'<div style="color:var(--gray);font-size:12px">경로 정보 없음</div>'}
+    ${trackerHtml||'<div style="color:var(--gray);font-size:14.5px">경로 정보 없음</div>'}
   </div>`;
 }
 

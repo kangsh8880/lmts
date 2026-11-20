@@ -152,17 +152,17 @@ function renderAnalytics() {
       const r   = calcRiskScore(o);
       const evc = events.filter(e => e.orderNo === o.no).length;
       return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #EEF2F7;flex-wrap:wrap">
-        <span style="font-size:20px;flex-shrink:0">${r.emoji}</span>
+        <span style="font-size:24px;flex-shrink:0">${r.emoji}</span>
         <div style="flex:1;min-width:140px">
-          <div style="font-size:12px;font-weight:700;color:var(--dk)">${o.no}</div>
-          <div style="font-size:10px;color:var(--gray)">${o.customer} · ${o.product||''}</div>
-          <div style="font-size:9px;color:var(--gray);margin-top:1px">이벤트 ${evc}건 | 경로: ${(o.route?.waypoints?.length||0)+1}구간</div>
+          <div style="font-size:14.5px;font-weight:700;color:var(--dk)">${o.no}</div>
+          <div style="font-size:12px;color:var(--gray)">${o.customer} · ${o.product||''}</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:1px">이벤트 ${evc}건 | 경로: ${(o.route?.waypoints?.length||0)+1}구간</div>
         </div>
         <div style="text-align:right;flex-shrink:0;min-width:90px">
           ${r.score > 0
-            ? `<div style="font-size:18px;font-weight:800;color:${r.color}">${r.score}%</div>
-               <div style="font-size:9px;color:var(--gray)">실제 ${r.elapsed}분 / 표준 ${r.std}분</div>`
-            : `<div style="font-size:10px;color:var(--gray)">${r.std > 0 ? '이벤트 수집 중' : '표준시간 미설정'}</div>`}
+            ? `<div style="font-size:21.5px;font-weight:800;color:${r.color}">${r.score}%</div>
+               <div style="font-size:11px;color:var(--gray)">실제 ${r.elapsed}분 / 표준 ${r.std}분</div>`
+            : `<div style="font-size:12px;color:var(--gray)">${r.std > 0 ? '이벤트 수집 중' : '표준시간 미설정'}</div>`}
         </div>
         <span class="status ${stMap[o.status]||'s-ready'}" style="flex-shrink:0">${o.status}</span>
       </div>`;
@@ -180,14 +180,14 @@ function renderAnalytics() {
       <div style="background:${a.sevColor}15;border:1px solid ${a.sevColor}60;border-radius:6px;padding:10px 12px;margin-bottom:8px">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
           <div>
-            <span style="font-size:11px;font-weight:800;color:#fff;background:${a.sevColor};padding:2px 8px;border-radius:8px">${a.severity}</span>
-            <span style="font-size:11px;font-weight:700;color:var(--dk);margin-left:8px">${a.orderNo}</span>
-            <span style="font-size:10px;color:var(--gray)"> · ${a.customer}</span>
+            <span style="font-size:13px;font-weight:800;color:#fff;background:${a.sevColor};padding:2px 8px;border-radius:8px">${a.severity}</span>
+            <span style="font-size:13px;font-weight:700;color:var(--dk);margin-left:8px">${a.orderNo}</span>
+            <span style="font-size:12px;color:var(--gray)"> · ${a.customer}</span>
           </div>
-          <div style="font-size:16px;font-weight:800;color:${a.sevColor}">${a.ratio}%</div>
+          <div style="font-size:19px;font-weight:800;color:${a.sevColor}">${a.ratio}%</div>
         </div>
-        <div style="font-size:11px;color:var(--gray);margin-top:5px">📍 ${a.fromHub} → ${a.toHub}</div>
-        <div style="font-size:10px;color:var(--gray);margin-top:2px">⏱ 경과 ${a.elapsed}분 / 표준 ${a.std}분 (표준대비 ${a.ratio}%)</div>
+        <div style="font-size:13px;color:var(--gray);margin-top:5px">📍 ${a.fromHub} → ${a.toHub}</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:2px">⏱ 경과 ${a.elapsed}분 / 표준 ${a.std}분 (표준대비 ${a.ratio}%)</div>
       </div>`).join('');
   }
 
@@ -215,7 +215,7 @@ function renderAnalytics() {
         <thead><tr><th>오더번호</th><th>고객사</th><th>구간</th><th>표준(분)</th><th>실제(분)</th><th>달성률</th></tr></thead>
         <tbody>${stdRows.map(t=>`<tr>
           <td><b>${t.orderNo}</b></td><td>${t.customer}</td>
-          <td style="font-size:11px">${t.fromHub} → ${t.toHub}</td>
+          <td style="font-size:13px">${t.fromHub} → ${t.toHub}</td>
           <td style="text-align:center">${t.std||'-'}</td>
           <td style="text-align:center;color:var(--gray)">미완료</td>
           <td style="text-align:center;color:var(--gray)">-</td>
@@ -229,7 +229,7 @@ function renderAnalytics() {
       <tbody>
       ${tatList.map(t=>`<tr>
         <td><b>${t.orderNo}</b></td><td>${t.customer}</td>
-        <td style="font-size:11px">${t.fromHub} → ${t.toHub}</td>
+        <td style="font-size:13px">${t.fromHub} → ${t.toHub}</td>
         <td style="text-align:center">${t.std||'-'}</td>
         <td style="text-align:center;font-weight:700">${t.actual}</td>
         <td style="text-align:center">
@@ -238,7 +238,7 @@ function renderAnalytics() {
         <td style="text-align:center">${icn[t.status]}</td>
       </tr>`).join('')}
       </tbody></table></div>
-    <div style="margin-top:8px;font-size:10px;color:var(--gray);display:flex;gap:14px">
+    <div style="margin-top:8px;font-size:12px;color:var(--gray);display:flex;gap:14px">
       <span>✅ 정상 (100%↓)</span><span>⚠️ 주의 (100~120%)</span><span>🚨 지연 (120%↑)</span>
     </div>`;
   }
@@ -264,14 +264,14 @@ function renderAnalytics() {
       const [bg,tc] = TC[h.type]||['#eee','#333'];
       const intensity = Math.min((inC+outC+podC)*20, 100);
       return `<div style="border:1px solid ${tc}60;border-radius:8px;padding:10px 12px;min-width:150px;background:${bg}">
-        <div style="font-size:11px;font-weight:700;color:${tc};margin-bottom:4px">${h.name}</div>
-        <div style="font-size:9px;color:var(--gray);margin-bottom:6px">${h.type}</div>
-        <div style="display:flex;gap:6px;font-size:11px;flex-wrap:wrap">
+        <div style="font-size:13px;font-weight:700;color:${tc};margin-bottom:4px">${h.name}</div>
+        <div style="font-size:11px;color:var(--gray);margin-bottom:6px">${h.type}</div>
+        <div style="display:flex;gap:6px;font-size:13px;flex-wrap:wrap">
           <span style="color:#0D47A1">IN: <b>${inC}</b></span>
           <span style="color:#E65100">OUT: <b>${outC}</b></span>
           ${podC?`<span style="color:#1B5E20">✅:<b>${podC}</b></span>`:''}
         </div>
-        ${relOrds>0?`<div style="font-size:9px;color:var(--gray);margin-top:3px">관련 오더 ${relOrds}건</div>`:''}
+        ${relOrds>0?`<div style="font-size:11px;color:var(--gray);margin-top:3px">관련 오더 ${relOrds}건</div>`:''}
         <div style="height:4px;background:#ddd;border-radius:2px;margin-top:6px">
           <div style="width:${intensity}%;height:4px;background:${tc};border-radius:2px;min-width:${intensity>0?'4px':'0'}"></div>
         </div>
@@ -285,17 +285,17 @@ function renderAnalytics() {
   const pods   = getPODRecords();
   if (!pods.length) {
     podDiv.innerHTML = `<div class="alert alert-info" style="margin:0">
-      ℹ️ 아직 도착완료 기록이 없습니다. 거점 In/Out 탭에서 이벤트 유형을 <b>도착완료</b>로 등록하면 여기에 표시됩니다.
+      <span>ℹ️ 아직 도착완료 기록이 없습니다. 거점 In/Out 탭에서 이벤트 유형을 <b>도착완료</b>로 등록하면 여기에 표시됩니다.</span>
     </div>`;
   } else {
     podDiv.innerHTML = `<div class="tbl-wrap"><table>
       <thead><tr><th>완료일시</th><th>오더번호</th><th>고객사</th><th>거점</th><th>제품</th><th>확인방식</th><th>처리자</th><th>비고</th></tr></thead>
       <tbody>${pods.map(p=>`<tr>
-        <td style="font-size:11px">${p.time}</td>
+        <td style="font-size:13px">${p.time}</td>
         <td><b>${p.orderNo}</b></td><td>${p.customer}</td><td>${p.hub}</td>
-        <td style="font-size:11px">${p.product}</td>
-        <td><span style="font-size:10px;background:#E8F5E9;color:#1B5E20;padding:2px 6px;border-radius:8px;font-weight:700">${p.confirm}</span></td>
-        <td>${p.person||'-'}</td><td style="font-size:11px">${p.note||'-'}</td>
+        <td style="font-size:13px">${p.product}</td>
+        <td><span style="font-size:12px;background:#E8F5E9;color:#1B5E20;padding:2px 6px;border-radius:8px;font-weight:700">${p.confirm}</span></td>
+        <td>${p.person||'-'}</td><td style="font-size:13px">${p.note||'-'}</td>
       </tr>`).join('')}
       </tbody></table></div>`;
   }

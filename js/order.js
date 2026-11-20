@@ -44,7 +44,7 @@ const TRANSPORT_LABEL = {truck:'차량', air:'항공', sea:'선박'};
 
 function renderWpList() {
   const c=el('waypoint-list');
-  if (!wpList.length) { c.innerHTML='<div style="font-size:11px;color:var(--gray);padding:6px 0 4px 38px">경유지 없음 — 직배송</div>'; return; }
+  if (!wpList.length) { c.innerHTML='<div style="font-size:13px;color:var(--gray);padding:6px 0 4px 38px">경유지 없음 — 직배송</div>'; return; }
   const destHubs = S.hubs().filter(h=>h.type==='도착(고객사)');
   c.innerHTML = wpList.map((w,i)=>{
     const hasTransport = w.transport && w.transport!=='';
@@ -55,11 +55,11 @@ function renderWpList() {
       <!-- 1행: 기본 정보 -->
       <div style="display:flex;align-items:center;gap:5px;">
         <div class="wp-seq" style="flex-shrink:0">${i+1}</div>
-        <div class="wp-name" style="flex:1;font-size:12px;font-weight:700;">${w.name}</div>
+        <div class="wp-name" style="flex:1;font-size:14.5px;font-weight:700;">${w.name}</div>
         <div style="display:flex;align-items:center;gap:3px;flex-shrink:0;">
-          <span style="font-size:9px;color:var(--gray);white-space:nowrap">→표준</span>
+          <span style="font-size:11px;color:var(--gray);white-space:nowrap">→표준</span>
           <input class="wp-time-input" type="number" min="0" placeholder="분" value="${w.stdTime||''}" oninput="updateWpTime(${i},this.value)">
-          <span style="font-size:9px;color:var(--gray)">분</span>
+          <span style="font-size:11px;color:var(--gray)">분</span>
         </div>
         <button class="wp-btn wp-up ${i===0?'wp-disabled':''}" onclick="moveWp(${i},-1)" ${i===0?'disabled':''}>↑</button>
         <button class="wp-btn wp-down ${i===wpList.length-1?'wp-disabled':''}" onclick="moveWp(${i},1)" ${i===wpList.length-1?'disabled':''}>↓</button>
@@ -67,29 +67,29 @@ function renderWpList() {
       </div>
       <!-- 2행: 운송수단 변경 -->
       <div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-left:28px;flex-wrap:wrap;">
-        <span style="font-size:10px;color:var(--gray);font-weight:600;flex-shrink:0;">출발 운송수단</span>
-        <select onchange="updateWpTransport(${i},this.value)" style="font-size:10px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:#fff;height:24px;">
+        <span style="font-size:12px;color:var(--gray);font-weight:600;flex-shrink:0;">출발 운송수단</span>
+        <select onchange="updateWpTransport(${i},this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:#fff;height:24px;">
           <option value="" ${!w.transport?'selected':''}>-- 이전 구간 유지 --</option>
           <option value="truck" ${w.transport==='truck'?'selected':''}>🚛 차량</option>
           <option value="air" ${w.transport==='air'?'selected':''}>✈️ 항공편</option>
           <option value="sea" ${w.transport==='sea'?'selected':''}>🚢 선박</option>
         </select>
-        ${hasTransport?`<input type="text" placeholder="${TRANSPORT_LABEL[w.transport]||'식별번호'}" value="${w.transportNo||''}" oninput="updateWpTransportNo(${i},this.value)" style="font-size:10px;padding:2px 7px;width:110px;border:1px solid var(--border);border-radius:4px;height:24px;">
-        ${w.transportNo?`<span style="font-size:10px;font-weight:600;color:var(--dk)">${TRANSPORT_ICON[w.transport]} ${w.transportNo}</span>`:''}`:
+        ${hasTransport?`<input type="text" placeholder="${TRANSPORT_LABEL[w.transport]||'식별번호'}" value="${w.transportNo||''}" oninput="updateWpTransportNo(${i},this.value)" style="font-size:12px;padding:2px 7px;width:110px;border:1px solid var(--border);border-radius:4px;height:24px;">
+        ${w.transportNo?`<span style="font-size:12px;font-weight:600;color:var(--dk)">${TRANSPORT_ICON[w.transport]} ${w.transportNo}</span>`:''}`:
         ''}
       </div>
       <!-- 3행: 도착지 변경 -->
       <div style="display:flex;align-items:center;gap:6px;margin-top:5px;padding-left:28px;flex-wrap:wrap;">
-        <label style="display:flex;align-items:center;gap:4px;font-size:10px;cursor:pointer;font-weight:600;color:var(--gray);">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;font-weight:600;color:var(--gray);">
           <input type="checkbox" ${destChangeActive?'checked':''} onchange="toggleWpDestChange(${i},this.checked)" style="width:auto;margin:0;">
           <span>이후 도착지 변경</span>
         </label>
         ${destChangeActive?`
-        <select onchange="updateWpDestChange(${i},this.value)" style="font-size:10px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:#fff;height:24px;">
+        <select onchange="updateWpDestChange(${i},this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:#fff;height:24px;">
           <option value="__pending__" ${!hasDestChange?'selected':''}>-- 새 도착지 선택 --</option>
           ${destHubs.map(h=>`<option value="${h.name}" ${w.destChange===h.name?'selected':''}>${h.name}</option>`).join('')}
         </select>
-        ${hasDestChange&&w.destChange!=='__pending__'?`<span style="font-size:10px;font-weight:700;color:var(--green)">🏢→ ${w.destChange}</span>`:''}
+        ${hasDestChange&&w.destChange!=='__pending__'?`<span style="font-size:12px;font-weight:700;color:var(--green)">🏢→ ${w.destChange}</span>`:''}
         `:''}
       </div>
     </div>`;
@@ -109,19 +109,19 @@ function updateRoutePreview() {
     parts.push(`<span class="r-arrow">${tIcon}</span><span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}${tNo}</span>`);
     if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${w.stdTime}분</span>`);
     if (w.destChange && w.destChange !== '__pending__') {
-      parts.push(`<span class="r-chip" style="background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;font-size:10px;">🔀→🏢 ${w.destChange}</span>`);
+      parts.push(`<span class="r-chip" style="background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;font-size:12px;">🔀→🏢 ${w.destChange}</span>`);
     }
   });
   // 최종 도착지: 마지막 destChange 또는 기본 dest
   const lastDestChange = [...wpList].reverse().find(w=>w.destChange && w.destChange!=='__pending__');
   const finalDest = lastDestChange ? lastDestChange.destChange : dest;
   if (finalDest) parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-dest">🏢 ${finalDest}</span>`);
-  el('route-chips').innerHTML = parts.length ? parts.join('') : '<span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
+  el('route-chips').innerHTML = parts.length ? parts.join('') : '<span style="font-size:13px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
 }
 
 let oItems = [];
 function renderOrderItems() {
-  el('o-items').innerHTML = oItems.length ? oItems.map((it,i)=>`<span style="display:inline-flex;gap:6px;align-items:center;border:1px solid #888;border-radius:14px;padding:3px 10px;background:#eef3fb;font-size:12px"><b>${it.product}</b> × ${it.qty}<a href="#" onclick="delOrderItem(${i});return false" style="color:#c0392b;text-decoration:none">✕</a></span>`).join('') : '<span style="font-size:11px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span>';
+  el('o-items').innerHTML = oItems.length ? oItems.map((it,i)=>`<span style="display:inline-flex;gap:6px;align-items:center;border:1px solid #888;border-radius:14px;padding:3px 10px;background:#eef3fb;font-size:14.5px"><b>${it.product}</b> × ${it.qty}<a href="#" onclick="delOrderItem(${i});return false" style="color:#c0392b;text-decoration:none">✕</a></span>`).join('') : '<span style="font-size:13px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span>';
 }
 function addOrderItem() {
   const product=v('o-product'), qty=parseInt(v('o-boxes'))||0;
@@ -193,9 +193,9 @@ function renderOrders() {
 }
 
 function buildRouteChips(o, small=true) {
-  if (!o||!o.route) return '<span style="color:var(--gray);font-size:11px">-</span>';
+  if (!o||!o.route) return '<span style="color:var(--gray);font-size:13px">-</span>';
   const {origin, waypoints, destination}=o.route;
-  const fs=small?'font-size:9px;':'';
+  const fs=small?'font-size:11px;':'';
   const TI={truck:'🚛',air:'✈️',sea:'🚢'};
   let html=`<span class="r-chip r-chip-origin" style="${fs}">🏭 ${origin||'?'}</span>`;
   if (waypoints?.length) waypoints.forEach((w,i)=>{
@@ -307,7 +307,7 @@ function reUpdateWpTime(idx, val) { reWpList[idx].stdTime = val; reUpdatePreview
 function reRenderWpList() {
   const c = el('re-wp-list');
   if (!reWpList.length) {
-    c.innerHTML = '<div style="font-size:11px;color:var(--gray);padding:6px 4px">경유지 없음 — 직배송</div>';
+    c.innerHTML = '<div style="font-size:13px;color:var(--gray);padding:6px 4px">경유지 없음 — 직배송</div>';
     return;
   }
   c.innerHTML = reWpList.map((w, i) => `
@@ -317,7 +317,7 @@ function reRenderWpList() {
       <div class="wp-time-wrap">
         <span class="wp-time-label">→표준</span>
         <input class="wp-time-input" type="number" min="0" placeholder="분" value="${w.stdTime||''}" oninput="reUpdateWpTime(${i},this.value)">
-        <span style="font-size:9px;color:var(--gray)">분</span>
+        <span style="font-size:11px;color:var(--gray)">분</span>
       </div>
       <button class="wp-btn wp-up ${i===0?'wp-disabled':''}" onclick="reMoveWp(${i},-1)" ${i===0?'disabled':''}>↑</button>
       <button class="wp-btn wp-down ${i===reWpList.length-1?'wp-disabled':''}" onclick="reMoveWp(${i},1)" ${i===reWpList.length-1?'disabled':''}>↓</button>
@@ -339,7 +339,7 @@ function reUpdatePreview() {
     if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${w.stdTime}분</span>`);
   });
   if (dest) parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-dest">🏢 ${dest}</span>`);
-  el('re-route-preview').innerHTML = parts.length ? parts.join('') : '<span style="font-size:11px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
+  el('re-route-preview').innerHTML = parts.length ? parts.join('') : '<span style="font-size:13px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';
 }
 
 function saveRouteEdit() {

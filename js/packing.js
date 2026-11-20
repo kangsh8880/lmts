@@ -100,7 +100,7 @@ function delPacking(i){
 function renderPackingDone() {
   const all=S.packings();
   el('packing-done-body').innerHTML = all.map((p,i)=>({p,i})).reverse().map(({p,i})=>
-    `<tr><td>${p.orderNo}</td><td>${p.customer}</td><td>${p.boxes}</td><td style="font-size:11px">${packSummary(p)}</td><td>${p.doneAt}</td><td>${p.person}</td><td><button class="btn btn-danger btn-xs" onclick="delPacking(${i})">삭제</button></td></tr>`
+    `<tr><td>${p.orderNo}</td><td>${p.customer}</td><td>${p.boxes}</td><td style="font-size:13px">${packSummary(p)}</td><td>${p.doneAt}</td><td>${p.person}</td><td><button class="btn btn-danger btn-xs" onclick="delPacking(${i})">삭제</button></td></tr>`
   ).join('') || '<tr><td colspan="7" class="empty">없음</td></tr>';
 }
 
