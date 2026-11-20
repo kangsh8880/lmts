@@ -245,3 +245,19 @@ html[data-theme="dark"] .lg-row:hover td{background:#2B3A55}
 .hp-tbl td{vertical-align:middle}.hp-tbl td:first-child,.hp-tbl th:first-child{text-align:center}
 .hp-go{margin-top:8px}
 .hp-row .form-group:first-child{flex:2 1 240px}.hp-row .form-group:first-child select{width:100%}
+
+/* 저장 버튼: 제목 막대와 구분되는 파스텔 + 진한 테두리 버튼, 우측 정렬 */
+.btn-save{font:700 16px/1 inherit;font-family:inherit;padding:11px 30px;border:2px solid #111827;border-radius:10px;background:#DDEBFA;color:#111827;cursor:pointer;white-space:nowrap}
+.btn-save:hover{background:#CFE0F1}
+.tr-noterow{align-items:flex-end;gap:12px;margin-bottom:0}
+.hp-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:10px}
+.hp-selcnt{font-size:14px;color:#4B5563}
+html[data-theme="dark"] .btn-save{background:#334A6B;color:#F1F5F9;border-color:#CBD5E1}
+html[data-theme="dark"] .btn-save:hover{background:#3B5578}
+/* 오더 추적 현황: 추적 카드는 위, 이벤트 이력은 남은 높이에서 블록 안 스크롤 */
+body.one .op-track .card:nth-child(2) .card-body{display:flex;flex-direction:column;overflow:hidden;gap:0}
+body.one #order-track-display{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+body.one #order-track-display .tracker-card{flex:0 1 auto;min-height:110px;overflow:auto}
+body.one #order-track-display .trk-log-t{flex:0 0 auto}
+body.one #order-track-display .trk-log-wrap{flex:1 1 0;min-height:150px;overflow:auto;border:1px solid #D1D5DB;border-radius:6px}
+.trk-log-wrap .trk-log th{position:sticky;top:0;z-index:2}
