@@ -13,6 +13,7 @@ function fillTrackingSelects() {
   renderTrackingLog();
 }
 // 출하오더 선택 → 거점·다음 처리 자동 세팅 + 오더 추적 현황 자동 연동
+function exportTrackHist(){ const t=el('trk-hist'); if(!t) return alert('오더를 선택하세요'); exportTableXlsx(t,'오더 이벤트 이력 '+v('tr-order')); }
 function onOrderPick(){ loadOrderHubs(); showOrderTrack(); }
 function routeNames(o){
   if(!o||!o.route) return [];
@@ -114,10 +115,10 @@ function showOrderTrack() {
   const evts=S.events().filter(e=>e.orderNo===no).sort((a,b)=>a.time.localeCompare(b.time));
   const ps=S.products();
   let html=buildTrackerCard(o, ps);
-  html+='<div class="trk-log-t">📋 이벤트 이력</div><table class="trk-log"><thead><tr><th>일시</th><th>이벤트</th><th>거점</th><th>처리자</th><th>비고</th></tr></thead><tbody>';
+  html+='<div class="trk-log-t">📋 이벤트 이력 <span class="hp-sub">('+evts.length+'건)</span></div><div class="trk-log-wrap"><table class="trk-log" data-xl="skip" id="trk-hist"><thead><tr><th>일시</th><th>이벤트</th><th>거점</th><th>처리자</th><th>비고</th></tr></thead><tbody>';
   evts.forEach(e=>{ html+=`<tr><td>${e.time.replace('T',' ')}</td><td><span class="trk-ev ${e.event}">${e.event}</span></td><td>${e.hub}</td><td>${e.person||'-'}</td><td>${e.note||''}</td></tr>`; });
   if (!evts.length) html+='<tr><td colspan="5" style="text-align:center;color:var(--gray)">이벤트 없음</td></tr>';
-  html+='</tbody></table>';
+  html+='</tbody></table></div>';
   el('order-track-display').innerHTML=html;
 }
 function dupEvents(){   // 같은 오더·거점·이벤트 중 가장 이른 것만 남기고 나머지를 중복으로 본다
@@ -186,14 +187,21 @@ function hubTodo(hub){
 function renderHubPanel(){
   const sel=el('hp-hub'); if(!sel) return;
   const hubs=S.hubs(), cur=sel.value;
-  sel.innerHTML=hubs.map(h=>{ const n=hubTodo(h.name).length; return `<option value="${h.name}"${h.name===cur?' selected':''}>${h.name} (${h.type})${n?` — 처리 ${n}건`:''}</option>`; }).join('');
-  if(!cur){ const f=hubs.find(h=>hubTodo(h.name).length); if(f) sel.value=f.name; }
+  // 처리할 오더가 있는 거점을 위로, 그 안에서·나머지는 가나다순 → ABC순
+  const isKo=n=>/^[\uAC00-\uD7A3]/.test(String(n).trim()), cmp=(a,b)=>(isKo(a.name)?0:1)-(isKo(b.name)?0:1)||String(a.name).localeCompare(String(b.name),isKo(a.name)?'ko':'en');
+  const withN=hubs.map(h=>({h,name:h.name,n:hubTodo(h.name).length}));
+  const top=withN.filter(x=>x.n).sort(cmp), rest=withN.filter(x=>!x.n).sort(cmp);
+  const opt=x=>`<option value="${x.name}"${x.name===cur?' selected':''}>${x.name} (${x.h.type})${x.n?` — 처리 ${x.n}건`:''}</option>`;
+  sel.innerHTML=(top.length?`<optgroup label="처리할 오더 있음 (${top.length})">${top.map(opt).join('')}</optgroup>`:'')+(rest.length?`<optgroup label="그 외 거점">${rest.map(opt).join('')}</optgroup>`:'');
+  if(!cur&&top.length) sel.value=top[0].name;
   if(!el('hp-time').value) el('hp-time').value=localDT();
   const rows=hubTodo(sel.value);
   el('hp-body').innerHTML=rows.map(r=>`<tr><td><input type="checkbox" class="hp-ck" value="${r.o.no}" data-e="${r.event}" checked></td><td><b>${r.o.no}</b></td><td>${r.o.customer}</td><td>${r.state}</td><td><span class="trk-ev ${r.event}">${r.event}</span></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--gray)">이 거점에서 지금 처리할 오더가 없습니다</td></tr>';
-  el('hp-all').checked=rows.length>0; el('hp-all').disabled=!rows.length;
+  el('hp-all').checked=rows.length>0; el('hp-all').disabled=!rows.length; hpCount();
 }
-function hpToggleAll(on){ document.querySelectorAll('.hp-ck').forEach(c=>c.checked=on); }
+function hpCount(){ const a=document.querySelectorAll('.hp-ck'), c=document.querySelectorAll('.hp-ck:checked'); el('hp-sel').textContent=a.length?`선택 ${c.length} / ${a.length}건`:''; }
+function hpToggleAll(on){ document.querySelectorAll('.hp-ck').forEach(c=>c.checked=on); hpCount(); }
+document.addEventListener('change',e=>{ if(e.target.classList&&e.target.classList.contains('hp-ck')) hpCount(); });
 function processHubBatch(){
   const hub=v('hp-hub'), picks=[...document.querySelectorAll('.hp-ck:checked')].map(c=>({no:c.value,event:c.dataset.e}));
   if(!hub) return alert('거점을 선택하세요');
