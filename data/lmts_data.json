@@ -594,12 +594,12 @@
       "transportType": "truck",
       "departPlan": "",
       "eta": "",
-      "savedAt": "2026-11-20 13:51",
+      "savedAt": "2026-11-20 13:52",
       "note": "",
       "status": "배차완료",
-      "vehicleNo": "경기 4521가",
-      "driver": "홍길동",
-      "dphone": "010-1234-5678"
+      "vehicleNo": "인천 3847나",
+      "driver": "김영수",
+      "dphone": "010-9876-5432"
     }
   ],
   "events": [
@@ -695,5 +695,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 13:51"
+  "lastUpdated": "2026-11-20 13:52"
 }
