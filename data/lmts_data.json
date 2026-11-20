@@ -525,6 +525,21 @@
       "vehicleNo": "인천 3847나",
       "driver": "김영수",
       "dphone": "010-9876-5432"
+    },
+    {
+      "orderNo": "ORD-261119-005",
+      "legIdx": 1,
+      "fromHub": "안성허브터미널",
+      "toHub": "SK Hynix 이천캠퍼스",
+      "transportType": "truck",
+      "departPlan": "2026-11-20T20:29",
+      "eta": "2026-11-21T07:29",
+      "savedAt": "2026-11-20 13:29",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "경기 4521가",
+      "driver": "홍길동",
+      "dphone": "010-1234-5678"
     }
   ],
   "events": [
@@ -620,5 +635,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 13:28"
+  "lastUpdated": "2026-11-20 13:29"
 }
