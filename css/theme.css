@@ -261,3 +261,10 @@ body.one #order-track-display .tracker-card{flex:0 1 auto;min-height:110px;overf
 body.one #order-track-display .trk-log-t{flex:0 0 auto}
 body.one #order-track-display .trk-log-wrap{flex:1 1 0;min-height:150px;overflow:auto;border:1px solid #D1D5DB;border-radius:6px}
 .trk-log-wrap .trk-log th{position:sticky;top:0;z-index:2}
+
+/* 현재 위치 · 다음 거점 · 최종 도착지 3등분 */
+.trk-sum:not(.ok){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:0}
+.trk-sum:not(.ok)>div{padding:8px 14px;min-width:0;align-items:center;text-align:center}
+.trk-sum:not(.ok)>div+div{border-left:1px solid #9CA3AF}
+.trk-sum:not(.ok) b{word-break:keep-all;overflow-wrap:anywhere}
+html[data-theme="dark"] .trk-sum:not(.ok)>div+div{border-color:#64748B}
