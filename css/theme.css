@@ -163,3 +163,5 @@ body.one .op-page > [id^="master-"] .form-group{min-width:120px}
 /* 표 제목줄 고정: 스크롤 시 아래 행이 비치지 않도록 불투명 배경 */
 body.one .op-page thead th{background:#CFE0F1;background-clip:padding-box;box-shadow:0 1px 0 #9CA3AF;z-index:3}
 html[data-theme="dark"] body.one .op-page thead th{background:#26334A !important}
+/* 모든 표의 제목줄(th)은 가운데 정렬 (본문 숫자 열의 우측 정렬은 유지) */
+table th, .tbl-wrap th, .dt th, th.num-col, td.num-col-h, thead th{text-align:center !important;vertical-align:middle}
