@@ -30,17 +30,41 @@ function nextStep(o){
   }
   return {done:true};
 }
+// 오더의 진행 현황: cur = 이벤트가 있는 가장 뒤쪽 경로 인덱스(그보다 앞 거점은 "이미 지나간 경로")
+function orderProgress(o){
+  const names=routeNames(o), evts=S.events().filter(e=>e.orderNo===o.no);
+  let cur=-1; names.forEach((n,i)=>{ if(evts.some(e=>e.hub===n)) cur=i; });
+  const has=(h,e)=>evts.some(x=>x.hub===h&&x.event===e);
+  // 거점별 등록 가능한 이벤트: 출발지=OUT / 경유지=IN,OUT / 도착지=IN,도착완료
+  const allowed=(i)=>{ const h=names[i], last=i===names.length-1, r=[];
+    if(i>0 && !has(h,'IN')) r.push('IN');
+    if(!last && !has(h,'OUT') && (i===0||has(h,'IN')||true)) r.push('OUT');
+    if(last && !has(h,'도착완료')) r.push('도착완료');
+    return r; };
+  return {names,cur,has,allowed};
+}
+function hubPassed(o,i,P){ P=P||orderProgress(o); return i<P.cur || P.allowed(i).length===0; }
 function loadOrderHubs() {
   const no=v('tr-order'), o=S.orders().find(x=>x.no===no);
   if (!o||!o.route) { fillSel('tr-hub', S.hubs().map(h=>({v:h.name, l:`${h.name} (${h.type})`}))); el('tr-hub-hint').textContent=''; return; }
-  const {origin, waypoints, destination}=o.route;
-  const names=[origin,...(waypoints||[]).map(w=>typeof w==='string'?w:w.name),destination].filter(Boolean);
-  const hs=S.hubs();
-  fillSel('tr-hub', names.map(n=>{const h=hs.find(x=>x.name===n); return {v:n, l:`${n} (${h?.type||''})`};}));
+  const P=orderProgress(o), hs=S.hubs();
+  el('tr-hub').innerHTML='<option value="">-- 거점 선택 --</option>'+P.names.map((n,i)=>{const h=hs.find(x=>x.name===n); const pass=hubPassed(o,i,P);
+    return `<option value="${n}"${pass?' disabled':''}>${pass?'✓ 통과 · ':''}${n} (${h?.type||''})</option>`;}).join('');
   const nx=nextStep(o);
-  if(nx.done){ el('tr-hub-hint').textContent='— 이 오더는 모든 거점 처리가 완료되었습니다'; return; }
-  el('tr-hub').value=nx.hub; el('tr-event').value=nx.event;
+  if(nx.done){ el('tr-hub-hint').textContent='— 이 오더는 모든 거점 처리가 완료되었습니다'; el('tr-event').querySelectorAll('option').forEach(op=>op.disabled=true); return; }
+  el('tr-hub').value=nx.hub;
   el('tr-hub-hint').textContent=`— 다음 처리: ${nx.hub} ${nx.event}`;
+  onHubPick(nx.event);
+}
+// 거점을 고르면 그 거점에서 등록 가능한 이벤트만 선택 가능
+function onHubPick(prefer){
+  const o=S.orders().find(x=>x.no===v('tr-order')), hub=v('tr-hub'), sel=el('tr-event');
+  const ops=[...sel.querySelectorAll('option')];
+  if(!o||!o.route||!hub){ ops.forEach(op=>op.disabled=false); return; }
+  const P=orderProgress(o), i=P.names.indexOf(hub), ok=i>=0?P.allowed(i):[];
+  ops.forEach(op=>{ op.disabled=!ok.includes(op.value); });
+  const want=(typeof prefer==='string'&&ok.includes(prefer))?prefer:ok[0];
+  if(want) sel.value=want;
 }
 function saveTracking() {
   const orderNo=v('tr-order'), hub=v('tr-hub'), eventType=v('tr-event');
@@ -54,6 +78,9 @@ function saveTracking() {
   if (dup) return alert(`⛔ 이미 처리된 이벤트입니다.\n\n오더: ${orderNo}\n거점: ${hub}\n이벤트: ${eventType}\n처리: ${dup.time} (${dup.person||'-'})\n\n같은 오더·거점·이벤트는 한 번만 등록할 수 있습니다.`);
   // ② 지정 경로 순서 확인 (경로 외 거점은 아래 비지정 알람으로 처리)
   if (o && o.route && routeNames(o).includes(hub)) {
+    const P=orderProgress(o), hi=P.names.indexOf(hub);
+    if (hi<P.cur) return alert(`⛔ 이미 지나간 경로입니다.\n\n오더: ${orderNo}\n거점: ${hub}\n\n이 오더는 ${P.names[P.cur]}까지 진행되어 이전 거점에는 이벤트를 등록할 수 없습니다.`);
+    if (!P.allowed(hi).includes(eventType)) return alert(`⛔ ${hub}에서는 ${eventType} 이벤트를 등록할 수 없습니다.\n(출발지=OUT / 경유지=IN·OUT / 도착지=IN·도착완료)`);
     const nx=nextStep(o);
     if (nx.done) return alert(`⛔ ${orderNo} 는 모든 거점 처리가 완료된 오더입니다.`);
     if ((nx.hub!==hub||nx.event!==eventType) && !confirm(`처리 순서가 다릅니다.\n\n다음 처리 순서: ${nx.hub} ${nx.event}\n선택한 이벤트: ${hub} ${eventType}\n\n그래도 등록할까요?`)) return;
@@ -79,11 +106,11 @@ function saveTracking() {
     } else { alert(`✅ [${orderNo}] ${hub} ${eventType}`); }
   } else { alert(`✅ [${orderNo}] ${hub} ${eventType}`); }
 
-  fillTrackingSelects(); onOrderPick();
+  fillTrackingSelects(); onOrderPick(); renderHubPanel();
 }
 function showOrderTrack() {
   const no=v('tr-order'), o=S.orders().find(x=>x.no===no);
-  if (!no||!o) { el('order-track-display').innerHTML='<div class="empty">출하오더를 선택하세요</div>'; renderRecent(); return; }
+  if (!no||!o) { el('order-track-display').innerHTML='<div class="empty">출하오더를 선택하세요</div>'; return; }
   const evts=S.events().filter(e=>e.orderNo===no).sort((a,b)=>a.time.localeCompare(b.time));
   const ps=S.products();
   let html=buildTrackerCard(o, ps);
@@ -92,7 +119,6 @@ function showOrderTrack() {
   if (!evts.length) html+='<tr><td colspan="5" style="text-align:center;color:var(--gray)">이벤트 없음</td></tr>';
   html+='</tbody></table>';
   el('order-track-display').innerHTML=html;
-  renderRecent();
 }
 function dupEvents(){   // 같은 오더·거점·이벤트 중 가장 이른 것만 남기고 나머지를 중복으로 본다
   const seen=new Map(), dups=[];
@@ -106,11 +132,6 @@ function cleanDupEvents(){
   renderTrackingLog(); onOrderPick();
 }
 const evCls=e=>e==='IN'?'s-in':e==='OUT'?'s-out':'s-done';
-function renderRecent(){
-  const t=el('tr-recent'); if(!t) return;
-  const r=S.events().slice().reverse().slice(0,5);
-  t.innerHTML=r.map(e=>`<tr><td>${String(e.time).slice(5,16)}</td><td><b>${e.orderNo}</b></td><td>${e.hub}</td><td><span class="trk-ev ${e.event}">${e.event}</span></td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--gray)">등록된 이벤트 없음</td></tr>';
-}
 function fillLogFilters(){
   const ev=S.events(), keep=id=>el(id).value;
   const o=keep('lg-order'), h=keep('lg-hub');
@@ -124,7 +145,7 @@ function renderTrackingLog() {
   // 탭 버튼 배지
   el('lg-n').textContent=`(${all.length})`;
   const bd=el('lg-dup'); bd.textContent=`⚠ 중복 ${d.length}`; bd.classList.toggle('hidden',!d.length);
-  renderRecent(); fillLogFilters();
+  fillLogFilters();
   const bar=el('tr-dup-bar');
   if(bar) bar.innerHTML = d.length ? `<div class="alert alert-warn" style="margin-bottom:10px;justify-content:space-between;align-items:center"><span>⚠️ 같은 오더·거점·이벤트가 중복 등록된 건이 <b>${d.length}건</b> 있습니다.</span><button class="btn btn-danger btn-sm" onclick="cleanDupEvents()">중복 정리</button></div>` : '';
   const fo=v('lg-order'), fh=v('lg-hub'), fe=v('lg-ev'), ff=v('lg-from'), ft=v('lg-to');
@@ -152,8 +173,49 @@ document.addEventListener('click',e=>{
 
 
 
+// ══ 거점 중심 처리: 거점을 먼저 고르고, 그 거점에서 지금 처리할 차례인 오더를 한 번에 처리 ══
+const HP_ACT=['패킹완료','배차완료','운송중'];
+function hubTodo(hub){
+  return S.orders().filter(o=>HP_ACT.includes(o.status)&&o.route&&routeNames(o).includes(hub)).map(o=>{
+    const nx=nextStep(o); if(nx.done||nx.hub!==hub) return null;
+    const P=orderProgress(o), i=P.names.indexOf(hub);
+    const st=nx.event==='IN'?'입고 예정':nx.event==='OUT'?(i===0?'출발 대기':'체류 중 · 출고 대기'):'도착완료 대기';
+    return {o,event:nx.event,state:st};
+  }).filter(Boolean);
+}
+function renderHubPanel(){
+  const sel=el('hp-hub'); if(!sel) return;
+  const hubs=S.hubs(), cur=sel.value;
+  sel.innerHTML=hubs.map(h=>{ const n=hubTodo(h.name).length; return `<option value="${h.name}"${h.name===cur?' selected':''}>${h.name} (${h.type})${n?` — 처리 ${n}건`:''}</option>`; }).join('');
+  if(!cur){ const f=hubs.find(h=>hubTodo(h.name).length); if(f) sel.value=f.name; }
+  if(!el('hp-time').value) el('hp-time').value=localDT();
+  const rows=hubTodo(sel.value);
+  el('hp-body').innerHTML=rows.map(r=>`<tr><td><input type="checkbox" class="hp-ck" value="${r.o.no}" data-e="${r.event}" checked></td><td><b>${r.o.no}</b></td><td>${r.o.customer}</td><td>${r.state}</td><td><span class="trk-ev ${r.event}">${r.event}</span></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--gray)">이 거점에서 지금 처리할 오더가 없습니다</td></tr>';
+  el('hp-all').checked=rows.length>0; el('hp-all').disabled=!rows.length;
+}
+function hpToggleAll(on){ document.querySelectorAll('.hp-ck').forEach(c=>c.checked=on); }
+function processHubBatch(){
+  const hub=v('hp-hub'), picks=[...document.querySelectorAll('.hp-ck:checked')].map(c=>({no:c.value,event:c.dataset.e}));
+  if(!hub) return alert('거점을 선택하세요');
+  if(!picks.length) return alert('처리할 오더를 선택하세요');
+  const t=normTime(el('hp-time').value), person=v('hp-person'), events=S.events();
+  // 처리 시점 기준으로 다시 확인(그 사이 다른 곳에서 처리됐을 수 있음) + 시각 역전 점검
+  const todo=hubTodo(hub), okMap=new Map(todo.map(r=>[r.o.no,r.event])), items=picks.filter(p=>okMap.get(p.no)===p.event);
+  if(!items.length) { alert('선택한 오더는 이미 처리되었거나 처리 차례가 아닙니다.'); return renderHubPanel(); }
+  const past=items.filter(p=>{ const l=events.filter(e=>e.orderNo===p.no).map(e=>e.time).sort().pop(); return l&&t<l; });
+  if(past.length && !confirm(`입력한 시각(${t})이 마지막 이벤트보다 과거인 오더가 ${past.length}건 있습니다.\n(${past.map(p=>p.no).join(', ')})\n\n그래도 처리할까요?`)) return;
+  if(!confirm(`${hub}\n${items.map(p=>`· ${p.no}  ${p.event}`).join('\n')}\n\n위 ${items.length}건을 ${t} 기준으로 등록합니다.`)) return;
+  items.forEach(p=>{ const o=S.orders().find(x=>x.no===p.no); events.push({time:t, orderNo:p.no, customer:o?.customer||'', hub, event:p.event, person, note:''}); });
+  S.set('events', events);
+  items.filter(p=>p.event==='도착완료').forEach(p=>updateOrderStatus(p.no,'도착완료'));
+  reconcileOrderStatus();
+  el('hp-time').value=localDT();
+  fillTrackingSelects(); onOrderPick(); renderHubPanel();
+  alert(`✅ ${hub} — ${items.length}건 처리 완료`);
+}
+
 // ── 페이지 초기화 ───────────────────────────────────────────────
 window.lmtsReady = function() {
   initNav();
-  fillTrackingSelects(); onOrderPick();
+  fillTrackingSelects(); onOrderPick(); renderHubPanel();
 };
