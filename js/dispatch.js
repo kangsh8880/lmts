@@ -302,7 +302,8 @@ function saveLegDispatch() {
 function renderDispatch() {
   const STAT_CLS = {배차완료:'s-dispatch', 운송중:'s-moving', 도착완료:'s-done'};
   // legIdx/fromHub/toHub 없는 불완전 레코드 제외
-  const validDispatches = S.dispatches().filter(d => d.legIdx !== undefined && d.fromHub && d.toHub);
+  const validDispatches = S.dispatches().filter(d => d.legIdx !== undefined && d.fromHub && d.toHub)
+    .sort((a, b) => String(a.orderNo).localeCompare(String(b.orderNo), undefined, {numeric:true}) || (a.legIdx - b.legIdx));   // 오더번호 오름차순 → 구간 순서 오름차순
   el('dispatch-table-body').innerHTML = validDispatches.map(d => {
     const o = S.orders().find(x => x.no === d.orderNo);
     const tIcon  = TRANSPORT_ICON[d.transportType] || '🚛';
