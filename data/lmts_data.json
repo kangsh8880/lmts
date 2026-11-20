@@ -555,6 +555,21 @@
       "vehicleNo": "경기 4521가",
       "driver": "홍길동",
       "dphone": "010-1234-5678"
+    },
+    {
+      "orderNo": "ORD-260420-001",
+      "legIdx": 2,
+      "fromHub": "인천국제공항 (ICN)",
+      "toHub": "Samsung Electronics 수원",
+      "transportType": "truck",
+      "departPlan": "",
+      "eta": "",
+      "savedAt": "2026-11-20 13:51",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "경기 4521가",
+      "driver": "홍길동",
+      "dphone": "010-1234-5678"
     }
   ],
   "events": [
@@ -650,5 +665,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 13:50"
+  "lastUpdated": "2026-11-20 13:51"
 }
