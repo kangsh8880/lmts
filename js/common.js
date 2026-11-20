@@ -343,6 +343,7 @@ function loadFromLocalStorage() {
 
 // ── 네비게이션: 현재 페이지 active 표시 ─────────────────────────
 function initNav() {
+  try { reconcileOrderStatus(); } catch (e) { console.warn('status reconcile', e); }
   const page = location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.page === page);
@@ -685,4 +686,24 @@ function cleanStaleDispatches(orderNo) {
   });
   if (removed.length) S.set('dispatches', keep);
   return removed;
+}
+
+
+// ── 오더 상태 정합: 이벤트·배차·Packing 실적에 비해 상태가 뒤처진 오더를 올려 맞춤 (되돌림 없음) ──
+// 우선순위: 도착완료 이벤트 > 거점 OUT 이벤트(운송중) > 배차 기록(배차완료) > Packing 기록(패킹완료)
+function reconcileOrderStatus() {
+  const RANK = {'대기':0, '패킹완료':1, '배차완료':2, '운송중':3, '지연':3, '도착완료':4};
+  const orders = S.orders(), evs = S.events(), dps = S.dispatches(), pks = S.packings();
+  let changed = 0;
+  orders.forEach(o => {
+    const my = evs.filter(e => e.orderNo === o.no);
+    let want = null;
+    if (my.some(e => e.event === '도착완료')) want = '도착완료';
+    else if (my.some(e => e.event === 'OUT')) want = '운송중';
+    else if (dps.some(d => d.orderNo === o.no)) want = '배차완료';
+    else if (pks.some(p => p.orderNo === o.no)) want = '패킹완료';
+    if (want && (RANK[want] > (RANK[o.status] ?? 0))) { o.status = want; changed++; }
+  });
+  if (changed) S.set('orders', orders);
+  return changed;
 }

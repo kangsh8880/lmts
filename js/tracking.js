@@ -59,6 +59,7 @@ function saveTracking() {
   events.push({time:t, orderNo, customer:o?.customer||'', hub, event:eventType, person:v('tr-person'), note:v('tr-note')});
   S.set('events', events);
   if (eventType==='도착완료') updateOrderStatus(orderNo,'도착완료');
+  else reconcileOrderStatus();   // 출발 OUT 등록 시 오더 상태를 운송중으로 반영
 
   // 비지정 거점 알람
   if (o&&o.route) {

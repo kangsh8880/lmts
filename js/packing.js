@@ -79,7 +79,7 @@ function doPacking() {
   if (!pkNeed(o).every(n=>n.left===0)) return alert('출하 요구 수량을 모두 담아야 완료 처리할 수 있습니다');
   const arr=S.packings();
   arr.push({orderNo:no, customer:o.customer||'', boxes:new Set(pkLines.map(l=>l.packNo)).size, lines:pkLines.map(l=>({...l})), doneAt:now(), person:'창고담당'});
-  S.set('packings', arr); updateOrderStatus(no,'패킹완료');
+  S.set('packings', arr); { const _o=S.orders().find(x=>x.no===no); if(!_o || ['대기','패킹완료',undefined,''].includes(_o.status)) updateOrderStatus(no,'패킹완료'); }
   pkLines=[]; fillPackingSelects();
   el('pk-order').value=''; loadPackingOrder();
   const m=el('pk-msg'); if(m){ m.style.color='#1a4fa0'; m.textContent=`✅ [${no}] Packing 완료 — 오른쪽 "Packing 완료 현황"에 등록되었습니다`; }
