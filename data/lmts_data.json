@@ -593,6 +593,21 @@
       "flightNo": "OZ8522",
       "depAirport": "ICN",
       "arrAirport": "HNI"
+    },
+    {
+      "orderNo": "ORD-261119-004",
+      "legIdx": 2,
+      "fromHub": "하노이 노이바이 공항",
+      "toHub": "VINA VINHYEN",
+      "transportType": "truck",
+      "departPlan": "",
+      "eta": "",
+      "savedAt": "2026-11-20 14:22",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "88A-012365",
+      "driver": "빈푹빈옌",
+      "dphone": "039123456789"
     }
   ],
   "events": [
