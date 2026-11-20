@@ -664,3 +664,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
   d.innerHTML = '<button id="bk-btn" class="btn btn-ghost btn-sm" onclick="downloadBackup()">💾 데이터 백업 받기 (JSON)</button><span style="font-size:13px;color:#6b7280">전체 데이터를 내 PC에 저장합니다. 정기적으로 보관하세요.</span>';
   m.appendChild(d);
 });
+
+
+// ── 배차 정합성: 오더 경로가 바뀌어 구간(출발·도착 거점)이 달라진 배차 기록은 무효 → 정리 ──
+// 이미 통과한 구간(출발 OUT + 도착 IN 이벤트 존재)은 이력이므로 보존한다. orderNo를 주면 그 오더만 대상.
+function cleanStaleDispatches(orderNo) {
+  const orders = S.orders(), evs = S.events(), all = S.dispatches(), removed = [];
+  const keep = all.filter(d => {
+    if (orderNo && d.orderNo !== orderNo) return true;
+    const o = orders.find(x => x.no === d.orderNo);
+    let ok = false;
+    if (o && o.route) {
+      const hubs = [o.route.origin, ...(o.route.waypoints || []).map(w => typeof w === 'string' ? w : w.name), o.route.destination].filter(Boolean);
+      ok = hubs[d.legIdx] === d.fromHub && hubs[d.legIdx + 1] === d.toHub;
+    }
+    if (ok) return true;
+    const passed = evs.some(e => e.orderNo === d.orderNo && e.hub === d.fromHub && e.event === 'OUT') && evs.some(e => e.orderNo === d.orderNo && e.hub === d.toHub && (e.event === 'IN' || e.event === '도착완료'));
+    if (passed) return true;
+    removed.push(d); return false;
+  });
+  if (removed.length) S.set('dispatches', keep);
+  return removed;
+}

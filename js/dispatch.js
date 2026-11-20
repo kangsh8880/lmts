@@ -341,5 +341,8 @@ function renderDispatch() {
 // ── 페이지 초기화 ───────────────────────────────────────────────
 window.lmtsReady = function() {
   initNav();
+  // 경로 변경 등으로 현재 경로와 맞지 않게 남은 옛 배차 기록 정리
+  const stale = cleanStaleDispatches();
+  if (stale.length) setTimeout(() => alert(`ℹ️ 경로가 변경되어 현재 경로와 맞지 않는 옛 배차 ${stale.length}건을 정리했습니다.\n새 경로 기준으로 다시 등록하세요.\n\n` + stale.map(d=>`· ${d.orderNo} 구간 ${d.legIdx+1}: ${d.fromHub} → ${d.toHub}`).join('\n')), 300);
   fillDispatchSelects(); renderDispatch();
 };

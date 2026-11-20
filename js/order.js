@@ -387,8 +387,10 @@ function saveRouteEdit() {
   };
 
   S.set('orders', arr);
+  const staleDp = cleanStaleDispatches(reOrderNo);   // 경로가 바뀐 구간의 기존 배차는 무효 처리
   closeRouteEditModal();
   renderOrders();
+  if (staleDp.length) alert(`ℹ️ 경로가 변경되어 아래 구간의 기존 배차 ${staleDp.length}건을 삭제했습니다.\n[차량배차] 화면에서 새 경로 기준으로 다시 등록하세요.\n\n` + staleDp.map(d=>`· 구간 ${d.legIdx+1}: ${d.fromHub} → ${d.toHub}`).join('\n'));
 
   // 대시보드 갱신
 
