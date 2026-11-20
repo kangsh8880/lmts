@@ -285,7 +285,7 @@ function saveLegDispatch() {
   if (ldLegIdx === 0 && !['운송중','배차완료'].includes(o?.status)) {
     updateOrderStatus(ldOrderNo, '운송중');
     const events = S.events();
-    events.push({
+    if (!events.some(e => e.orderNo === ldOrderNo && e.hub === leg.fromHub && e.event === 'OUT')) events.push({
       time: now(), orderNo: ldOrderNo, customer: o?.customer||'',
       hub: leg.fromHub, event: 'OUT', person: '배차담당',
       note: `${TRANSPORT_LABEL[ldTransport]} 출발`
