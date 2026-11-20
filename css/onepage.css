@@ -16,7 +16,7 @@
   body.one .op-ana .op-span2{grid-column:span 2}
   body.one #ana-kpi-row{margin:0;flex:0 0 auto;gap:10px}
   body.one #ana-kpi-row .kpi-card{padding:8px 12px}
-  body.one #ana-kpi-row .kpi-val{font-size:26px}
+  body.one #ana-kpi-row .kpi-val{font-size:31px}
   body.one .op-page .banner-card{flex:0 0 auto}
   body.one .op-page .banner-card .card-body{overflow:visible}
 }

@@ -108,8 +108,32 @@ html[data-theme="dark"] .nav-sep,html[data-theme="dark"] .nav-tools{border-color
 .modal-bg .modal{resize:both;overflow:auto !important;min-width:340px;min-height:170px;box-sizing:border-box;}
 .modal-bg .modal .modal-title{cursor:move;user-select:none;touch-action:none;}
 .modal-bg .modal .modal-title button{cursor:pointer;}
-.pop-hint{float:left;font-size:11px;color:#6B7280;padding-top:10px;} html[data-theme="dark"] .pop-hint{color:#94A3B8;}
+.pop-hint{float:left;font-size:13px;color:#6B7280;padding-top:10px;} html[data-theme="dark"] .pop-hint{color:#94A3B8;}
 
 #manual-btn{text-decoration:none;}
 /* 탭 9개: 1450px 미만 화면에서는 이모지를 숨겨 한 줄(18px)로 표시 */
 @media (max-width:1449px){ .nav-tab .ti{display:none} .nav-tab{padding:7px 9px !important} }
+
+/* ══ 폰트 120% 확대 보정 (뉴스바 이하) — 칸·표·카드 어긋남 방지 ══ */
+.form-group{min-width:165px}
+table th,table td{padding:8px 9px}
+.tbl-wrap th,.tbl-wrap td{padding:8px 4px}
+.tbl-wrap th{white-space:normal;line-height:1.3}
+.tbl-wrap th:first-child,.tbl-wrap td:first-child{white-space:nowrap}
+.tbl-wrap td:nth-child(n){word-break:keep-all}
+@media (min-width:901px){
+  body.one .op-cols{grid-template-columns:minmax(0,3.5fr) minmax(0,8.5fr)}
+}
+.dt td{max-width:11em;overflow:hidden;text-overflow:ellipsis}
+.dt th,.dt td{padding:5px 5px}
+@media (max-width:1500px){
+  .cal .dn em{font-size:10.5px}.cal .dn{gap:2px}.cal .day{gap:2px}.cal .cn{font-size:11px}
+  .mp-ttl small{display:none}
+}
+.rb-add-row{flex-wrap:wrap}.rb-add-row select{flex:1 1 160px;min-width:0}
+.tbl-wrap th{word-break:keep-all}
+.dt th,.dt td{padding:5px 4px}
+@media (min-width:901px){.d-body.g-ops{grid-template-columns:minmax(0,1.15fr) minmax(0,1.1fr) minmax(0,.95fr)}}
+.form-group:has(input[type=datetime-local]){flex:1.6 1 230px}
+input[type=datetime-local],input[type=date]{padding-left:8px;padding-right:6px}
+#kpi-pop .dt td a,.dt td a{white-space:nowrap}

@@ -4,7 +4,7 @@
   --d-bg:#F4F7FB; --d-card:#FFFFFF;
   --d-red:#C62828; --d-blue:#1D4ED8; --d-green:#16A34A;
   --c1:#E8F1FB; --c2:#E6F6EC; --c3:#FFF6DC; --c4:#F0EAFB; --c5:#FDEBEF; --c6:#EEF1F5;
-  --fs-xs:11px; --fs-sm:12.5px; --fs-md:14px; --fs-lg:16px; --fs-kpi:30px;
+  --fs-xs:13px; --fs-sm:15px; --fs-md:17px; --fs-lg:19px; --fs-kpi:36px;
 }
 html,body.dash{height:100%;}
 body.dash{background:var(--d-bg);color:var(--d-text);display:flex;flex-direction:column;overflow:hidden;}
@@ -12,7 +12,7 @@ body.dash{background:var(--d-bg);color:var(--d-text);display:flex;flex-direction
 
 /* 상단 제목 줄 */
 .d-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;}
-.d-title{font-size:20px;font-weight:800;border-left:5px solid var(--d-line-dk);padding-left:10px;white-space:nowrap;}
+.d-title{font-size:24px;font-weight:800;border-left:5px solid var(--d-line-dk);padding-left:10px;white-space:nowrap;}
 .d-title small{font-size:var(--fs-sm);font-weight:500;color:var(--d-sub);margin-left:8px;}
 .d-asof{font-size:var(--fs-sm);color:var(--d-sub);white-space:nowrap;}
 .d-search{display:flex;gap:6px;flex:1;max-width:520px;}
@@ -90,7 +90,7 @@ body.dash{background:var(--d-bg);color:var(--d-text);display:flex;flex-direction
 
 /* 추이 차트 */
 .trend-svg{display:block;}
-.trend-svg text{font-size:10.5px;fill:#6B7280;}
+.trend-svg text{font-size:12.5px;fill:#6B7280;}
 .trend-svg .bar-in{fill:#93B8E8;stroke:#1D4ED8;stroke-width:.7;}
 .trend-svg .bar-out{fill:#F4B6BF;stroke:#C62828;stroke-width:.7;}
 .trend-svg .ln{fill:none;stroke:#1D4ED8;stroke-width:2;}
@@ -118,9 +118,9 @@ body.dash{background:var(--d-bg);color:var(--d-text);display:flex;flex-direction
 .cal .day.sel{background:var(--c1)}
 .cal .dn{display:flex;gap:4px;align-items:baseline;white-space:nowrap;overflow:hidden;}
 .cal .dn b{font-size:var(--fs-sm)} .cal .dn.sat b{color:var(--d-blue)} .cal .dn.sun b,.cal .dn.hol b{color:var(--d-red)}
-.cal .dn em{font-style:normal;color:var(--d-sub);font-size:10px;}
-.cal .hn{font-size:10px;color:var(--d-red);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cal .cn{display:flex;flex-direction:column;gap:0;font-size:10.5px;font-variant-numeric:tabular-nums;}
+.cal .dn em{font-style:normal;color:var(--d-sub);font-size:12px;}
+.cal .hn{font-size:12px;color:var(--d-red);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal .cn{display:flex;flex-direction:column;gap:0;font-size:12.5px;font-variant-numeric:tabular-nums;}
 .cal .cn div{display:flex;justify-content:space-between;}
 .cal .cn .a{color:var(--d-blue)} .cal .cn .b{color:var(--d-red)} .cal .cn .c{border-top:1px dotted var(--d-line);}
 .cal-nav{display:flex;align-items:center;gap:6px;}
@@ -132,7 +132,7 @@ body.dash{background:var(--d-bg);color:var(--d-text);display:flex;flex-direction
 .abbr{font-size:8pt;color:var(--d-sub);padding:0 16px 4px;max-width:none;width:100%;margin:0;}
 
 /* 반응형 */
-@media (max-width:1366px){ :root{--fs-kpi:26px;} }
+@media (max-width:1366px){ :root{--fs-kpi:31px;} }
 @media (max-height:800px){ .k-sub{display:none;} .kbox{padding:7px 8px;} .cal .day{min-height:46px;} }
 @media (max-width:900px){
   body.dash{overflow:auto;height:auto;}
@@ -144,7 +144,7 @@ body.dash{background:var(--d-bg);color:var(--d-text);display:flex;flex-direction
 /* 캘린더 높이 맞춤 */
 #cal{height:100%;}
 .cal .day{overflow:hidden;min-height:0;}
-body.dash .sync-bar{position:fixed;top:14px;right:170px;font-size:12px;margin:0 !important;z-index:30;max-width:380px;padding:6px 12px;}
+body.dash .sync-bar{position:fixed;top:14px;right:170px;font-size:14.5px;margin:0 !important;z-index:30;max-width:380px;padding:6px 12px;}
 .cal .cn div{line-height:1.15;}
 .cal .day{padding:2px 5px;}
 .pnl-h select{max-width:150px;}
@@ -197,7 +197,7 @@ body.dash .sync-bar{position:fixed;top:14px;right:170px;font-size:12px;margin:0 
 .mk.c1{background:var(--c1)}.mk.c3{background:var(--c3)}.mk.c4{background:var(--c4)}
 .mk.on{border:2px solid #222;padding:7px 3px;}
 .mk span{display:block;font-size:var(--fs-sm);font-weight:700;}
-.mk b{font-size:26px;font-variant-numeric:tabular-nums;} .mk b u{text-decoration:none;font-size:var(--fs-xs);color:var(--d-sub);font-weight:500;margin-left:2px;}
+.mk b{font-size:31px;font-variant-numeric:tabular-nums;} .mk b u{text-decoration:none;font-size:var(--fs-xs);color:var(--d-sub);font-weight:500;margin-left:2px;}
 .sub-ttl .hint{font-weight:400;color:var(--d-sub);}
 
 .kbox[onclick]{cursor:pointer;}
