@@ -402,7 +402,7 @@
       "product": "LCD Panel B타입 / Phone Glass",
       "boxes": 2,
       "note": "",
-      "status": "대기",
+      "status": "패킹완료",
       "created": "2026-11-19 17:00",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -436,6 +436,31 @@
         }
       ],
       "doneAt": "2026-11-20 13:11",
+      "person": "창고담당"
+    },
+    {
+      "orderNo": "ORD-261119-005",
+      "customer": "K1 VINA",
+      "boxes": 1,
+      "lines": [
+        {
+          "seq": 1,
+          "packNo": "1",
+          "boxNo": "P002",
+          "product": "LCD Panel B타입",
+          "qty": 1,
+          "at": "13:23"
+        },
+        {
+          "seq": 2,
+          "packNo": "1",
+          "boxNo": "P004",
+          "product": "Phone Glass",
+          "qty": 1,
+          "at": "13:23"
+        }
+      ],
+      "doneAt": "2026-11-20 13:23",
       "person": "창고담당"
     }
   ],
@@ -571,5 +596,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 13:11"
+  "lastUpdated": "2026-11-20 13:23"
 }
