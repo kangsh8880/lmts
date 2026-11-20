@@ -88,9 +88,12 @@ function renderMasterTable(tab) {
   if (tab==='customer') el('customer-table-body').innerHTML = S.customers().map((c,i)=>
     `<tr><td>${c.code}</td><td>${c.name}</td><td>${c.manager||'-'}</td><td>${c.phone||'-'}</td><td>${c.addr||'-'}</td><td>${c.confirm}</td>
     <td><button class="btn btn-ghost btn-xs" onclick="editMaster('customer',${i})">수정</button> <button class="btn btn-danger btn-xs" onclick="delItem('customers',${i})">삭제</button></td></tr>`).join('') || empty(7);
-  if (tab==='product') el('product-table-body').innerHTML = S.products().map((p,i)=>
-    `<tr><td>${p.code}</td><td>${p.name}</td><td>${p.box||'-'}</td><td>${p.qty||'-'}</td><td>${p.weight||'-'}kg</td>
-    <td><button class="btn btn-ghost btn-xs" onclick="editMaster('product',${i})">수정</button> <button class="btn btn-danger btn-xs" onclick="delItem('products',${i})">삭제</button></td></tr>`).join('') || empty(6);
+  if (tab==='product') el('product-table-body').innerHTML = S.products().map((p,i)=>{
+    const tot = parseInt(p.qty)||0, used = S.packings().reduce((a,pk)=>a+(pk.lines||[]).filter(l=>l.boxNo===p.code).reduce((s2,l)=>s2+(+l.qty||0),0),0);
+    const left = Math.max(0, tot-used), low = tot>0 && left===0;
+    const leftCell = !tot ? '<span style="color:#6B7280">제한없음</span>' : low ? `<b style="color:#C0392B">${left} (소진)</b>` : `<b>${left}</b>`;
+    return `<tr><td>${p.code}</td><td>${p.name}</td><td>${p.box||'-'}</td><td>${p.qty||'-'}</td><td>${tot?used:'-'}</td><td>${leftCell}</td><td>${p.weight||'-'}kg</td>
+    <td><button class="btn btn-ghost btn-xs" onclick="editMaster('product',${i})">수정</button> <button class="btn btn-danger btn-xs" onclick="delItem('products',${i})">삭제</button></td></tr>`;}).join('') || empty(8);
   if (tab==='vehicle') el('vehicle-table-body').innerHTML = S.vehicles().map((vv,i)=>
     `<tr><td>${vv.no}</td><td>${vv.type||'-'}</td><td>${vv.cap||'-'}kg</td><td>${vv.driver}</td><td>${vv.dphone||'-'}</td>
     <td><span class="status s-ready">${vv.status}</span></td>

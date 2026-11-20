@@ -577,3 +577,27 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(lmtsInit, 0);
 }
+
+
+// ── 표 숫자열 자동 정렬: 숫자만 들어 있는 열은 머리글·셀 모두 우측 정렬 ──────────────
+(function(){
+  const NUM = /^-?[\d,]+(\.\d+)?\s*(kg|g|%|분|건|개|곳|h|EA|ea)?$/;
+  function align(root){
+    (root||document).querySelectorAll('table').forEach(t=>{
+      if (t.closest('.cal')) return;
+      const rows=[...t.tBodies].flatMap(b=>[...b.rows]); if(!rows.length) return;
+      if (rows.some(r=>[...r.cells].some(c=>c.colSpan>1))) return;
+      const n=Math.max(...rows.map(r=>r.cells.length));
+      for(let i=0;i<n;i++){
+        let num=0, bad=0;
+        rows.forEach(r=>{ const c=r.cells[i]; if(!c) return; const x=c.textContent.trim(); if(!x||x==='-') return; (NUM.test(x)&&!c.querySelector('button,input,select,a'))?num++:bad++; });
+        const on = num>0 && bad===0;
+        rows.forEach(r=>{ const c=r.cells[i]; if(c) c.classList.toggle('num-col',on); });
+        if(t.tHead) [...t.tHead.rows].forEach(r=>{ const c=r.cells[i]; if(c) c.classList.toggle('num-col',on); });
+      }
+    });
+  }
+  let tm=null; const run=()=>{ clearTimeout(tm); tm=setTimeout(()=>align(),60); };
+  document.addEventListener('DOMContentLoaded',()=>{ run(); new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true}); });
+  window.alignNumCols=align;
+})();
