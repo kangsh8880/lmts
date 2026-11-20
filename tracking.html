@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 거점 In/Out</title>
-  <link rel="stylesheet" href="css/style.css?v=20260577">
-  <link rel="stylesheet" href="css/onepage.css?v=20260577">
-  <link rel="stylesheet" href="css/theme.css?v=20260577">
-  <script src="js/theme.js?v=20260577"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260578">
+  <link rel="stylesheet" href="css/onepage.css?v=20260578">
+  <link rel="stylesheet" href="css/theme.css?v=20260578">
+  <script src="js/theme.js?v=20260578"></script>
 </head>
 <body class="one">
 
@@ -73,14 +73,37 @@
   </div>
 </div>
 
+<!-- ══ 이벤트 로그 전체 (보조창: 이동·크기 조절) ══ -->
+<div class="modal-bg hidden" id="log-modal">
+  <div class="modal">
+    <div class="modal-title">📋 이벤트 로그 전체 <button type="button" class="btn btn-ghost btn-sm lg-close" onclick="closeLog()">✕ 닫기</button></div>
+    <div id="tr-dup-bar"></div>
+    <div class="lg-filter">
+      <div class="form-group"><label>오더</label><select id="lg-order" onchange="renderTrackingLog()"></select></div>
+      <div class="form-group"><label>거점</label><select id="lg-hub" onchange="renderTrackingLog()"></select></div>
+      <div class="form-group"><label>이벤트</label><select id="lg-ev" onchange="renderTrackingLog()"><option value="">전체</option><option>IN</option><option>OUT</option><option>도착완료</option></select></div>
+      <div class="form-group"><label>시작일</label><input type="date" id="lg-from" onchange="renderTrackingLog()"></div>
+      <div class="form-group"><label>종료일</label><input type="date" id="lg-to" onchange="renderTrackingLog()"></div>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="resetLogFilter()">초기화</button>
+    </div>
+    <div class="lg-bar"><span id="lg-count"></span><button type="button" class="xl-btn" onclick="exportLog()">⬇ 엑셀</button></div>
+    <div class="tbl-wrap"><table id="lg-table" data-xl="skip">
+      <thead><tr><th>처리일시</th><th>오더번호</th><th>고객사</th><th>거점</th><th>이벤트</th><th>처리자</th><th>비고</th></tr></thead>
+      <tbody id="tracking-log-body"></tbody>
+    </table></div>
+    <div class="pop-hint" style="float:none;padding-top:8px">행을 누르면 해당 오더를 선택합니다 · 제목줄을 끌어 이동 · 우측 아래 모서리를 끌어 크기 조절</div>
+  </div>
+</div>
+
 <div class="page op-page">
 
-  <div class="sec-title">거점별 In/Out 이벤트 관리</div>
+  <div class="sec-title lg-titlebar"><span>거점별 In/Out 이벤트 관리</span>
+    <button type="button" class="lg-tab" id="lg-tab" onclick="openLog()" title="전체 이벤트 로그를 보조창으로 열기">📋 이벤트 로그 전체 <b id="lg-n"></b><span class="lg-dup hidden" id="lg-dup"></span></button></div>
   <div class="op-track">
     <div class="card"><div class="card-head">📍 In/Out 이벤트 등록</div><div class="card-body">
       <div class="form-row">
         <div class="form-group"><label>출하오더</label>
-          <select id="tr-order" onchange="loadOrderHubs()"><option value="">-- 선택 --</option></select></div>
+          <select id="tr-order" onchange="onOrderPick()"><option value="">-- 선택 --</option></select></div>
         <div class="form-group">
           <label>거점 <span id="tr-hub-hint" style="font-weight:400;color:var(--accent);font-size:12px"></span></label>
           <select id="tr-hub"><option value="">-- 거점 선택 --</option></select></div>
@@ -93,25 +116,19 @@
       </div>
       <div class="form-group" style="margin-bottom:12px"><label>비고</label><input id="tr-note"></div>
       <button class="btn btn-primary" onclick="saveTracking()" style="width:100%">📍 이벤트 등록</button>
+      <div class="trk-log-t">🕘 최근 등록 5건</div>
+      <table class="trk-log" data-xl="skip"><thead><tr><th>일시</th><th>오더번호</th><th>거점</th><th>이벤트</th></tr></thead><tbody id="tr-recent"></tbody></table>
     </div></div>
     <div class="card"><div class="card-head">🗺️ 오더 추적 현황</div><div class="card-body">
-      <div class="form-group" style="margin-bottom:12px"><label>오더 선택</label>
-        <select id="tr-track-order" onchange="showOrderTrack()"><option value="">-- 선택 --</option></select></div>
-      <div id="order-track-display"><div class="empty">오더를 선택하세요</div></div>
+      <div class="trk-pick" id="trk-pick"></div>
+      <div id="order-track-display"><div class="empty">출하오더를 선택하세요</div></div>
     </div></div>
-  <div class="card op-wide"><div class="card-head">📋 이벤트 로그 전체</div><div class="card-body">
-    <div id="tr-dup-bar"></div>
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>처리일시</th><th>오더번호</th><th>고객사</th><th>거점</th><th>이벤트</th><th>처리자</th><th>비고</th></tr></thead>
-      <tbody id="tracking-log-body"></tbody>
-    </table></div>
-  </div></div>
   </div>
 </div>
 
-<script src="js/common.js?v=20260577"></script>
+<script src="js/common.js?v=20260578"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260577"></script>
-<script src="js/tracking.js?v=20260577"></script>
+<script src="js/export.js?v=20260578"></script>
+<script src="js/tracking.js?v=20260578"></script>
 </body>
 </html>
