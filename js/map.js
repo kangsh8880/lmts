@@ -195,13 +195,60 @@ const MP = (() => {
       <div class="mp-tl">${tl}</div>`;
   }
 
+
+  // ── 전체 보기(초기 화면): 운송 중인 모든 오더를 한 번에 ──────────────────
+  function overview() {
+    if (!S_.map) return;
+    cancelAnimationFrame(S_.raf); S_.touring = false;
+    if (S_.trail) { S_.map.removeLayer(S_.trail); S_.trail = null; }
+    if (S_.mk) { S_.map.removeLayer(S_.mk); S_.mk = null; } S_.pos = null;
+    S_.order = null; S_.st = null; S_.token = Math.random(); S_.lg.clearLayers();
+    const t = S_.token, R = DC.refNow().t, list = DC.moving().map(m => m.o), rows = [], all = [];
+    list.forEach(o => {
+      const st = calc(o, R);
+      st.legs.forEach(L => { if (L.mode === 'truck' && L.a && L.b) { const c = roadCache()[roadKey(L.a, L.b)]; if (c) { setPts(L, c); L.road = true; } } });
+      const bad = st.over > 0 || st.delta > 30 || o.status === '지연';
+      st.legs.forEach(L => {
+        if (!L.pts) return; all.push(...L.pts);
+        let lay;
+        if (L.i < st.leg) lay = [L_.polyline(L.pts, styleOf(L.mode, true, false))];
+        else if (L.i === st.leg && st.state === 'move') { const [a, b] = split(L, st.prog); lay = [L_.polyline(a, styleOf(L.mode, true, bad)), L_.polyline(b, styleOf(L.mode, false))]; }
+        else lay = [L_.polyline(L.pts, styleOf(L.mode, false))];
+        lay.forEach(x => x.addTo(S_.lg));
+      });
+      const p = curPos(st);
+      if (p) {
+        const Lg = st.legs[Math.min(st.leg, st.n - 1)], ic = st.state === 'move' ? ICON[Lg.mode] : '📍';
+        const mk = L_.marker(p, { icon: L_.divIcon({ className: '', html: `<div class="mp-mk ${bad ? 'bad' : ''}"><span>${ic}</span><em class="mp-mk-no">${esc(o.no.slice(-7))}</em></div>`, iconSize: [38, 38], iconAnchor: [19, 19] }), zIndexOffset: 1000 });
+        mk.bindTooltip(`<b>${esc(o.no)}</b><br>${esc(o.customer)}<br>진행 ${st.pct.toFixed(1)}%`, { className: 'mp-tip', direction: 'top', offset: [0, -18] });
+        mk.on('click', () => pick(o.no)); mk.addTo(S_.lg); all.push(p);
+      }
+      st.D.stops.forEach(s => { if (s.ll) all.push(s.ll); });
+      const where = st.state === 'move' ? `${esc(DC.shortName(st.legs[st.leg].from))} → ${esc(DC.shortName(st.legs[st.leg].to))} ${ICON[st.legs[st.leg].mode]}` : st.state === 'at' ? `${esc(DC.shortName(st.D.stops[st.leg].name))} 체류` : '-';
+      rows.push({ o, st, bad, where });
+      if (st.state === 'move') st.legs.filter(L => L.mode === 'truck' && L.a && L.b && !L.road).forEach(L => loadRoad(L, t).then(ok => { if (ok && t === S_.token && !S_.order) overview(); }));
+    });
+    // 전체 경로가 지도에 보이도록 맞춤 (가장 처음 한 번)
+    if (all.length) { S_.map.invalidateSize(); S_.map.fitBounds(L_.latLngBounds(all), { padding: [50, 50], maxZoom: 10, animate: false }); }
+    el('mp-warn').classList.add('hidden'); el('mp-q').value = '';
+    el('mp-head').textContent = `🗺️ 운송 중 오더 전체 (${rows.length}건)`;
+    el('mp-side').innerHTML = rows.length ? `<div class="mp-note" style="margin-top:0">지도의 오더를 누르거나 아래 목록을 선택하면 해당 오더만 자세히 보여줍니다.</div>` +
+      rows.map(r => `<div class="mp-ovc ${r.bad ? 'bad' : ''}" onclick="MP.pick('${esc(r.o.no)}')"><div class="mp-ord" style="font-size:inherit">${esc(r.o.no)} <span class="status" style="font-size:13px">${esc(r.o.status)}</span></div>
+        <div class="mp-sub">${esc(r.o.customer)} · ${esc(ordText(r.o))}</div>
+        <div class="mp-ovr"><span>${r.where}</span><span>진행 <b>${r.st.pct.toFixed(1)}%</b></span><span>ETA <b>${fmt(r.st.eta)}</b></span></div>
+        <div class="mp-bar"><i style="width:${Math.min(100, r.st.pct)}%"></i></div></div>`).join('')
+      : '<div class="empty">현재 운송 중인 오더가 없습니다.<br>상단 목록에서 오더를 선택하면 위치를 볼 수 있습니다.</div>';
+    el('mp-all').style.display = 'none'; chips();
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  }
+
   // ── 제어 ──────────────────────────────────────────────
   const el = id => document.getElementById(id);
   let L_ = null;
   function chips() {
     const act = S.orders().filter(o => o.status !== '도착완료'), mv = act.filter(o => ['운송중', '지연'].includes(o.status));
-    const cur = S_.order ? S_.order.no : '', opt = o => `<option value="${esc(o.no)}" ${o.no === cur ? 'selected' : ''}>${esc(o.no)} · ${esc(o.customer)} [${esc(o.status)}]</option>`;
-    el('mp-q').innerHTML = `<optgroup label="진행 중 오더">${act.map(opt).join('')}</optgroup><optgroup label="도착 완료 오더">${S.orders().filter(o => o.status === '도착완료').map(opt).join('')}</optgroup>`;
+    const cur = S_.order ? S_.order.no : '', nmv = DC.moving().length, opt = o => `<option value="${esc(o.no)}" ${o.no === cur ? 'selected' : ''}>${esc(o.no)} · ${esc(o.customer)} [${esc(o.status)}]</option>`;
+    el('mp-q').innerHTML = `<option value="" ${cur ? '' : 'selected'}>🗺️ 운송 중 전체 (${nmv}건)</option><optgroup label="진행 중 오더">${act.map(opt).join('')}</optgroup><optgroup label="도착 완료 오더">${S.orders().filter(o => o.status === '도착완료').map(opt).join('')}</optgroup>`;
   }
   function warn(st) {
     const miss = st.D.stops.filter(s => !s.ll).map(s => s.name), w = el('mp-warn');
@@ -214,7 +261,7 @@ const MP = (() => {
   function pick(no) {
     const o = S.orders().find(x => x.no === no); if (!o) { alert('오더번호를 찾을 수 없습니다: ' + no); return; }
     S_.touring = false; S_.order = o; S_.fitted = false; S_.mk && S_.map.removeLayer(S_.mk); S_.mk = null; S_.pos = null; S_.token = Math.random();
-    el('mp-q').value = no; refresh(false); chips();
+    el('mp-q').value = no; el('mp-all').style.display = ''; S_.lg.clearLayers(); refresh(false); chips();
     const t = S_.token; S_.st.legs.filter(L => L.mode === 'truck' && L.a && L.b).forEach(L => loadRoad(L, t).then(ok => { if (ok && t === S_.token) { drawRoute(); placeMarker(0); if (!S_.fitted) fit(); } }));
     try { history.replaceState(null, '', '?order=' + encodeURIComponent(no)); } catch (e) {}
   }
@@ -229,7 +276,7 @@ const MP = (() => {
     st.legs.forEach(L => { const p = old.find(x => x.i === L.i && x.from === L.from && x.to === L.to); if (p && p.road && L.mode === 'truck') { L.pts = p.pts; L.cum = p.cum; L.len = p.len; L.road = true; } else if (L.mode === 'truck' && L.a && L.b) { const c = roadCache()[roadKey(L.a, L.b)]; if (c) { setPts(L, c); L.road = true; } } });
     return st;
   }
-  function search() { const q = el('mp-q').value; if (q) pick(q); }
+  function search() { const q = el('mp-q').value; if (q) pick(q); else overview(); }
   function replay() {
     const st = S_.st; if (!st || !S_.map || !S_.mk) return; const pts = [];
     st.legs.forEach(L => { if (!L.pts) return; if (L.i < st.leg || st.state === 'done') pts.push(...L.pts); else if (L.i === st.leg && st.state === 'move') pts.push(...split(L, st.prog)[0]); });
@@ -261,11 +308,12 @@ const MP = (() => {
       S_.lg = L_.layerGroup().addTo(S_.map);
     }
     const q = new URLSearchParams(location.search).get('order');
-    const first = (q && S.orders().find(o => o.no === q)) || S.orders().find(o => o.status === '운송중') || S.orders().find(o => o.status === '지연') || S.orders().find(o => o.status !== '도착완료') || S.orders()[0];
-    if (first && S_.map) pick(first.no); else if (!first) el('mp-side').innerHTML = '<div class="empty">등록된 오더가 없습니다</div>';
-    clearInterval(S_.timer); S_.timer = setInterval(() => { if (S_.order && !document.hidden && !S_.touring) { chips(); refresh(true); } }, 20000);
+    const first = q && S.orders().find(o => o.no === q);
+    if (!S.orders().length) el('mp-side').innerHTML = '<div class="empty">등록된 오더가 없습니다</div>';
+    else if (S_.map) { if (first) pick(first.no); else overview(); }
+    clearInterval(S_.timer); S_.timer = setInterval(() => { if (document.hidden || S_.touring) return; if (S_.order) { chips(); refresh(true); } else if (S_.map) { const c = S_.map.getCenter(), z = S_.map.getZoom(); overview(); S_.map.setView(c, z, { animate: false }); } }, 20000);
     window.addEventListener('resize', () => S_.map && S_.map.invalidateSize());
   }
-  return { init, pick, search, replay, tour, fit: () => fit(), focusNow, _s: S_, _calc: calc };
+  return { init, pick, overview, search, replay, tour, fit: () => fit(), focusNow, _s: S_, _calc: calc };
 })();
 window.lmtsReady = function () { MP.init(); };
