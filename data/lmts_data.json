@@ -367,7 +367,7 @@
       "product": "Phone Glass",
       "boxes": 2,
       "note": "",
-      "status": "대기",
+      "status": "패킹완료",
       "created": "2026-11-19 14:57",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -420,7 +420,25 @@
       }
     }
   ],
-  "packings": [],
+  "packings": [
+    {
+      "orderNo": "ORD-261119-004",
+      "customer": "K1 VINA",
+      "boxes": 1,
+      "lines": [
+        {
+          "seq": 1,
+          "packNo": "1",
+          "boxNo": "P004",
+          "product": "Phone Glass",
+          "qty": 2,
+          "at": "13:10"
+        }
+      ],
+      "doneAt": "2026-11-20 13:11",
+      "person": "창고담당"
+    }
+  ],
   "dispatches": [
     {
       "orderNo": "ORD-261119-004",
@@ -553,5 +571,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 13:09"
+  "lastUpdated": "2026-11-20 13:11"
 }
