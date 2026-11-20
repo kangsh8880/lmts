@@ -149,3 +149,14 @@ html[data-theme="dark"] .mst-tabs .btn{background:#1E293B !important;color:#CBD5
 html[data-theme="dark"] .mst-tabs .btn.btn-primary{background:#334155 !important;color:#fff !important;border-color:#E2E8F0 !important}
 /* 숫자 열 우측 정렬 */
 td.num-col,th.num-col{text-align:right !important;font-variant-numeric:tabular-nums}
+
+/* 기준정보: 화면 고정(1페이지) — 목록이 많아지면 표 안에서만 스크롤 */
+body.one .op-page > #master-customer, body.one .op-page > #master-product, body.one .op-page > #master-vehicle, body.one .op-page > #master-hub{flex:1;min-height:0;flex-direction:column}
+body.one .op-page > [id^="master-"]:not([style*="none"]):not(#master-tab-btns){display:flex}
+body.one .op-page > [id^="master-"] > .card{flex:1;min-height:0}
+body.one .op-page > [id^="master-"] .card-body{display:flex;flex-direction:column;overflow:hidden}
+body.one .op-page > [id^="master-"] .card-body > *{flex:0 0 auto}
+body.one .op-page > [id^="master-"] .card-body > .tbl-wrap{flex:1 1 auto;min-height:0;overflow:auto}
+body.one .op-page .mst-head{flex:0 0 auto}
+body.one .op-page > [id^="master-"] .form-row{gap:10px}
+body.one .op-page > [id^="master-"] .form-group{min-width:120px}
