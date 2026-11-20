@@ -83,12 +83,10 @@ function showOrderTrack() {
   const evts=S.events().filter(e=>e.orderNo===no).sort((a,b)=>a.time.localeCompare(b.time));
   const ps=S.products();
   let html=buildTrackerCard(o, ps);
-  html+='<ul class="timeline" style="margin-top:12px">';
-  evts.forEach(e=>{ html+=`<li class="tl-item ${e.event==='도착완료'?'done':''}">
-    <div class="tl-time">${e.time}</div><div class="tl-text">[${e.event}] ${e.hub}</div>
-    <div class="tl-sub">처리자: ${e.person||'-'}${e.note?' | '+e.note:''}</div></li>`; });
-  if (!evts.length) html+='<li class="tl-item"><div class="tl-text" style="color:var(--gray)">이벤트 없음</div></li>';
-  html+='</ul>';
+  html+='<div class="trk-log-t">📋 이벤트 이력</div><table class="trk-log"><thead><tr><th>일시</th><th>이벤트</th><th>거점</th><th>처리자</th><th>비고</th></tr></thead><tbody>';
+  evts.forEach(e=>{ html+=`<tr><td>${e.time.replace('T',' ')}</td><td><span class="trk-ev ${e.event}">${e.event}</span></td><td>${e.hub}</td><td>${e.person||'-'}</td><td>${e.note||''}</td></tr>`; });
+  if (!evts.length) html+='<tr><td colspan="5" style="text-align:center;color:var(--gray)">이벤트 없음</td></tr>';
+  html+='</tbody></table>';
   el('order-track-display').innerHTML=html;
 }
 function dupEvents(){   // 같은 오더·거점·이벤트 중 가장 이른 것만 남기고 나머지를 중복으로 본다

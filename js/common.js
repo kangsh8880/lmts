@@ -372,11 +372,14 @@ function buildTrackerCard(o, ps) {
   const pcode=ordCodes(o,ps).join(', ')||'-';
   const events=S.events().filter(e=>e.orderNo===o.no).sort((a,b)=>a.time.localeCompare(b.time));
   const stMap={'대기':'s-ready','패킹완료':'s-packing','배차완료':'s-dispatch','운송중':'s-moving','도착완료':'s-done','지연':'s-delay'};
+  const TI2={truck:'🚛',air:'✈️',sea:'🚢'};
+  const hhmm=t=>t?String(t).slice(5,16).replace('-','/'):'';
 
   let trackerHtml='';
   if (o.route) {
     const {origin, waypoints, destination}=o.route;
-    const allHubs=[origin,...(waypoints||[]).map(w=>typeof w==='string'?w:w.name),destination].filter(Boolean);
+    const wps=(waypoints||[]);
+    const allHubs=[origin,...wps.map(w=>typeof w==='string'?w:w.name),destination].filter(Boolean);
     const passedSet=new Set();
     events.forEach(e=>{
       if (e.event==='OUT'&&e.hub===origin) passedSet.add(origin);
@@ -384,67 +387,52 @@ function buildTrackerCard(o, ps) {
     });
     let currentIdx=-1;
     for (let i=allHubs.length-1;i>=0;i--) { if (passedSet.has(allHubs[i])) { currentIdx=i; break; } }
-
-    trackerHtml=`<div style="overflow-x:auto;padding:4px 0"><div class="tracker-route">`;
-    const TI2={truck:'🚛',air:'✈️',sea:'🚢'};
-    allHubs.forEach((hub,i)=>{
-      const passed=passedSet.has(hub), isActive=i===currentIdx;
-      const cls=passed?'done':(isActive?'active':'pending');
-      const emoji=i===0?'🏭':i===allHubs.length-1?'🏢':'📍';
-      const lastEvt=events.filter(e=>e.hub===hub).slice(-1)[0];
-      const stdT=i===0?(o.route.originStdTime||''):(o.route.waypoints?.[i-1]?.stdTime||'');
-      const timeStr=lastEvt?lastEvt.time.slice(11,16):(stdT?`표준${stdT}분`:'');
-      trackerHtml+=`<div class="tr-node">
-        <div class="tr-dot ${cls}">${emoji}</div>
-        <div class="tr-node-label" style="color:${passed?'var(--green)':isActive?'var(--accent)':'#999'}">${hub}</div>
-        <div class="tr-node-time">${timeStr}</div></div>`;
-      if (i<allHubs.length-1) {
-        const nextPassed=passedSet.has(allHubs[i+1]);
-        const fillPct=passed&&nextPassed?'100':passed?'50':'0';
-        const wpObj=o.route.waypoints?.[i]||{};
-        const st=i===0?o.route.originStdTime:(typeof wpObj==='object'?wpObj.stdTime:'');
-        // 운송수단 정보
-        const wt=typeof wpObj==='object'?wpObj.transport:'';
-        const wno=typeof wpObj==='object'?wpObj.transportNo:'';
-        const tLabel=wt?(TI2[wt]||'')+(wno?` ${wno}`:''):'';
-        const connLabel=[st?`⏱${st}분`:'', tLabel].filter(Boolean).join(' ');
-        trackerHtml+=`<div class="tr-conn"><div class="tr-conn-bg"></div>
-          <div class="tr-conn-fill" style="width:${fillPct}%"></div>
-          ${connLabel?`<div class="tr-conn-label">${connLabel}</div>`:''}</div>`;
-        // 도착지 변경 표시
-        const wdc=typeof wpObj==='object'?wpObj.destChange:'';
-        if (wdc) {
-          trackerHtml+=`</div></div><div style="display:flex;align-items:center;gap:4px;margin:2px 0 4px 4px;flex-shrink:0;">
-            <span style="font-size:11px;background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;border-radius:8px;padding:1px 6px;font-weight:700;white-space:nowrap;">🔀 도착지변경→🏢 ${wdc}</span>
-          </div><div class="tracker-route" style="margin:0;">`;
-        }
-      }
-    });
-    trackerHtml+=`</div></div>`;
-
     const currentHub=currentIdx>=0?allHubs[currentIdx]:null;
     const nextHub=(currentIdx>=0&&currentIdx<allHubs.length-1)?allHubs[currentIdx+1]:null;
     const finalDest=destination||allHubs[allHubs.length-1]||'-';
-    if (currentHub) {
-      const isAtDest=currentHub===destination;
-      trackerHtml+=isAtDest
-        ? `<div class="alert alert-success" style="margin-top:8px;margin-bottom:0">✅ <b>배송 완료</b> — 최종 도착지: <b>${finalDest}</b> 수령 확인됨</div>`
-        : `<div class="alert alert-info" style="margin-top:8px;margin-bottom:0">🚛 <b>현재 위치:</b> ${currentHub} 통과 &nbsp;|&nbsp; <b>다음 거점:</b> ${nextHub||'?'} &nbsp;|&nbsp; 🏢 <b>최종 도착지:</b> <b style="color:#1565C0">${finalDest}</b></div>`;
-    } else {
-      trackerHtml+=`<div class="alert alert-warn" style="margin-top:8px;margin-bottom:0">⏳ 아직 출발 전 &nbsp;|&nbsp; 🏢 최종 도착지: <b>${finalDest}</b></div>`;
-    }
+    const isAtDest=currentHub&&currentHub===destination;
+
+    // 상단 요약 한 줄
+    if (isAtDest) trackerHtml+=`<div class="trk-sum ok">✅ <b>배송 완료</b><span>${finalDest} 수령 확인</span></div>`;
+    else if (currentHub) trackerHtml+=`<div class="trk-sum"><div><em>현재 위치</em><b>${currentHub}</b></div><div><em>다음 거점</em><b>${nextHub||'-'}</b></div><div><em>최종 도착지</em><b class="dst">${finalDest}</b></div></div>`;
+    else trackerHtml+=`<div class="trk-sum wait"><div><em>상태</em><b>출발 전</b></div><div><em>최종 도착지</em><b class="dst">${finalDest}</b></div></div>`;
+
+    // 세로 단계
+    trackerHtml+='<ol class="trk-steps">';
+    allHubs.forEach((hub,i)=>{
+      const passed=passedSet.has(hub), isCur=i===currentIdx&&!isAtDest;
+      const cls=passed?'done':'pending';
+      const emoji=i===0?'🏭':i===allHubs.length-1?'🏢':'📍';
+      const lastEvt=events.filter(e=>e.hub===hub).slice(-1)[0];
+      const stdT=i===0?(o.route.originStdTime||''):(wps[i-1]?.stdTime||'');
+      const tm=lastEvt?`${hhmm(lastEvt.time)} ${lastEvt.event}`:(stdT?`표준 ${stdT}분`:'');
+      trackerHtml+=`<li class="trk-step ${cls}${isCur?' cur':''}"><span class="trk-dot">${emoji}</span>
+        <span class="trk-hub">${hub}</span><span class="trk-tm">${tm}</span></li>`;
+      if (i<allHubs.length-1) {
+        const wpObj=wps[i]||{};
+        const st=i===0?o.route.originStdTime:(typeof wpObj==='object'?wpObj.stdTime:'');
+        const wt=typeof wpObj==='object'?wpObj.transport:'';
+        const wno=typeof wpObj==='object'?wpObj.transportNo:'';
+        const tLabel=wt?(TI2[wt]||'')+(wno?` ${wno}`:''):'';
+        const lbl=[tLabel, st?`⏱ ${st}분`:''].filter(Boolean).join('  ·  ');
+        const wdc=typeof wpObj==='object'?wpObj.destChange:'';
+        const seg=passed&&passedSet.has(allHubs[i+1])?'done':'';
+        trackerHtml+=`<li class="trk-leg ${seg}"><span class="trk-line"></span><span class="trk-leg-t">${lbl}${wdc?`<span class="trk-chg">🔀 도착지변경 → ${wdc}</span>`:''}</span></li>`;
+      }
+    });
+    trackerHtml+='</ol>';
   }
 
   const lastEvt=events.slice(-1)[0];
   return `<div class="tracker-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-      <div>
-        <div style="font-size:18px;font-weight:800;color:var(--dk)">${o.no}</div>
-        <div style="font-size:14.5px;color:var(--gray);margin-top:2px">고객사: <b>${o.customer}</b> &nbsp;|&nbsp; 제품: <b>${ordText(o)}</b> (코드: ${pcode}) &nbsp;|&nbsp; 총 ${ordQty(o)} &nbsp;|&nbsp; ${o.date}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span>
-        ${lastEvt?`<span style="font-size:13px;color:var(--gray)">최근: ${lastEvt.hub} ${lastEvt.event} ${lastEvt.time.slice(11,16)}</span>`:''}
+    <div class="trk-head">
+      <div class="trk-no">${o.no}<span class="status ${stMap[o.status]||'s-ready'}">${o.status}</span></div>
+      <div class="trk-meta">
+        <span><em>고객사</em>${o.customer}</span>
+        <span><em>제품</em>${ordText(o)} (${pcode})</span>
+        <span><em>수량</em>${ordQty(o)}</span>
+        <span><em>출하일</em>${o.date}</span>
+        ${lastEvt?`<span><em>최근</em>${lastEvt.hub} ${lastEvt.event} ${hhmm(lastEvt.time)}</span>`:''}
       </div>
     </div>
     ${trackerHtml||'<div style="color:var(--gray);font-size:14.5px">경로 정보 없음</div>'}
