@@ -13,10 +13,21 @@ function fillOrderSelects() {
   if (origins.length===1) el('o-origin').value = origins[0].name;
   fillSel('o-wp-add', hs.filter(h=>h.type==='경유지').map(h=>({v:h.name, l:h.name})));
   fillSel('o-dest', hs.filter(h=>h.type==='도착(고객사)').map(h=>({v:h.name, l:h.name})));
-  const today = new Date().toISOString().slice(2,10).replace(/-/g,'');
-  el('o-no').value = `ORD-${today}-${String(S.orders().length+1).padStart(3,'0')}`;
-  el('o-date').value = new Date().toISOString().slice(0,10);
+  el('o-no').value = nextOrderNo();
+  el('o-date').value = localDateStr();
   wpList = []; renderWpList(); updateRoutePreview();
+}
+
+// 오더번호 규칙: ORD-YYMMDD-NNNN (생성일 기준, 일자별 0001부터 순번, 4자리)
+function localDateStr(d) { d = d || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function nextOrderNo() {
+  const ymd = localDateStr().slice(2).replace(/-/g,''), pre = `ORD-${ymd}-`;
+  const max = S.orders().reduce((m, o) => {   // 같은 일자의 기존 번호(3자리·4자리 모두) 중 최대 순번
+    const x = String(o.no||'');
+    if (!x.startsWith(pre)) return m;
+    const n = parseInt(x.slice(pre.length), 10); return isNaN(n) ? m : Math.max(m, n);
+  }, 0);
+  return pre + String(max + 1).padStart(4, '0');
 }
 
 function onOriginChange() { updateRoutePreview(); }
