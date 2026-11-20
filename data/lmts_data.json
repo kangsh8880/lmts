@@ -327,7 +327,7 @@
       "product": "LCD Panel B타입",
       "boxes": 3,
       "note": "",
-      "status": "배차완료",
+      "status": "운송중",
       "created": "2026-04-20 09:00",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -375,7 +375,7 @@
       "product": "Phone Glass",
       "boxes": 2,
       "note": "",
-      "status": "패킹완료",
+      "status": "운송중",
       "created": "2026-11-19 14:57",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -703,5 +703,5 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 14:22"
+  "lastUpdated": "2026-11-20 14:35"
 }
