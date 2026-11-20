@@ -577,8 +577,17 @@
       "event": "OUT",
       "person": "Kim",
       "note": ""
+    },
+    {
+      "time": "2026-11-20 10:13",
+      "orderNo": "ORD-261119-004",
+      "customer": "K1 VINA",
+      "hub": "자사물류창고 (화성)",
+      "event": "OUT",
+      "person": "Kim",
+      "note": ""
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 10:12"
+  "lastUpdated": "2026-11-20 10:13"
 }
