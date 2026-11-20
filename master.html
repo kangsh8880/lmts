@@ -72,14 +72,16 @@
   </div>
 </div>
 
-<div class="page" style="display:block;padding:16px 20px;max-width:none;margin:0">
+<div class="page" style="display:block;padding:8px 20px 16px;max-width:none;margin:0">
 
-  <div class="sec-title">기준정보 관리</div>
-  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap" id="master-tab-btns">
-    <button class="btn btn-primary btn-sm" onclick="showMaster('customer',this)">👥 고객사</button>
-    <button class="btn btn-ghost btn-sm"   onclick="showMaster('product',this)">📦 제품</button>
-    <button class="btn btn-ghost btn-sm"   onclick="showMaster('vehicle',this)">🚛 차량·기사</button>
-    <button class="btn btn-ghost btn-sm"   onclick="showMaster('hub',this)">📍 거점(Hub)</button>
+  <div class="mst-head">
+    <div class="sec-title">기준정보 관리</div>
+    <div class="mst-tabs" id="master-tab-btns">
+      <button class="btn btn-primary btn-sm" onclick="showMaster('customer',this)">👥 고객사</button>
+      <button class="btn btn-ghost btn-sm"   onclick="showMaster('product',this)">📦 제품</button>
+      <button class="btn btn-ghost btn-sm"   onclick="showMaster('vehicle',this)">🚛 차량·기사</button>
+      <button class="btn btn-ghost btn-sm"   onclick="showMaster('hub',this)">📍 거점(Hub)</button>
+    </div>
   </div>
   <div id="master-customer">
     <div class="card"><div class="card-head">👥 고객사 등록</div><div class="card-body">
