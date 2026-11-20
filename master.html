@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 기준정보 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260555">
-  <link rel="stylesheet" href="css/theme.css?v=20260555">
-  <script src="js/theme.js?v=20260555"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260561">
+  <link rel="stylesheet" href="css/theme.css?v=20260561">
+  <script src="js/theme.js?v=20260561"></script>
 </head>
 <body>
 
@@ -108,8 +108,9 @@
         <div class="form-group"><label>중량(kg)</label><input id="p-weight" type="number"></div>
         <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveProduct()">+ 등록</button></div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>Box No</th><th>제품명</th><th>박스규격</th><th>총수량</th><th>중량</th><th>수정 / 삭제</th></tr></thead>
+      <div class="tbl-wrap"><table><thead><tr><th>Box No</th><th>제품명</th><th>박스규격</th><th>총수량</th><th>Packing 출고(누적)</th><th>보관 잔량</th><th>중량</th><th>수정 / 삭제</th></tr></thead>
       <tbody id="product-table-body"></tbody></table></div>
+      <div style="font-size:14.5px;color:var(--gray);margin-top:8px">※ 보관 잔량 = 총수량 − Packing 출고(누적). 잔량이 <b style="color:#C0392B">0</b>이면 빨강(소진)으로 표시합니다. 총수량을 비워 두면 제한없음입니다.</div>
     </div></div>
   </div>
   <div id="master-vehicle" style="display:none">
@@ -149,7 +150,7 @@
   </div>
 </div>
 
-<script src="js/common.js?v=20260555"></script>
-<script src="js/master.js?v=20260555"></script>
+<script src="js/common.js?v=20260561"></script>
+<script src="js/master.js?v=20260561"></script>
 </body>
 </html>
