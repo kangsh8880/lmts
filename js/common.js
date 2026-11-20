@@ -649,8 +649,8 @@ function downloadBackup(){
 }
 document.addEventListener('DOMContentLoaded', ()=>{
   const m = document.querySelector('#token-modal .modal'); if (!m || m.querySelector('#bk-btn')) return;
-  const d = document.createElement('div'); d.style.cssText = 'margin-top:14px;padding-top:12px;border-top:1px dashed #cbd5e1;display:flex;gap:10px;align-items:center';
-  d.innerHTML = '<button id="bk-btn" class="btn btn-ghost btn-sm" onclick="downloadBackup()">💾 데이터 백업 받기 (JSON)</button><span style="font-size:13px;color:#6b7280">전체 데이터를 내 PC에 저장합니다. 정기적으로 보관하세요.</span>';
+  const d = document.createElement('div'); d.id = 'bk-box'; d.style.cssText = 'margin-top:14px;padding-top:12px;border-top:1px dashed #cbd5e1';
+  d.innerHTML = '<div id="bk-row" style="display:flex;gap:8px;flex-wrap:wrap"><button id="bk-btn" class="btn btn-ghost btn-sm" onclick="downloadBackup()">💾 데이터 백업 받기 (JSON)</button></div><div style="font-size:13px;color:#6b7280;margin-top:8px">전체 데이터를 내 PC에 저장합니다. 정기적으로 보관하세요.</div>';
   m.appendChild(d);
 });
 
