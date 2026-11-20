@@ -39,6 +39,7 @@
     XLSX.writeFile(wb, file + '.xlsx');
   }
   function sheetOf(aoa) {
+    const T = window.LMTS_I18N ? window.LMTS_I18N.t : (x => x); aoa = aoa.map(r => r.map(c => typeof c === 'string' ? T(c) : c));
     const ws = XLSX.utils.aoa_to_sheet(aoa);
     ws['!cols'] = aoa[0].map((_, ci) => ({ wch: Math.min(60, Math.max(8, ...aoa.map(r => (String(r[ci] == null ? '' : r[ci]).length * 1.6 + 2) | 0))) }));
     ws['!freeze'] = { xSplit: 0, ySplit: 1 };
@@ -78,7 +79,7 @@
   }
   function exportAll() {
     if (typeof XLSX === 'undefined') return alert('엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결 확인 후 새로고침하세요.\n(표별 "⬇ 엑셀" 버튼은 CSV로 내려받을 수 있습니다)');
-    const wb = XLSX.utils.book_new(), add = (n, aoa) => XLSX.utils.book_append_sheet(wb, sheetOf(aoa.length > 1 ? aoa : [aoa[0] || ['데이터 없음']]), n);
+    const wb = XLSX.utils.book_new(), add = (n, aoa) => XLSX.utils.book_append_sheet(wb, sheetOf(aoa.length > 1 ? aoa : [aoa[0] || ['데이터 없음']]), (window.LMTS_I18N ? window.LMTS_I18N.t(n) : n).slice(0, 31));
     add('오더', arrSheet(S.orders(), { drop: ['route', 'items'], extra: { '제품·수량': o => (o.items || []).map(i => `${i.product} ${i.qty}`).join(' / ') || o.product || '', '운송경로': o => routeText(o.route) } }));
     add('Packing', arrSheet(S.packings(), { drop: ['lines'], extra: { 'Packing내역': p => (p.lines || []).map(l => `상자${l.packNo}:${l.boxNo}×${l.qty}`).join(' / ') } }));
     add('배차', arrSheet(S.dispatches().slice().sort((a, b) => String(a.orderNo).localeCompare(String(b.orderNo), undefined, { numeric: true }) || a.legIdx - b.legIdx)));

@@ -44,6 +44,7 @@
     const st = nav.querySelector('.nav-status'), tools = document.createElement('div'); tools.className = 'nav-tools';
     const mb = document.createElement('a');   // 사용 설명서(PDF) 열기 — 새 탭
     mb.id = 'manual-btn'; mb.className = 'theme-btn tool-ic'; mb.href = 'docs/LMTS_manual.pdf'; mb.target = '_blank'; mb.rel = 'noopener'; mb.textContent = '📖'; mb.title = '사용 설명서 보기 (PDF)'; mb.setAttribute('aria-label', '사용 설명서');
+    if (window.LMTS_I18N) tools.append(window.LMTS_I18N.makeSelect());
     tools.append(mb, nb, btn); if (st) tools.append(st); nav.appendChild(tools);
     // 탭 그룹 구분선: 대시보드 | 업무 | 분석
     const tabs = nav.querySelector('.nav-tabs');
