@@ -160,3 +160,6 @@ body.one .op-page > [id^="master-"] .card-body > .tbl-wrap{flex:1 1 auto;min-hei
 body.one .op-page .mst-head{flex:0 0 auto}
 body.one .op-page > [id^="master-"] .form-row{gap:10px}
 body.one .op-page > [id^="master-"] .form-group{min-width:120px}
+/* 표 제목줄 고정: 스크롤 시 아래 행이 비치지 않도록 불투명 배경 */
+body.one .op-page thead th{background:#CFE0F1;background-clip:padding-box;box-shadow:0 1px 0 #9CA3AF;z-index:3}
+html[data-theme="dark"] body.one .op-page thead th{background:#26334A !important}
