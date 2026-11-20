@@ -89,8 +89,18 @@ function packSummary(p){
   const g={}; (p.lines||[]).forEach(l=>{ const k=l.packNo||'-'; (g[k]=g[k]||[]).push(`${l.boxNo}×${l.qty}`); });
   return Object.keys(g).map(k=>`<b>상자 ${k}</b>: ${g[k].join(', ')}`).join('<br>')||'-';
 }
+// 출고(자사물류창고 OUT)·배차가 이루어진 오더의 Packing은 삭제 불가
+function packLockReason(orderNo){
+  const o=S.orders().find(x=>x.no===orderNo);
+  if (o && !['대기','패킹완료'].includes(o.status)) return `오더 상태가 '${o.status}'입니다`;
+  if (S.events().some(e=>e.orderNo===orderNo && e.event==='OUT')) return '거점 OUT(출고)이 이미 등록되었습니다';
+  if (S.dispatches().some(d=>d.orderNo===orderNo)) return '차량 배차가 이미 등록되었습니다';
+  return '';
+}
 function delPacking(i){
   const arr=S.packings(), p=arr[i]; if(!p) return;
+  const why=packLockReason(p.orderNo);
+  if (why) return alert(`⛔ 삭제할 수 없습니다.\n\n[${p.orderNo}] ${why}.\n출고된 오더의 Packing 기록은 보존해야 합니다.`);
   if(!confirm(`[${p.orderNo}] Packing 완료 기록을 삭제할까요?\n삭제하면 꺼낸 보관 Box 수량이 복구되고, 다른 완료 기록이 없으면 오더가 '대기'로 돌아갑니다.`)) return;
   arr.splice(i,1); S.set('packings', arr);
   const o=S.orders().find(x=>x.no===p.orderNo);
@@ -100,7 +110,7 @@ function delPacking(i){
 function renderPackingDone() {
   const all=S.packings();
   el('packing-done-body').innerHTML = all.map((p,i)=>({p,i})).reverse().map(({p,i})=>
-    `<tr><td>${p.orderNo}</td><td>${p.customer}</td><td>${p.boxes}</td><td style="font-size:13px">${packSummary(p)}</td><td>${p.doneAt}</td><td>${p.person}</td><td><button class="btn btn-danger btn-xs" onclick="delPacking(${i})">삭제</button></td></tr>`
+    `<tr><td>${p.orderNo}</td><td>${p.customer}</td><td>${p.boxes}</td><td style="font-size:13px">${packSummary(p)}</td><td>${p.doneAt}</td><td>${p.person}</td><td>${packLockReason(p.orderNo)?'<span class="lock-chip" title="'+packLockReason(p.orderNo)+'">🔒 출고됨</span>':`<button class="btn btn-danger btn-xs" onclick="delPacking(${i})">삭제</button>`}</td></tr>`
   ).join('') || '<tr><td colspan="7" class="empty">없음</td></tr>';
 }
 
