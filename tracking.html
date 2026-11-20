@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 거점 In/Out</title>
-  <link rel="stylesheet" href="css/style.css?v=20260584">
-  <link rel="stylesheet" href="css/onepage.css?v=20260584">
-  <link rel="stylesheet" href="css/theme.css?v=20260584">
-  <script src="js/theme.js?v=20260584"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260585">
+  <link rel="stylesheet" href="css/onepage.css?v=20260585">
+  <link rel="stylesheet" href="css/theme.css?v=20260585">
+  <script src="js/theme.js?v=20260585"></script>
 </head>
 <body class="one">
 
@@ -101,6 +101,7 @@
     <button type="button" class="lg-tab" id="lg-tab" onclick="openLog()" title="전체 이벤트 로그를 보조창으로 열기">📋 이벤트 로그 전체 <b id="lg-n"></b><span class="lg-dup hidden" id="lg-dup"></span></button></div>
   <div class="op-track">
     <div class="card"><div class="card-head">📍 In/Out 이벤트 등록</div><div class="card-body">
+      <div class="trk-log-t mode-t">📋 오더 중심 처리 <span class="hp-sub">— 오더를 먼저 고르고, 그 오더의 거점 이벤트를 처리</span></div>
       <div class="form-row">
         <div class="form-group"><label>출하오더</label>
           <select id="tr-order" onchange="onOrderPick()"><option value="">-- 선택 --</option></select></div>
@@ -117,7 +118,7 @@
       <div class="form-row tr-noterow"><div class="form-group" style="flex:1"><label>비고</label><input id="tr-note"></div>
         <button type="button" class="btn-save" onclick="saveTracking()">💾 저장</button></div>
       <div class="hp-box">
-        <div class="trk-log-t">🏢 거점 중심 처리 <span class="hp-sub">— 거점을 먼저 고르고, 그 거점에서 처리할 오더를 한 번에 처리</span></div>
+        <div class="trk-log-t mode-t">🏢 거점 중심 처리 <span class="hp-sub">— 거점을 먼저 고르고, 그 거점에서 처리할 오더를 한 번에 처리</span></div>
         <div class="form-row hp-row">
           <div class="form-group"><label>거점</label><select id="hp-hub" onchange="renderHubPanel()"></select></div>
           <div class="form-group"><label>처리일시</label><input id="hp-time" type="datetime-local"></div>
@@ -134,9 +135,9 @@
   </div>
 </div>
 
-<script src="js/common.js?v=20260584"></script>
+<script src="js/common.js?v=20260585"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260584"></script>
-<script src="js/tracking.js?v=20260584"></script>
+<script src="js/export.js?v=20260585"></script>
+<script src="js/tracking.js?v=20260585"></script>
 </body>
 </html>
