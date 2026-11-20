@@ -273,3 +273,17 @@ html[data-theme="dark"] .trk-sum:not(.ok)>div+div{border-color:#64748B}
 .trk-log-t.mode-t{font-size:22px;margin:0 0 10px;line-height:1.3}
 .mode-t .hp-sub{font-size:14px}
 .hp-box .trk-log-t.mode-t{margin:0 0 8px}
+
+/* 언어 선택 */
+.nav-tools .lang-sel{height:34px;padding:0 6px;border:1px solid #9CA3AF;border-radius:17px;background:#F1F5F9;color:#111827;font-size:13px;font-weight:600;cursor:pointer;width:auto;max-width:120px;}
+html[data-theme="dark"] .nav-tools .lang-sel{background:#1E293B;color:#E5E7EB;border-color:#475569;}
+
+/* 다국어: 영어·베트남어는 글이 길어 1366 폭에서도 한 줄로 들어가도록 간격을 줄임 */
+@media (max-width:1449px){
+  html:not([lang="ko"]) .nav-tab{padding:7px 5px !important;}
+  html:not([lang="ko"]) .nav-sep{margin:0 3px !important;}
+  html:not([lang="ko"]) .nav-logo{padding-right:6px !important;}
+  html:not([lang="ko"]) .nav-logo span{font-size:9.5px;}
+  html:not([lang="ko"]) .nav-tools{padding-left:6px;gap:4px;}
+  html:not([lang="ko"]) .nav-tools .lang-sel{max-width:106px;font-size:12px;padding:0 3px;}
+}
