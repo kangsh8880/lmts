@@ -402,7 +402,7 @@
       "product": "LCD Panel B타입 / Phone Glass",
       "boxes": 2,
       "note": "",
-      "status": "패킹완료",
+      "status": "운송중",
       "created": "2026-11-19 17:00",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -510,6 +510,21 @@
       "vehicleNo": "인천 3847나",
       "driver": "김영수",
       "dphone": "010-9876-5432"
+    },
+    {
+      "orderNo": "ORD-261119-005",
+      "legIdx": 0,
+      "fromHub": "자사물류창고 (화성)",
+      "toHub": "안성허브터미널",
+      "transportType": "truck",
+      "departPlan": "2026-11-20T13:27",
+      "eta": "2026-11-20T20:37",
+      "savedAt": "2026-11-20 13:28",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "인천 3847나",
+      "driver": "김영수",
+      "dphone": "010-9876-5432"
     }
   ],
   "events": [
@@ -593,8 +608,17 @@
       "event": "OUT",
       "person": "Kang",
       "note": ""
+    },
+    {
+      "time": "2026-11-20 13:28",
+      "orderNo": "ORD-261119-005",
+      "customer": "K1 VINA",
+      "hub": "자사물류창고 (화성)",
+      "event": "OUT",
+      "person": "배차담당",
+      "note": "차량 출발"
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 13:23"
+  "lastUpdated": "2026-11-20 13:28"
 }
