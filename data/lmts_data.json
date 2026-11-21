@@ -774,9 +774,9 @@
           "destChange": ""
         },
         {
-          "name": "인천국제공항 (ICN)",
-          "stdTime": "60",
-          "transport": "air",
+          "name": "수원 중간집하장",
+          "stdTime": "20",
+          "transport": "truck",
           "transportNo": "",
           "destChange": ""
         }
@@ -863,5 +863,5 @@
       "destination": "SK Hynix 이천캠퍼스"
     }
   ],
-  "lastUpdated": "2026-11-21 12:13"
+  "lastUpdated": "2026-11-21 12:14"
 }
