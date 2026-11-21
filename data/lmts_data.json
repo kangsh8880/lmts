@@ -757,6 +757,110 @@
         }
       ],
       "destination": "Samsung Electronics 수원"
+    },
+    {
+      "code": "RT-002",
+      "name": "Samsung Electronics 수원 (수도권물류센터·인천국제공항 경유)",
+      "customer": "Samsung Electronics",
+      "note": "기존 오더에서 자동 생성",
+      "origin": "자사물류창고 (화성)",
+      "originStdTime": "30",
+      "waypoints": [
+        {
+          "name": "수도권물류센터 (용인)",
+          "stdTime": "45",
+          "transport": "truck",
+          "transportNo": "",
+          "destChange": ""
+        },
+        {
+          "name": "인천국제공항 (ICN)",
+          "stdTime": "60",
+          "transport": "air",
+          "transportNo": "",
+          "destChange": ""
+        }
+      ],
+      "destination": "Samsung Electronics 수원"
+    },
+    {
+      "code": "RT-003",
+      "name": "LG Display 파주공장 (안성허브터미널 경유)",
+      "customer": "LG Display",
+      "note": "기존 오더에서 자동 생성",
+      "origin": "자사물류창고 (화성)",
+      "originStdTime": "25",
+      "waypoints": [
+        {
+          "name": "안성허브터미널",
+          "stdTime": "30",
+          "transport": "truck",
+          "transportNo": "",
+          "destChange": ""
+        }
+      ],
+      "destination": "LG Display 파주공장"
+    },
+    {
+      "code": "RT-004",
+      "name": "SK Hynix 이천캠퍼스 (수원 중간집하장 경유)",
+      "customer": "SK Hynix",
+      "note": "기존 오더에서 자동 생성",
+      "origin": "자사물류창고 (화성)",
+      "originStdTime": "20",
+      "waypoints": [
+        {
+          "name": "수원 중간집하장",
+          "stdTime": "35",
+          "transport": "truck",
+          "transportNo": "",
+          "destChange": ""
+        }
+      ],
+      "destination": "SK Hynix 이천캠퍼스"
+    },
+    {
+      "code": "RT-005",
+      "name": "K1 VINA · VINA VINHYEN (인천국제공항·하노이 노이바이 공항 경유)",
+      "customer": "K1 VINA",
+      "note": "기존 오더에서 자동 생성",
+      "origin": "자사물류창고 (화성)",
+      "originStdTime": "20",
+      "waypoints": [
+        {
+          "name": "인천국제공항 (ICN)",
+          "stdTime": "10",
+          "transport": "",
+          "transportNo": "",
+          "destChange": ""
+        },
+        {
+          "name": "하노이 노이바이 공항",
+          "stdTime": "50",
+          "transport": "",
+          "transportNo": "",
+          "destChange": ""
+        }
+      ],
+      "destination": "VINA VINHYEN"
+    },
+    {
+      "code": "RT-006",
+      "name": "K1 VINA · SK Hynix 이천캠퍼스 (안성허브터미널 경유)",
+      "customer": "K1 VINA",
+      "note": "기존 오더에서 자동 생성",
+      "origin": "자사물류창고 (화성)",
+      "originStdTime": "20",
+      "waypoints": [
+        {
+          "name": "안성허브터미널",
+          "stdTime": "30",
+          "transport": "truck",
+          "transportNo": "",
+          "destChange": ""
+        }
+      ],
+      "destination": "SK Hynix 이천캠퍼스"
     }
   ],
   "lastUpdated": "2026-11-21 12:12"
