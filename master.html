@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 기준정보 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260589">
-  <link rel="stylesheet" href="css/onepage.css?v=20260589">
-  <link rel="stylesheet" href="css/theme.css?v=20260589">
-  <script src="js/i18n-dict.js?v=20260589"></script>
-  <script src="js/i18n.js?v=20260589"></script>
-  <script src="js/theme.js?v=20260589"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260590">
+  <link rel="stylesheet" href="css/onepage.css?v=20260590">
+  <link rel="stylesheet" href="css/theme.css?v=20260590">
+  <script src="js/i18n-dict.js?v=20260590"></script>
+  <script src="js/i18n.js?v=20260590"></script>
+  <script src="js/theme.js?v=20260590"></script>
 </head>
 <body class="one">
 
@@ -56,7 +56,7 @@
     <a class="nav-tab" href="ops.html" data-page="ops.html"><span class="ti">🧭</span> 운영관제</a>
     <a class="nav-tab" href="master.html" data-page="master.html"><span class="ti">⚙️</span> 기준정보</a>
     <a class="nav-tab" href="order.html" data-page="order.html"><span class="ti">📋</span> 출하오더</a>
-    <a class="nav-tab" href="packing.html" data-page="packing.html"><span class="ti">📦</span> 박스Packing</a>
+    <a class="nav-tab" href="packing.html" data-page="packing.html"><span class="ti">📦</span> 입고Packing</a>
     <a class="nav-tab" href="dispatch.html" data-page="dispatch.html"><span class="ti">🚛</span> 차량배차</a>
     <a class="nav-tab" href="tracking.html" data-page="tracking.html"><span class="ti">📍</span> 거점In/Out</a>
     <a class="nav-tab" href="map.html" data-page="map.html"><span class="ti">🗺️</span> 위치추적</a>
@@ -84,6 +84,7 @@
       <button class="btn btn-ghost btn-sm"   onclick="showMaster('product',this)">📦 제품</button>
       <button class="btn btn-ghost btn-sm"   onclick="showMaster('vehicle',this)">🚛 차량·기사</button>
       <button class="btn btn-ghost btn-sm"   onclick="showMaster('hub',this)">📍 거점(Hub)</button>
+      <button class="btn btn-ghost btn-sm"   onclick="showMaster('route',this)">🛣 Route</button>
     </div>
   </div>
   <div id="master-customer">
@@ -107,13 +108,13 @@
         <div class="form-group"><label>Box No</label><input id="p-code" placeholder="P001"></div>
         <div class="form-group"><label>제품명</label><input id="p-name"></div>
         <div class="form-group"><label>박스규격</label><input id="p-box" placeholder="40x30x25cm"></div>
-        <div class="form-group"><label>총수량</label><input id="p-qty" type="number"></div>
+        <div class="form-group"><label>기초재고</label><input id="p-qty" type="number"></div>
         <div class="form-group"><label>중량(kg)</label><input id="p-weight" type="number"></div>
         <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary btn-sm" onclick="saveProduct()">+ 등록</button></div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>Box No</th><th>제품명</th><th>박스규격</th><th>총수량</th><th>Packing 출고(누적)</th><th>보관 잔량</th><th>중량</th><th>수정 / 삭제</th></tr></thead>
+      <div class="tbl-wrap"><table><thead><tr><th>Box No</th><th>제품명</th><th>박스규격</th><th>기초재고</th><th>입고(누적)</th><th>출고(누적)</th><th>현재고</th><th>중량</th><th>수정 / 삭제</th></tr></thead>
       <tbody id="product-table-body"></tbody></table></div>
-      <div style="font-size:14.5px;color:var(--gray);margin-top:8px">※ 보관 잔량 = 총수량 − Packing 출고(누적). 잔량이 <b style="color:#C0392B">0</b>이면 빨강(소진)으로 표시합니다. 총수량을 비워 두면 제한없음입니다.</div>
+      <div style="font-size:14.5px;color:var(--gray);margin-top:8px">※ 현재고 = 기초재고 + 창고 입고(누적) − Packing 출고(누적). 입고는 [입고Packing] 화면의 [📥 창고 입고]에서 등록합니다. 현재고가 <b style="color:#C0392B">0</b>이면 빨강(소진)으로 표시됩니다.</div>
     </div></div>
   </div>
   <div id="master-vehicle" style="display:none">
@@ -151,11 +152,51 @@
       </div>
     </div></div>
   </div>
+  <div id="master-route" style="display:none;grid-column:1/-1">
+    <div class="card"><div class="card-head">🛣 Route 등록 <span style="font-size:13px;font-weight:400;color:#666;margin-left:8px">자주 쓰는 출하 경로(자사창고 → 경유 → 고객사)를 미리 등록해 두고, 출하오더에서 선택해 사용합니다</span></div><div class="card-body">
+      <div class="rt-form-grid">
+        <div class="form-group"><label>Route 코드</label><input id="rt-code" placeholder="RT-001"></div>
+        <div class="form-group"><label>Route 명</label><input id="rt-name" placeholder="예: Samsung 수원 · 용인 경유 직송"></div>
+        <div class="form-group"><label>주 고객사 (선택)</label><select id="rt-customer"><option value="">-- 공통 --</option></select></div>
+        <div class="form-group"><label>비고</label><input id="rt-note" placeholder="예: 긴급 항공, 냉동 차량"></div>
+      </div>
+      <div class="route-builder" style="margin-top:8px">
+        <div class="rb-row">
+          <div class="rb-badge rb-origin">출발</div>
+          <div style="flex:1"><select id="rt-origin" onchange="rtPreview()"><option value="">-- 출발 거점 --</option></select></div>
+          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0"><span style="font-size:12px;color:var(--gray)">→표준</span><input id="rt-origin-std" type="number" min="0" placeholder="분" oninput="rtPreview()" style="width:60px;padding:5px 6px;font-size:13px;text-align:center"><span style="font-size:12px;color:var(--gray)">분</span></div>
+        </div>
+        <div class="rb-vline"></div>
+        <div id="rt-wp-list"></div>
+        <div class="rb-add-row">
+          <div class="rb-badge rb-wp" style="width:24px;height:24px;font-size:15.5px;flex-shrink:0">+</div>
+          <select id="rt-wp-add" style="flex:2;min-width:140px"><option value="">-- 경유지 선택 --</option></select>
+          <select id="rt-wp-tr" style="flex:1;min-width:110px"><option value="">이전 구간 유지</option><option value="truck">🚛 차량</option><option value="air">✈️ 항공편</option><option value="sea">🚢 선박</option></select>
+          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0"><span style="font-size:12px;color:var(--gray)">→표준</span><input id="rt-wp-std" type="number" min="0" placeholder="분" style="width:58px;padding:5px 6px;font-size:13px;text-align:center"><span style="font-size:12px;color:var(--gray)">분</span></div>
+          <button class="btn btn-yellow btn-sm" onclick="rtAddWp()" style="flex-shrink:0">경유지 추가</button>
+        </div>
+        <div class="rb-vline"></div>
+        <div class="rb-row">
+          <div class="rb-badge rb-dest">도착</div>
+          <div style="flex:1"><select id="rt-dest" onchange="rtPreview()"><option value="">-- 도착 거점 --</option></select></div>
+        </div>
+        <div class="route-preview"><div class="rp-title">📋 Route 미리보기</div><div class="route-chips" id="rt-chips"></div></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" id="rt-save" onclick="saveRoute()">+ Route 등록</button>
+        <button class="btn btn-ghost btn-sm" onclick="rtFromOrders()" title="지금까지 등록된 오더의 경로를 중복 없이 Route로 만듭니다">📥 기존 오더에서 Route 자동 생성</button>
+      </div>
+    </div></div>
+    <div class="card" style="margin-top:12px"><div class="card-head">🛣 등록된 Route</div><div class="card-body">
+      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>Route 명</th><th>주 고객사</th><th>경로</th><th>사용 오더</th><th>비고</th><th>수정 / 삭제</th></tr></thead>
+      <tbody id="route-table-body"></tbody></table></div>
+    </div></div>
+  </div>
 </div>
 
-<script src="js/common.js?v=20260589"></script>
+<script src="js/common.js?v=20260590"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260589"></script>
-<script src="js/master.js?v=20260589"></script>
+<script src="js/export.js?v=20260590"></script>
+<script src="js/master.js?v=20260590"></script>
 </body>
 </html>

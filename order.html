@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 출하오더 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260589">
-  <link rel="stylesheet" href="css/onepage.css?v=20260589">
-  <link rel="stylesheet" href="css/theme.css?v=20260589">
-  <script src="js/i18n-dict.js?v=20260589"></script>
-  <script src="js/i18n.js?v=20260589"></script>
-  <script src="js/theme.js?v=20260589"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260590">
+  <link rel="stylesheet" href="css/onepage.css?v=20260590">
+  <link rel="stylesheet" href="css/theme.css?v=20260590">
+  <script src="js/i18n-dict.js?v=20260590"></script>
+  <script src="js/i18n.js?v=20260590"></script>
+  <script src="js/theme.js?v=20260590"></script>
 </head>
 <body class="one">
 
@@ -108,7 +108,7 @@
     <a class="nav-tab" href="ops.html" data-page="ops.html"><span class="ti">🧭</span> 운영관제</a>
     <a class="nav-tab" href="master.html" data-page="master.html"><span class="ti">⚙️</span> 기준정보</a>
     <a class="nav-tab" href="order.html" data-page="order.html"><span class="ti">📋</span> 출하오더</a>
-    <a class="nav-tab" href="packing.html" data-page="packing.html"><span class="ti">📦</span> 박스Packing</a>
+    <a class="nav-tab" href="packing.html" data-page="packing.html"><span class="ti">📦</span> 입고Packing</a>
     <a class="nav-tab" href="dispatch.html" data-page="dispatch.html"><span class="ti">🚛</span> 차량배차</a>
     <a class="nav-tab" href="tracking.html" data-page="tracking.html"><span class="ti">📍</span> 거점In/Out</a>
     <a class="nav-tab" href="map.html" data-page="map.html"><span class="ti">🗺️</span> 위치추적</a>
@@ -135,15 +135,22 @@
     <div class="form-row">
       <div class="form-group"><label>오더번호</label><input id="o-no" readonly></div>
       <div class="form-group"><label>출하예정일</label><input id="o-date" type="date"></div>
-      <div class="form-group"><label>고객사</label><select id="o-customer"><option value="">-- 선택 --</option></select></div>
+      <div class="form-group"><label>고객사</label><select id="o-customer" onchange="onCustomerChange()"><option value="">-- 선택 --</option></select></div>
       <div class="form-group"><label>특이사항</label><input id="o-note"></div>
       <div class="form-group" style="flex:1 1 100%;min-width:0;border:1px solid #ccc;border-radius:6px;padding:8px 10px;background:#fafcff"><label>출하 제품 (한 오더에 여러 제품 지정 가능)</label>
         <div style="display:flex;gap:8px;align-items:center">
-          <select id="o-product" style="flex:1 1 auto;min-width:0"><option value="">-- 제품 선택 --</option></select>
+          <select id="o-product" onchange="onProductHint()" style="flex:1 1 auto;min-width:0"><option value="">-- 제품 선택 --</option></select>
           <input id="o-boxes" type="number" placeholder="수량" min="1" style="width:100px;flex:0 0 100px">
           <button type="button" class="btn btn-yellow btn-sm" style="flex:0 0 auto;white-space:nowrap" onclick="addOrderItem()">+ 제품 추가</button></div>
+        <div id="o-stock" class="rt-hint" style="margin-top:4px"></div>
         <div id="o-items" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:13px;color:var(--gray)">제품과 수량을 넣고 "+ 제품 추가"를 누르세요</span></div></div>
       
+    </div>
+    <div class="rt-sel">
+      <label>📌 등록 Route 선택</label>
+      <select id="o-route" onchange="applyRoute()"><option value="">-- 직접 입력 --</option></select>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="saveAsRoute()" title="아래에서 설정한 경로를 기준정보 Route로 저장">💾 현재 경로를 Route로 저장</button>
+      <span class="rt-hint" id="o-route-hint">자주 쓰는 경로를 선택하면 아래가 자동으로 채워지며, 필요하면 고쳐서 쓸 수 있습니다</span>
     </div>
     <div class="route-builder">
       <div class="rb-title">🗺️ 운송 경로 설정 <span style="font-size:12px;color:var(--gray);font-weight:400;margin-left:6px">출발지 → 경유지(순서·표준시간 지정) → 도착지</span></div>
@@ -196,9 +203,9 @@
   </div>
 </div>
 
-<script src="js/common.js?v=20260589"></script>
+<script src="js/common.js?v=20260590"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260589"></script>
-<script src="js/order.js?v=20260589"></script>
+<script src="js/export.js?v=20260590"></script>
+<script src="js/order.js?v=20260590"></script>
 </body>
 </html>
