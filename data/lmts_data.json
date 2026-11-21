@@ -735,7 +735,7 @@
   "routes": [
     {
       "code": "RT-001",
-      "name": "S사 납품경로 A",
+      "name": "S사 납품경로 A(안성-용인)",
       "customer": "Samsung Electronics",
       "note": "",
       "origin": "자사물류창고 (화성)",
@@ -863,5 +863,5 @@
       "destination": "SK Hynix 이천캠퍼스"
     }
   ],
-  "lastUpdated": "2026-11-21 12:12"
+  "lastUpdated": "2026-11-21 12:13"
 }
