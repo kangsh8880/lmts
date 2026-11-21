@@ -70,8 +70,9 @@ const DC = (() => {
       const miss = legs(o).filter(l => l.act == null && !got.has(l.i));
       return { o, miss, total: Math.max(0, nodes(o).length - 1), got: got.size };
     }).filter(x => x.miss.length);
+    const ss = stockShort();
     return {
-      packPend: packPend.length, packPendList: packPend, dispNeed: dispNeed.length, dispNeedList: dispNeed, dispNeedLegs: dispNeed.reduce((a, x) => a + x.miss.length, 0),
+      stockShort: ss.length, stockShortList: ss, packPend: packPend.length, packPendList: packPend, dispNeed: dispNeed.length, dispNeedList: dispNeed, dispNeedLegs: dispNeed.reduce((a, x) => a + x.miss.length, 0),
       orders: O.length, active: active.length, moving: moving().length,   // 이벤트 기준(거점 OUT 후 다음 거점 IN 전) — 우측 '이동 중 운송 현황'과 동일 기준
       done, delay, off, alarm: delay + off,
       onTime: (done + delay) > 0 ? pct(done, done + delay) : null,
@@ -129,6 +130,10 @@ const DC = (() => {
       else if (o.status !== '도착완료' && S.packings().some(p => p.orderNo === o.no) && !dispatchDone(o))
         out.push({ lv: 2, t: `배차 미완료 · ${o.no}`, fact: `패킹 완료, 구간 배차 ${new Set(S.dispatches().filter(d => d.orderNo === o.no).map(d => d.legIdx)).size}/${Math.max(0, nodes(o).length - 1)}`, cause: '배차 담당 미지정(가설)', act: '차량배차 화면에서 미배차 구간 지정', go: 'dispatch.html' });
     });
+    stockShort().forEach(x => out.push({
+      lv: x.left === 0 ? 0 : 1, t: `재고 부족 · ${x.name}`, fact: `창고 현재고 ${x.left} · Packing 전 오더 필요 ${x.need} → ${x.short} 부족`,
+      cause: '입고 미등록 또는 생산·협력사 입고 지연(가설)', act: '입고Packing > 창고 입고에서 입고 등록, 생산·협력사 입고 일정 확인, 출하 우선순위 조정', go: 'packing.html'
+    }));
     return out.sort((a, b) => a.lv - b.lv);
   }
 

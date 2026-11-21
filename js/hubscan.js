@@ -32,6 +32,7 @@ const HS = (() => {
   function resolve(raw) {
     raw = String(raw || '').trim(); if (!raw) return null;
     const L = LBL.parse(raw);
+    if (L.ok && L.pk === 'IN' && /^RCV-/.test(L.no)) return { err: `${L.no} 는 자사물류창고 입고 라벨입니다 — 거점 IN/OUT 대상이 아닙니다 (출하 포장 라벨을 스캔하세요)` };
     if (L.ok) { const p = pkgOf(L.no); if (!p) return { err: `${L.no} 는 LMTS 라벨이지만 Packing 기록이 없습니다 (이 시스템에 등록되지 않은 오더)` }; if (!packsOf(p).includes(L.pk)) return { err: `${L.no} 에 상자 ${L.pk} 는 없습니다` }; return { no: L.no, pack: L.pk }; }
     if (L.mine) return { err: L.err };
     const way = S.packings().find(p => p.waybill && p.waybill.toLowerCase() === raw.toLowerCase()); if (way) return { no: way.orderNo, pack: null, via: '운송장' };

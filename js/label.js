@@ -45,6 +45,31 @@ const LBL = (() => {
       </style></head><body><div class="bar">라벨 ${esc(orderNo)} — 인쇄 창이 열리지 않으면 Ctrl+P 를 누르세요. (용지 100×70mm 라벨 기준)</div>${b}<script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);
     w.document.close();
   }
-  return { print, html, code, parse, packsOf, qrSvg };
+
+  // ── 입고 라벨: 자사물류창고에 들어온 박스에 붙임. QR = LMTS:입고번호#IN:검증값 ──
+  function rcvHtml(no, copies) {
+    const r = S.receipts().find(x => x.no === no); if (!r) return '';
+    const n = Math.max(1, Math.min(200, parseInt(copies) || 1)), c = code(no, 'IN');
+    let out = '';
+    for (let i = 1; i <= n; i++) out += `<section class="lb"><div class="lq">${qrSvg(c, 150)}<div class="lm">LMTS 입고</div></div><div class="lt">
+      <div class="ln">${esc(r.no)}</div><div class="lbx">${esc(r.product)}</div>
+      <div class="lc">수량 ${esc(r.qty)} · 박스 ${i} / ${n}</div>
+      <div class="li">LOT ${esc(r.lot || '-')}<br>적치 위치 ${esc(r.loc || '-')}<br>입고 ${esc(String(r.time || '').slice(0, 16))}<br>${esc(r.srcType || '')} · ${esc(r.src || '')}</div><div class="lk">${esc(c)}</div></div></section>`;
+    return out;
+  }
+  function printRcv(no, copies) {
+    const b = rcvHtml(no, copies); if (!b) return alert('입고 내역을 찾을 수 없습니다');
+    const w = window.open('', '_blank'); if (!w) return alert('팝업이 차단되었습니다. 팝업을 허용해 주세요');
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>입고 라벨 ${esc(no)}</title><style>
+      @page{size:100mm 70mm;margin:0}*{box-sizing:border-box}body{margin:0;font-family:'Malgun Gothic',sans-serif;color:#000}
+      .lb{width:100mm;height:70mm;padding:4mm;display:flex;gap:4mm;page-break-after:always;border:1px dashed #bbb;overflow:hidden}
+      .lq svg{display:block;width:34mm;height:34mm}.lm{margin-top:1mm;text-align:center;font-weight:700;font-size:10pt;letter-spacing:1px;border:1.5px solid #000;border-radius:2mm}.lt{flex:1;min-width:0}
+      .ln{font-size:11pt;font-weight:700}.lbx{font-size:14pt;font-weight:700;margin:1mm 0}.lc{font-size:10pt}
+      .li{margin-top:2mm;font-size:8.5pt;line-height:1.35}.lk{margin-top:1mm;font-size:7pt;color:#555;word-break:break-all}
+      @media print{.lb{border:0}.bar{display:none}}.bar{padding:8px;background:#eef2f7;font-size:14px}
+      </style></head><body><div class="bar">입고 라벨 ${esc(no)} — 인쇄 창이 열리지 않으면 Ctrl+P 를 누르세요. (용지 100×70mm 라벨 기준)</div>${b}<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`);
+    w.document.close();
+  }
+  return { print, html, code, parse, packsOf, qrSvg, printRcv, rcvHtml };
 })();
 window.LBL = LBL;

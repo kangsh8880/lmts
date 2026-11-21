@@ -186,6 +186,14 @@ function stockCalc(code){
   const tracked=base>0||rc.length>0;
   return {base,inn,out,left:Math.max(0,base+inn-out),tracked};
 }
+
+// 재고 부족: 아직 Packing 전(대기) 오더가 요구하는 수량 > 창고 현재고인 제품 (재고관리 대상만)
+function needByProduct(){ const m={}; S.orders().filter(o=>o.status==='대기').forEach(o=>ordItems(o).forEach(i=>{ m[i.product]=(m[i.product]||0)+(+i.qty||0); })); return m; }
+function stockShort(){
+  const need=needByProduct(), out=[];
+  S.products().forEach(p=>{ const c=stockCalc(p.code), nd=need[p.name]||0; if(c.tracked && nd>c.left) out.push({code:p.code,name:p.name,left:c.left,need:nd,short:nd-c.left}); });
+  return out.sort((a,b)=>b.short-a.short);
+}
 function nextReceiptNo(){
   const pre='RCV-'+localDateStr().slice(2).replace(/-/g,'')+'-';
   const max=S.receipts().reduce((m,r)=>{const x=String(r.no||'');if(!x.startsWith(pre))return m;const n=parseInt(x.slice(pre.length),10);return isNaN(n)?m:Math.max(m,n);},0);

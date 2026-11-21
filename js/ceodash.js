@@ -8,6 +8,7 @@ function renderCEO() {
     ot: '(클릭: 목록) 정시납품율 = 도착완료 ÷ (도착완료 + 지연) × 100. 집계 대상이 없으면 표시하지 않음',
     pk: '패킹 미완료 = 진행 오더(도착완료 제외) 중 패킹 기록이 없는 오더 건수. 클릭하면 목록',
     dp: '배차 필요 = 진행 오더 중 아직 이동하지 않은 구간에 배차(차량·선박·항공)가 지정되지 않은 오더 건수. 클릭하면 목록',
+    st: '재고 부족 = 창고 현재고가 Packing 전(대기) 오더의 필요 수량보다 적은 제품 수. 클릭하면 목록',
     ov: '표준초과율 = 실적이 표준시간을 넘은 구간 ÷ 표준시간이 있고 실적이 측정된 구간 × 100',
     lg: '평균 구간 소요 = 출발거점 OUT → 다음거점 IN 측정 구간의 평균(분)'
   };
@@ -18,6 +19,7 @@ function renderCEO() {
     kbox('c5', '지연 · 알람', kv(K.alarm, '건', K.alarm > 0 ? 'bad' : ''), `지연 ${K.delay} + 비지정 ${K.off}`, tip.al, 'js:openKpi(\'al\')'),
     kbox('c4', '패킹 미완료', kv(K.packPend, '건', K.packPend > 0 ? 'bad' : ''), `진행 ${K.active}건 중 패킹 기록 없음`, tip.pk, 'js:openKpi(\'pk\')'),
     kbox('c1', '배차 필요', kv(K.dispNeed, '건', K.dispNeed > 0 ? 'bad' : ''), `미배차 구간 ${K.dispNeedLegs}개`, tip.dp, 'js:openKpi(\'dp\')'),
+    kbox('c4', '재고 부족', kv(K.stockShort, '품목', K.stockShort > 0 ? 'bad' : ''), K.stockShort ? '입고 등록 필요' : '대기 오더 충족', tip.st, 'js:openKpi(\'st\')'),
     kbox('c6', '구간 표준초과율', kv(DC.fmtPct(K.overRate), '%', K.overRate > 0 ? 'bad' : ''), K.measStd ? `측정 ${K.measStd}구간` : '표준시간·실적 부족', tip.ov, 'js:openKpi(\'ov\')')
   ].join('');
 
@@ -151,6 +153,9 @@ function openKpi(k) {
     const dl = O.filter(o => o.status === '지연'), al = S.alarms().filter(a => a.type === 'OFF_ROUTE');
     openPop('지연 · 알람 상세', `지연 오더 <b>${dl.length}</b>건 + 비지정 거점 이벤트 <b>${al.length}</b>건`,
       tb(['구분', '오더', '내용', '현재 위치'], [...dl.map(o => ['<span class="chip red">지연</span>', `<b>${E(o.no)}</b>`, `${E(o.customer)} · ${E(o.product)}`, where(o)]), ...al.map(a => ['<span class="chip ylw">비지정 거점</span>', `<b>${E(a.orderNo)}</b>`, `${E(a.hub)} ${E(a.event)} (${DC.hhmm(a.time)}) — 경로 외 거점`, E(a.hub)])]), 'order.html', '출하오더');
+  } else if (k === 'st') {
+    const L = K.stockShortList;
+    openPop('재고 부족 상세', `창고 현재고가 대기 오더 필요 수량보다 적은 제품 <b>${L.length}</b>품목`, tb(['Box No', '제품', '현재고', '오더 필요', '부족'], L.map(x => [E(x.code), `<b>${E(x.name)}</b>`, x.left, x.need, `<b style="color:#C0392B">${x.short}</b>`])), 'packing.html', '입고Packing');
   } else if (k === 'pk') {
     openPop('패킹 미완료 상세', `진행 오더 중 패킹 기록이 없는 오더 <b>${K.packPend}</b>건`, tb(['오더', '고객사', '제품(박스)', '상태', '출하예정일'], K.packPendList.map(o => [...base(o), E(o.date || '-')])), 'packing.html', '입고Packing');
   } else if (k === 'dp') {

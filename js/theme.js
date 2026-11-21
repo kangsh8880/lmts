@@ -14,6 +14,7 @@
       const O = S.orders(), E = S.events(), A = S.alarms();
       O.filter(o => o.status === '지연').forEach(o => items.push({ c: 'red', h: `🔴 <b>지연</b> ${esc(o.no)} · ${esc(o.customer)}` }));
       A.filter(a => a.type === 'OFF_ROUTE').forEach(a => items.push({ c: 'red', h: `⚠️ <b>비지정 거점</b> ${esc(a.orderNo)} · ${esc(a.hub)} ${esc(a.event)}` }));
+      stockShort().forEach(x => items.push({ c: 'red', h: `📉 <b>재고 부족</b> ${esc(x.name)} · 현재고 ${x.left} / 오더 필요 ${x.need}` }));
       E.slice().sort((a, b) => String(b.time).localeCompare(String(a.time))).slice(0, 15).forEach(e => {
         const arr = e.event === '도착완료';
         items.push({ c: arr ? 'blue' : '', h: `${arr ? '✅' : e.event === 'IN' ? '⬇️' : '⬆️'} <span class="tm">${esc(String(e.time).slice(5, 16))}</span> <b>${esc(e.orderNo)}</b> · ${esc(e.hub)} ${esc(e.event)}` });

@@ -124,10 +124,7 @@ function pkView(v2, btn){
   try{ sessionStorage.setItem('lmts_pk_view', v2); }catch(e){}
   if (v2==='in') rcRender(); else fillPackingSelects();
 }
-function rcNeed(){   // 아직 Packing 전(대기) 오더가 요구하는 제품별 수량
-  const m={}; S.orders().filter(o=>o.status==='대기').forEach(o=>ordItems(o).forEach(i=>{ m[i.product]=(m[i.product]||0)+(+i.qty||0); }));
-  return m;
-}
+function rcNeed(){ return needByProduct(); }
 function rcRender(){
   const nowLocal=()=>{ const d=new Date(); return localDateStr(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
   if (!v('rc-time')) el('rc-time').value=nowLocal();
@@ -143,8 +140,8 @@ function rcRender(){
   const R=S.receipts();
   el('rc-body').innerHTML = R.map((r,i)=>({r,i})).reverse().map(({r,i})=>{
     const cancelled=r.status==='취소';
-    return `<tr style="${cancelled?'color:#9CA3AF;text-decoration:line-through':''}"><td>${r.no}</td><td>${r.time}</td><td>${r.srcType||'-'}</td><td>${r.src||'-'}</td><td>${r.product}</td><td><b>${r.qty}</b></td><td>${r.lot||'-'}</td><td>${r.loc||'-'}</td><td>${r.person||'-'}</td><td>${r.note||''}</td><td>${cancelled?'취소됨':`<button class="btn btn-danger btn-xs" onclick="rcCancel(${i})">취소</button>`}</td></tr>`;
-  }).join('') || '<tr><td colspan="11" class="empty">입고 내역 없음</td></tr>';
+    return `<tr style="${cancelled?'color:#9CA3AF;text-decoration:line-through':''}"><td>${r.no}</td><td>${r.time}</td><td>${r.srcType||'-'}</td><td>${r.src||'-'}</td><td>${r.product}</td><td><b>${r.qty}</b></td><td>${r.lot||'-'}</td><td>${r.loc||'-'}</td><td>${r.person||'-'}</td><td>${r.note||''}</td><td>${cancelled?'-':`<button class="btn btn-ghost btn-xs" onclick="rcLabel('${r.no}')">🏷 라벨</button>`}</td><td>${cancelled?'취소됨':`<button class="btn btn-danger btn-xs" onclick="rcCancel(${i})">취소</button>`}</td></tr>`;
+  }).join('') || '<tr><td colspan="12" class="empty">입고 내역 없음</td></tr>';
 }
 function rcAdd(){
   const code=v('rc-box'), qty=parseInt(v('rc-qty'))||0, time=(v('rc-time')||'').replace('T',' ');
@@ -158,8 +155,12 @@ function rcAdd(){
   S.set('receipts', arr);
   ['rc-qty','rc-lot','rc-note'].forEach(id=>el(id).value=''); el('rc-time').value='';
   rcRender();
-  const c=stockCalc(code), m=el('rc-msg'); m.style.color='#1a4fa0'; m.textContent=`✅ [${no}] ${p?p.name:code} +${qty} 입고 — 현재고 ${c.left}`;
-  setTimeout(()=>{ if(el('rc-msg')) el('rc-msg').textContent=''; },12000);
+  const c=stockCalc(code), m=el('rc-msg'); m.style.color='#1a4fa0'; m.innerHTML=`✅ [${no}] ${p?p.name:code} +${qty} 입고 — 현재고 ${c.left} <button type="button" class="btn btn-ghost btn-sm" onclick="rcLabel('${no}')">🏷 입고 라벨 인쇄</button>`;
+  setTimeout(()=>{ if(el('rc-msg')) el('rc-msg').textContent=''; },30000);
+}
+function rcLabel(no){
+  const n=prompt('인쇄할 라벨 수(입고한 박스 수)를 입력하세요', '1'); if(n===null) return;
+  LBL.printRcv(no, n);
 }
 function rcCancel(i){
   const arr=S.receipts(), r=arr[i]; if(!r||r.status==='취소') return;
