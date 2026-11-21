@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 위치추적</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=20260587">
-  <link rel="stylesheet" href="css/onepage.css?v=20260587">
-  <link rel="stylesheet" href="css/theme.css?v=20260587">
-  <link rel="stylesheet" href="css/map.css?v=20260587">
-  <script src="js/i18n-dict.js?v=20260587"></script>
-  <script src="js/i18n.js?v=20260587"></script>
-  <script src="js/theme.js?v=20260587"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260588">
+  <link rel="stylesheet" href="css/onepage.css?v=20260588">
+  <link rel="stylesheet" href="css/theme.css?v=20260588">
+  <link rel="stylesheet" href="css/map.css?v=20260588">
+  <script src="js/i18n-dict.js?v=20260588"></script>
+  <script src="js/i18n.js?v=20260588"></script>
+  <script src="js/theme.js?v=20260588"></script>
 </head>
 <body class="one mp-body">
 
@@ -77,11 +77,13 @@
   <div class="mp-top">
     <div class="sec-title mp-ttl" style="margin:0">위치추적<small style="font-size:14.5px;color:var(--gray);margin-left:8px">운송 중 오더 전체 · 오더 선택 시 출발 → 현재 위치 → 예상 경로</small></div>
     <div class="mp-ctl">
+      <div class="mp-seg"><button id="mp-m-o" class="on" onclick="MP.setMode('order')">📋 오더별</button><button id="mp-m-u" onclick="MP.setMode('unit')">🚚 운송수단별</button></div>
       <select id="mp-q" onchange="MP.search()" title="오더번호 선택"></select>
-      <button class="btn btn-primary btn-sm" id="mp-all" style="display:none" onclick="MP.overview()" title="운송 중인 모든 오더를 지도에 한 번에 보여줍니다">🗺️ 전체 보기</button>
-      <button class="btn btn-ghost btn-sm" onclick="MP.replay()" title="출발지부터 현재 위치까지 이동을 다시 보여줍니다">▶ 현재까지 재생</button>
-      <button class="btn btn-ghost btn-sm" onclick="MP.focusNow()" title="현재 위치로 이동">⌖ 현재 위치</button>
-      <button class="btn btn-ghost btn-sm" onclick="MP.tour()" title="출발지부터 최종 도착지까지 전체 이동을 처음부터 끝까지 보여줍니다">⤢ 전체 경로</button>
+      <select id="mp-u" style="display:none" onchange="MP.unitPick(this.value)" title="운송수단 선택"></select>
+      <button class="btn btn-primary btn-sm" id="mp-all" style="display:none" onclick="MP.allBtn()" title="전체를 지도에 한 번에 보여줍니다">🗺️ 전체 보기</button>
+      <button class="btn btn-ghost btn-sm" id="mp-rep" onclick="MP.replay()" title="출발지부터 현재 위치까지 이동을 다시 보여줍니다">▶ 현재까지 재생</button>
+      <button class="btn btn-ghost btn-sm" id="mp-foc" onclick="MP.focusNow()" title="현재 위치로 이동">⌖ 현재 위치</button>
+      <button class="btn btn-ghost btn-sm" id="mp-tour" onclick="MP.tour()" title="출발지부터 최종 도착지까지 전체 이동을 처음부터 끝까지 보여줍니다">⤢ 전체 경로</button>
     </div>
     <div class="mp-sp"></div>
   </div>
@@ -105,10 +107,11 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="js/common.js?v=20260587"></script>
+<script src="js/common.js?v=20260588"></script>
+<script src="js/evidence.js?v=20260588"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260587"></script>
-<script src="js/dash-core.js?v=20260587"></script>
-<script src="js/map.js?v=20260587"></script>
+<script src="js/export.js?v=20260588"></script>
+<script src="js/dash-core.js?v=20260588"></script>
+<script src="js/map.js?v=20260588"></script>
 </body>
 </html>
