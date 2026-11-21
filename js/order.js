@@ -16,10 +16,10 @@ function fillOrderSelects() {
   el('o-no').value = nextOrderNo();
   el('o-date').value = localDateStr();
   wpList = []; renderWpList(); updateRoutePreview();
+  fillRouteSelect(); onProductHint();
 }
 
 // 오더번호 규칙: ORD-YYMMDD-NNNN (생성일 기준, 일자별 0001부터 순번, 4자리)
-function localDateStr(d) { d = d || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function nextOrderNo() {
   const ymd = localDateStr().slice(2).replace(/-/g,''), pre = `ORD-${ymd}-`;
   const max = S.orders().reduce((m, o) => {   // 같은 일자의 기존 번호(3자리·4자리 모두) 중 최대 순번
@@ -28,6 +28,61 @@ function nextOrderNo() {
     const n = parseInt(x.slice(pre.length), 10); return isNaN(n) ? m : Math.max(m, n);
   }, 0);
   return pre + String(max + 1).padStart(4, '0');
+}
+
+
+// ── 등록 Route 선택 / 현재 경로를 Route로 저장 ──
+function routeSig(r){ return [r.origin, (r.waypoints||[]).map(w=>w.name+'/'+(w.transport||'')).join('>'), r.destination].join('|'); }
+function curRoute(){
+  const lastDc=[...wpList].reverse().find(w=>w.destChange && w.destChange!=='__pending__');
+  return {origin:v('o-origin'), originStdTime:v('o-origin-std')||'', waypoints:wpList.map(w=>({name:w.name,stdTime:w.stdTime||'',transport:w.transport||'',transportNo:w.transportNo||'',destChange:''})), destination: lastDc?lastDc.destChange:v('o-dest')};
+}
+function fillRouteSelect(){
+  const cu=v('o-customer'), cur=v('o-route');
+  const rs=S.routes().slice().sort((a,b)=>((b.customer===cu&&cu)?1:0)-((a.customer===cu&&cu)?1:0));
+  el('o-route').innerHTML='<option value="">-- 직접 입력 --</option>'+rs.map(r=>`<option value="${r.code}">${(r.customer&&r.customer===cu)?'★ ':''}${r.code} · ${r.name}${r.customer&&r.customer!==cu?' ['+r.customer+']':''}</option>`).join('');
+  if (cur && rs.some(r=>r.code===cur)) el('o-route').value=cur;
+}
+function onCustomerChange(){
+  fillRouteSelect();
+  const cu=v('o-customer'); if(!cu) return;
+  const m=S.routes().filter(r=>r.customer===cu);
+  const hint=el('o-route-hint');
+  if (m.length===1 && !v('o-route') && !v('o-dest') && !wpList.length) { el('o-route').value=m[0].code; applyRoute(); }
+  else if (m.length>1 && !v('o-route')) hint.textContent=`★ 표시: ${cu}의 등록 Route ${m.length}건 — 선택하세요`;
+  else if (!m.length && !v('o-route')) hint.textContent=`${cu}의 등록 Route가 없습니다. 직접 입력 후 [현재 경로를 Route로 저장]하면 다음부터 선택할 수 있습니다`;
+}
+function applyRoute(){
+  const code=v('o-route'), hint=el('o-route-hint');
+  if(!code){ hint.textContent='직접 입력 모드 — 출발지·경유지·도착지를 아래에서 설정하세요'; return; }
+  const r=S.routes().find(x=>x.code===code); if(!r) return;
+  const hubs=S.hubs().map(h=>h.name), miss=[r.origin,r.destination,...(r.waypoints||[]).map(w=>w.name)].filter(n=>!hubs.includes(n));
+  if (miss.length){ hint.textContent='⚠ 기준정보에 없는 거점: '+miss.join(', ')+' — Route를 먼저 수정하세요'; el('o-route').value=''; return; }
+  el('o-origin').value=r.origin; el('o-origin-std').value=r.originStdTime||''; el('o-dest').value=r.destination;
+  wpList=(r.waypoints||[]).map(w=>({name:w.name,stdTime:w.stdTime||'',transport:w.transport||'',transportNo:'',destChange:''}));
+  renderWpList(); updateRoutePreview();
+  hint.textContent=`✅ ${r.code} 적용됨 — 필요하면 아래에서 고쳐 쓸 수 있습니다 (운송수단 번호는 배차 시 입력)`;
+}
+function saveAsRoute(){
+  const cur=curRoute();
+  if(!cur.origin||!cur.destination) return alert('출발 거점과 도착 거점을 먼저 설정하세요');
+  const rs=S.routes(), dup=rs.find(r=>routeSig(r)===routeSig(cur));
+  if (dup) return alert(`이미 같은 경로가 등록되어 있습니다: ${dup.code} · ${dup.name}`);
+  const cu=v('o-customer'), nm=prompt('Route 이름을 입력하세요', `${cu?cu+' · ':''}${cur.destination}${cur.waypoints.length?' ('+cur.waypoints.map(w=>w.name.replace(/\s*\(.*\)/,'')).join('·')+' 경유)':' 직송'}`);
+  if (!nm) return;
+  const n=rs.reduce((m,r)=>{const x=parseInt(String(r.code||'').replace(/\D/g,''),10);return isNaN(x)?m:Math.max(m,x);},0), code='RT-'+String(n+1).padStart(3,'0');
+  rs.push(Object.assign({code,name:nm.trim(),customer:cu,note:''},cur)); S.set('routes',rs);
+  fillRouteSelect(); el('o-route').value=code; el('o-route-hint').textContent=`💾 ${code} 로 저장했습니다. 다음부터 선택해서 쓸 수 있습니다`;
+}
+function onProductHint(){
+  const nm=v('o-product'), h=el('o-stock'); if(!h) return;
+  if(!nm){ h.textContent=''; return; }
+  const p=S.products().find(x=>x.name===nm); if(!p){ h.textContent=''; return; }
+  const c=stockCalc(p.code);
+  if(!c.tracked){ h.textContent='창고 재고 관리 대상 아님(기초재고·입고 미등록)'; return; }
+  let need=0; S.orders().filter(o=>o.status==='대기').forEach(o=>ordItems(o).forEach(i=>{ if(i.product===nm) need+=(+i.qty||0); }));
+  const av=c.left-need;
+  h.innerHTML=`📦 창고 현재고 <b>${c.left}</b> · Packing 전 오더 필요 ${need} → 가용 <b style="color:${av<0?'#C0392B':'#1a4fa0'}">${av}</b>${av<=0?' (재고 부족 — 입고 등록 필요)':''}`;
 }
 
 function onOriginChange() { updateRoutePreview(); }
@@ -138,6 +193,7 @@ function addOrderItem() {
   const product=v('o-product'), qty=parseInt(v('o-boxes'))||0;
   if (!product) return alert('제품을 선택하세요');
   if (qty<1) return alert('수량을 입력하세요');
+  { const p=S.products().find(x=>x.name===product); if(p){ const c=stockCalc(p.code); if(c.tracked){ let need=qty+(oItems.find(i=>i.product===product)||{qty:0}).qty; S.orders().filter(o=>o.status==='대기').forEach(o=>ordItems(o).forEach(i=>{ if(i.product===product) need+=(+i.qty||0); })); if(need>c.left && !confirm(`⚠️ 창고 재고가 부족합니다.\n\n${product}: 현재고 ${c.left} / 필요(대기 오더 포함) ${need}\n\n그래도 오더에 추가할까요? (Packing 전에 입고 등록이 필요합니다)`)) return; } } }
   const ex=oItems.find(i=>i.product===product);
   if (ex) ex.qty+=qty; else oItems.push({product, qty});
   el('o-product').value=''; el('o-boxes').value='';
@@ -172,6 +228,7 @@ function createOrder() {
   const arr = S.orders();
   const items=oItems.map(i=>({...i}));
   arr.push({no, date, customer, items, product:items.map(i=>i.product).join(' / '), boxes:items.reduce((a,i)=>a+i.qty,0), note:v('o-note'), status:'대기', created:now(),
+    routeCode:(function(){ const rc=S.routes().find(r=>r.code===v('o-route')); return rc && routeSig(rc)===routeSig(curRoute()) ? rc.code : ''; })(),
     route:{
       origin, originStdTime:v('o-origin-std')||'',
       waypoints: wpList.map(w=>({
@@ -186,7 +243,7 @@ function createOrder() {
   });
   S.set('orders', arr);
   oItems=[]; renderOrderItems();
-  fillOrderSelects(); renderOrders();
+  el('o-route').value=''; fillOrderSelects(); renderOrders();
   alert(`✅ 오더 [${no}] 생성 완료`);
 }
 
@@ -223,7 +280,7 @@ function buildRouteChips(o, small=true) {
     if (wdc) html+=`<span class="r-chip" style="${fs}background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;">🔀🏢${wdc}</span>`;
   });
   if (destination) html+=`<span class="r-arrow" style="${fs}">→</span><span class="r-chip r-chip-dest" style="${fs}">🏢 ${destination}</span>`;
-  return `<div class="route-chips">${html}</div>`;
+  return `${o.routeCode?`<div class="rt-hint" style="margin-bottom:2px">🛣 ${o.routeCode}</div>`:''}<div class="route-chips">${html}</div>`;
 }
 
 function getRouteShort(o) {

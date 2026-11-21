@@ -7,10 +7,9 @@ function boxInfo(code){   // '@제품명' = 기준정보에 Box가 없는 제품
   return S.products().find(x=>x.code===code) || {code, name:''};
 }
 function stockOf(code){
-  if (String(code).startsWith('@')) return {total:0, left:9e9, unlimited:true};            // 보관 Box 잔량 = 총수량 − 이미 Packing 완료로 꺼낸 수량
-  const p=S.products().find(x=>x.code===code); const tot=parseInt(p?.qty)||0;
-  const used=S.packings().reduce((a,pk)=>a+(pk.lines||[]).filter(l=>l.boxNo===code).reduce((s,l)=>s+(+l.qty||0),0),0);
-  return {total:tot, left: tot? Math.max(0,tot-used) : 9e9, unlimited: !tot};
+  if (String(code).startsWith('@')) return {total:0, left:9e9, unlimited:true};            // 현재고 = 기초재고 + 창고 입고 누계 − Packing 출고 누계
+  const c=stockCalc(code);
+  return {total:c.base+c.inn, left: c.tracked? c.left : 9e9, unlimited: !c.tracked};
 }
 function pkTaken(code){ const bn=String(code).startsWith('@')?'미등록':code; return pkLines.filter(l=>l.boxNo===bn).reduce((a,l)=>a+l.qty,0); }
 function pkNeed(o){
@@ -41,7 +40,7 @@ function pkRender(){
   const direct=need.filter(n=>n.left>0 && !S.products().some(p=>p.name===n.product));   // 기준정보에 Box 미등록 제품
   el('pk-box').innerHTML = '<option value="">-- 보관 Box 선택 --</option>' + ps.map(p=>{
     const st=stockOf(p.code), left=st.unlimited?'∞':st.left-pkTaken(p.code);
-    return `<option value="${p.code}" ${p.code===cur?'selected':''}>${p.code} · ${p.name} (보관 잔량 ${left}${st.unlimited?'':'/'+st.total})</option>`;
+    return `<option value="${p.code}" ${p.code===cur?'selected':''}>${p.code} · ${p.name} (창고 현재고 ${left}${st.unlimited?'':'/'+st.total})</option>`;
   }).join('') + direct.map(n=>`<option value="@${n.product}" ${('@'+n.product)===cur?'selected':''}>(Box 미등록) ${n.product} — 직접 담기</option>`).join('');
   pkBoxChange(true);
   el('pk-lines').innerHTML = pkLines.length ? pkLines.map((l,i)=>`<tr><td>${i+1}</td><td><b>${l.packNo}</b></td><td>${l.boxNo}</td><td>${l.product}</td><td>${l.qty}</td><td>${l.at}</td><td><a href="#" onclick="pkDel(${i});return false" style="color:#c0392b;text-decoration:none">✕</a></td></tr>`).join('') : '<tr><td colspan="7" class="empty">담은 내역 없음</td></tr>';
@@ -54,7 +53,7 @@ function pkBoxChange(keep){
   const p=boxInfo(code), st=stockOf(code);
   const n=pkNeed(o).find(x=>x.product===p.name), avail=st.unlimited?9e9:st.left-pkTaken(code);
   const max=Math.min(n?n.left:0, avail);
-  el('pk-stock').textContent = `필요 ${n?n.left:0} · 보관 잔량 ${st.unlimited?'제한없음':avail} → 최대 ${max}개까지 담을 수 있습니다`;
+  el('pk-stock').textContent = `필요 ${n?n.left:0} · 창고 현재고 ${st.unlimited?'제한없음':avail} → 최대 ${max}개까지 담을 수 있습니다`;
   if (!keep || !v('pk-qty')) el('pk-qty').value = max>0?max:'';
 }
 function pkAdd(){
@@ -65,7 +64,7 @@ function pkAdd(){
   const p=boxInfo(code), st=stockOf(code);
   const n=pkNeed(o).find(x=>x.product===p.name);
   if(!n || qty>n.left) return alert(`이 제품의 남은 출하 수량(${n?n.left:0})보다 많이 담을 수 없습니다`);
-  if(!st.unlimited && qty>st.left-pkTaken(code)) return alert(`보관 Box 잔량(${st.left-pkTaken(code)})이 부족합니다`);
+  if(!st.unlimited && qty>st.left-pkTaken(code)) return alert(`창고 현재고(${st.left-pkTaken(code)})가 부족합니다. [📥 창고 입고]에서 입고 등록 후 진행하세요`);
   const packNo=(v('pk-pack')||'1').trim();
   pkLines.push({seq:pkLines.length+1, packNo, boxNo:p.code, product:p.name, qty, at:now().slice(11,16)});   // 합치지 않고 담을 때마다 1건씩 이력 기록
   el('pk-qty').value=''; pkRender();
@@ -115,8 +114,65 @@ function renderPackingDone() {
   ).join('') || '<tr><td colspan="7" class="empty">없음</td></tr>';
 }
 
+
+// ══ 자사물류창고 입고 ══
+function pkView(v2, btn){
+  el('pk-view-in').style.display = v2==='in' ? '' : 'none';
+  el('pk-view-out').style.display = v2==='out' ? '' : 'none';
+  document.querySelectorAll('#pk-tabs .btn').forEach(b=>b.className=b.className.replace('btn-primary','btn-ghost'));
+  if (btn) btn.className = btn.className.replace('btn-ghost','btn-primary');
+  try{ sessionStorage.setItem('lmts_pk_view', v2); }catch(e){}
+  if (v2==='in') rcRender(); else fillPackingSelects();
+}
+function rcNeed(){   // 아직 Packing 전(대기) 오더가 요구하는 제품별 수량
+  const m={}; S.orders().filter(o=>o.status==='대기').forEach(o=>ordItems(o).forEach(i=>{ m[i.product]=(m[i.product]||0)+(+i.qty||0); }));
+  return m;
+}
+function rcRender(){
+  const nowLocal=()=>{ const d=new Date(); return localDateStr(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+  if (!v('rc-time')) el('rc-time').value=nowLocal();
+  if (!v('rc-src')) el('rc-src').value='UTI VINA 생산라인';
+  const cur=v('rc-box');
+  fillSel('rc-box', S.products().map(p=>({v:p.code, l:`${p.code} · ${p.name}`}))); el('rc-box').value=cur;
+  const need=rcNeed();
+  el('rc-stock-body').innerHTML = S.products().map(p=>{
+    const c=stockCalc(p.code), nd=need[p.name]||0, av=c.left-nd;
+    const avCell = !c.tracked ? '<span style="color:#6B7280">제한없음</span>' : av<0 ? `<b style="color:#C0392B">${av} (부족)</b>` : `<b>${av}</b>`;
+    return `<tr><td>${p.code}</td><td>${p.name}</td><td>${c.base}</td><td>${c.inn}</td><td>${c.out}</td><td><b>${c.tracked?c.left:'-'}</b></td><td>${nd}</td><td>${avCell}</td></tr>`;
+  }).join('') || '<tr><td colspan="8" class="empty">기준정보 > 제품에 Box를 먼저 등록하세요</td></tr>';
+  const R=S.receipts();
+  el('rc-body').innerHTML = R.map((r,i)=>({r,i})).reverse().map(({r,i})=>{
+    const cancelled=r.status==='취소';
+    return `<tr style="${cancelled?'color:#9CA3AF;text-decoration:line-through':''}"><td>${r.no}</td><td>${r.time}</td><td>${r.srcType||'-'}</td><td>${r.src||'-'}</td><td>${r.product}</td><td><b>${r.qty}</b></td><td>${r.lot||'-'}</td><td>${r.loc||'-'}</td><td>${r.person||'-'}</td><td>${r.note||''}</td><td>${cancelled?'취소됨':`<button class="btn btn-danger btn-xs" onclick="rcCancel(${i})">취소</button>`}</td></tr>`;
+  }).join('') || '<tr><td colspan="11" class="empty">입고 내역 없음</td></tr>';
+}
+function rcAdd(){
+  const code=v('rc-box'), qty=parseInt(v('rc-qty'))||0, time=(v('rc-time')||'').replace('T',' ');
+  if(!time) return alert('입고 일시를 입력하세요');
+  if(!code) return alert('입고 제품(Box)을 선택하세요');
+  if(qty<1) return alert('입고 수량을 입력하세요');
+  if(!v('rc-src').trim()) return alert('출처(공장·업체명)를 입력하세요');
+  const p=S.products().find(x=>x.code===code);
+  const arr=S.receipts(), no=nextReceiptNo();
+  arr.push({no, time, boxNo:code, product:p?p.name:'', qty, lot:v('rc-lot').trim(), srcType:v('rc-type'), src:v('rc-src').trim(), loc:v('rc-loc').trim(), person:v('rc-person').trim()||'창고담당', note:v('rc-note').trim(), status:'입고완료'});
+  S.set('receipts', arr);
+  ['rc-qty','rc-lot','rc-note'].forEach(id=>el(id).value=''); el('rc-time').value='';
+  rcRender();
+  const c=stockCalc(code), m=el('rc-msg'); m.style.color='#1a4fa0'; m.textContent=`✅ [${no}] ${p?p.name:code} +${qty} 입고 — 현재고 ${c.left}`;
+  setTimeout(()=>{ if(el('rc-msg')) el('rc-msg').textContent=''; },12000);
+}
+function rcCancel(i){
+  const arr=S.receipts(), r=arr[i]; if(!r||r.status==='취소') return;
+  const c=stockCalc(r.boxNo);
+  if (c.left - r.qty < 0 && c.out>0) return alert(`⛔ 취소할 수 없습니다.\n\n이 입고분(${r.qty})을 취소하면 현재고가 음수가 됩니다. 이미 Packing으로 출고된 수량이 있습니다.`);
+  if(!confirm(`[${r.no}] ${r.product} ${r.qty}개 입고를 취소할까요?\n취소하면 현재고에서 차감됩니다.`)) return;
+  r.status='취소'; S.set('receipts', arr); rcRender();
+}
+
 // ── 페이지 초기화 ───────────────────────────────────────────────
 window.lmtsReady = function() {
   initNav();
   fillPackingSelects();
+  let vw='out'; try{ vw=sessionStorage.getItem('lmts_pk_view')||'out'; }catch(e){}
+  const bs=document.querySelectorAll('#pk-tabs .btn'); pkView(vw, bs[vw==='in'?0:1]);
 };

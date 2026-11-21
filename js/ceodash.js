@@ -152,7 +152,7 @@ function openKpi(k) {
     openPop('지연 · 알람 상세', `지연 오더 <b>${dl.length}</b>건 + 비지정 거점 이벤트 <b>${al.length}</b>건`,
       tb(['구분', '오더', '내용', '현재 위치'], [...dl.map(o => ['<span class="chip red">지연</span>', `<b>${E(o.no)}</b>`, `${E(o.customer)} · ${E(o.product)}`, where(o)]), ...al.map(a => ['<span class="chip ylw">비지정 거점</span>', `<b>${E(a.orderNo)}</b>`, `${E(a.hub)} ${E(a.event)} (${DC.hhmm(a.time)}) — 경로 외 거점`, E(a.hub)])]), 'order.html', '출하오더');
   } else if (k === 'pk') {
-    openPop('패킹 미완료 상세', `진행 오더 중 패킹 기록이 없는 오더 <b>${K.packPend}</b>건`, tb(['오더', '고객사', '제품(박스)', '상태', '출하예정일'], K.packPendList.map(o => [...base(o), E(o.date || '-')])), 'packing.html', '박스Packing');
+    openPop('패킹 미완료 상세', `진행 오더 중 패킹 기록이 없는 오더 <b>${K.packPend}</b>건`, tb(['오더', '고객사', '제품(박스)', '상태', '출하예정일'], K.packPendList.map(o => [...base(o), E(o.date || '-')])), 'packing.html', '입고Packing');
   } else if (k === 'dp') {
     openPop('배차 필요 상세', `아직 이동하지 않은 구간에 배차가 없는 오더 <b>${K.dispNeed}</b>건 · 미배차 구간 <b>${K.dispNeedLegs}</b>개`,
       tb(['오더', '고객사', '상태', '배차 현황', '배차 필요 구간'], K.dispNeedList.map(x => [`<b>${E(x.o.no)}</b>`, E(x.o.customer), st(x.o), `${x.got}/${x.total}구간`, x.miss.map(l => `<span class="chip red">${E(DC.shortName(l.from))} ➜ ${E(DC.shortName(l.to))}</span>`).join(' ')])), 'dispatch.html', '차량배차');

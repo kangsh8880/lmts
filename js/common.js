@@ -143,7 +143,7 @@ const GH = {
 // ══════════════════════════════════════════════════════════════════
 const DB = {
   customers:[], products:[], vehicles:[], hubs:[],
-  orders:[], packings:[], dispatches:[], events:[], alarms:[], scans:[],
+  orders:[], packings:[], dispatches:[], events:[], alarms:[], scans:[], receipts:[], routes:[],
   lastUpdated: ''
 };
 
@@ -159,7 +159,7 @@ function cleanDeep(o){
 // 컬렉션별 식별 키 — 동시 저장 병합·삭제 추적용
 const KEYFN = {
   customers:r=>r.code, products:r=>r.code, vehicles:r=>r.no, hubs:r=>r.code||r.name, orders:r=>r.no, packings:r=>r.orderNo,
-  dispatches:r=>r.orderNo+'#'+r.legIdx, events:r=>[r.time,r.orderNo,r.hub,r.event].join('|'), alarms:r=>r.id, scans:r=>[r.time,r.code,r.hub,r.event].join('|')
+  dispatches:r=>r.orderNo+'#'+r.legIdx, events:r=>[r.time,r.orderNo,r.hub,r.event].join('|'), alarms:r=>r.id, scans:r=>[r.time,r.code,r.hub,r.event].join('|'), receipts:r=>r.no, routes:r=>r.code
 };
 const _KS = {}, _DEL = {};     // 마지막 확인 시점의 키 목록 / 이 세션에서 지운 키
 function snapKeys(){ Object.keys(KEYFN).forEach(k=>{ _KS[k] = new Set((DB[k]||[]).map(KEYFN[k])); _DEL[k] = _DEL[k] || new Set(); }); }
@@ -176,6 +176,22 @@ function mergeRemote(remote){     // 서버에만 있고 내가 지우지 않은
 function ordItems(o){ return (o.items && o.items.length) ? o.items : [{product:o.product, qty:parseInt(o.boxes)||0}]; }
 function ordQty(o){ return ordItems(o).reduce((a,i)=>a+(+i.qty||0),0); }
 function ordText(o){ return ordItems(o).map(i=>`${i.product} ${i.qty}`).join(' / '); }
+
+// ── 자사물류창고 재고: 기초재고(기준정보 수량) + 입고 누계 − Packing 출고 누계 ──
+function stockCalc(code){
+  const p=S.products().find(x=>x.code===code); const base=parseInt(p&&p.qty)||0;
+  const rc=S.receipts().filter(r=>r.boxNo===code&&r.status!=='취소');
+  const inn=rc.reduce((a,r)=>a+(+r.qty||0),0);
+  const out=S.packings().reduce((a,pk)=>a+(pk.lines||[]).filter(l=>l.boxNo===code).reduce((s,l)=>s+(+l.qty||0),0),0);
+  const tracked=base>0||rc.length>0;
+  return {base,inn,out,left:Math.max(0,base+inn-out),tracked};
+}
+function nextReceiptNo(){
+  const pre='RCV-'+localDateStr().slice(2).replace(/-/g,'')+'-';
+  const max=S.receipts().reduce((m,r)=>{const x=String(r.no||'');if(!x.startsWith(pre))return m;const n=parseInt(x.slice(pre.length),10);return isNaN(n)?m:Math.max(m,n);},0);
+  return pre+String(max+1).padStart(3,'0');
+}
+function localDateStr(d){ d=d||new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function ordCodes(o, ps){ return ordItems(o).map(i=>(ps.find(p=>p.name===i.product)||{}).code||'').filter(Boolean); }
 
 // 오더 상태 변경 — Packing·배차·거점 In/Out 화면 공용
@@ -210,6 +226,8 @@ const S = {
   events:     () => S.get('events'),
   alarms:     () => S.get('alarms'),
   scans:      () => S.get('scans'),
+  receipts:   () => S.get('receipts'),
+  routes:     () => S.get('routes'),
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -332,7 +350,7 @@ async function loadFromGitHub() {
 
 function loadFromLocalStorage() {
   // localStorage 캐시에서 데이터 로드 (오프라인 모드)
-  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms','scans'];
+  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms','scans','receipts','routes'];
   keys.forEach(k => {
     const raw = localStorage.getItem('lmts_' + k);
     if (raw) { try { DB[k] = JSON.parse(raw); } catch(e) {} }
@@ -527,6 +545,17 @@ function initSampleData() {
      route:{origin:'자사물류창고 (화성)', originStdTime:'20',
             waypoints:[{name:'수원 중간집하장', stdTime:'35', transport:'truck', transportNo:'서울 9012다', destChange:''}],
             destination:'SK Hynix 이천캠퍼스'}},
+  ];
+  DB.receipts = [
+    {no:'RCV-260418-001', time:'2026-04-18 10:20', boxNo:'P001', product:'OLED Module A타입', qty:20, lot:'LOT-260418-A', srcType:'생산공장', src:'UTI VINA 생산라인', loc:'A-01-02', person:'창고담당', note:'', status:'입고완료'},
+    {no:'RCV-260418-002', time:'2026-04-18 14:05', boxNo:'P002', product:'LCD Panel B타입', qty:10, lot:'LOT-260418-B', srcType:'생산공장', src:'UTI VINA 생산라인', loc:'A-02-01', person:'창고담당', note:'', status:'입고완료'},
+    {no:'RCV-260419-001', time:'2026-04-19 09:40', boxNo:'P003', product:'Camera Module C타입', qty:30, lot:'LOT-260419-C', srcType:'협력사', src:'협력사 (모듈)', loc:'B-01-03', person:'창고담당', note:'수입검사 합격', status:'입고완료'},
+  ];
+  DB.routes = [
+    {code:'RT-001', name:'Samsung 수원 · 용인 경유 직송', customer:'Samsung Electronics', origin:'자사물류창고 (화성)', originStdTime:'30', waypoints:[{name:'수도권물류센터 (용인)', stdTime:'45', transport:'truck', transportNo:'', destChange:''}], destination:'Samsung Electronics 수원', note:'국내 차량'},
+    {code:'RT-002', name:'Samsung 수원 · 항공(ICN) 경유', customer:'Samsung Electronics', origin:'자사물류창고 (화성)', originStdTime:'30', waypoints:[{name:'수도권물류센터 (용인)', stdTime:'45', transport:'truck', transportNo:'', destChange:''},{name:'인천국제공항 (ICN)', stdTime:'60', transport:'air', transportNo:'', destChange:''}], destination:'Samsung Electronics 수원', note:'긴급 항공'},
+    {code:'RT-003', name:'LG 파주 · 안성 경유', customer:'LG Display', origin:'자사물류창고 (화성)', originStdTime:'25', waypoints:[{name:'안성허브터미널', stdTime:'30', transport:'truck', transportNo:'', destChange:''}], destination:'LG Display 파주공장', note:''},
+    {code:'RT-004', name:'SK 이천 · 수원집하장 경유', customer:'SK Hynix', origin:'자사물류창고 (화성)', originStdTime:'20', waypoints:[{name:'수원 중간집하장', stdTime:'35', transport:'truck', transportNo:'', destChange:''}], destination:'SK Hynix 이천캠퍼스', note:''},
   ];
   DB.events = [
     {time:'2026-04-20 08:30', orderNo:'ORD-260420-001', customer:'Samsung Electronics', hub:'자사물류창고 (화성)', event:'OUT', person:'창고담당', note:'차량 출발'},
