@@ -164,6 +164,12 @@ const MP = (() => {
   function uInfo(o, i) { const u = uOf(o, i); if (!u || !u.id) return '<span style="color:#c0392b">배차 미등록</span>'; const d = u.d, ic = ICON[d.transportType] || '';
     const sub = d.transportType === 'truck' ? [d.driver, d.dphone && d.dphone !== '-' ? d.dphone : ''] : d.transportType === 'air' ? [d.depAirport && d.arrAirport ? d.depAirport + ' → ' + d.arrAirport : ''] : [d.shippingCo, d.depPort && d.arrPort ? d.depPort + ' → ' + d.arrPort : ''];
     return `${ic} <b>${esc(u.id)}</b>${sub.filter(Boolean).length ? ' · ' + sub.filter(Boolean).map(esc).join(' · ') : ''}`; }
+  function nowUnit(o, st) {
+    const row = (t, i) => `<span class="mp-unit">${t}: ${uInfo(o, i)}</span><br>`;
+    if (st.state === 'done') return '';
+    if (st.state === 'move') return row('운송수단', st.leg);
+    return (st.state === 'at' && st.leg > 0 ? row('도착 운송수단', st.leg - 1) : '') + (st.leg < st.n ? row('다음 출발', st.leg) : '');
+  }
   function evHtml(o) {
     if (!window.EV) return ''; const rows = EV.of(o.no);
     if (!rows.length) return '<div class="mp-note">📷 증빙 사진 없음 (Packing·거점 처리 시 선택적으로 촬영)</div>';
@@ -207,8 +213,8 @@ const MP = (() => {
       <div class="mp-kpis"><div class="mp-kpi"><small>진행률</small><b>${st.pct.toFixed(1)}%</b></div>
         <div class="mp-kpi ${bad ? 'bad' : 'ok'}"><small>${st.state === 'done' ? '도착 시각' : '도착 예상(ETA)'}</small><b>${fmt(st.eta)}</b></div>
         <div class="mp-kpi ${bad ? 'bad' : 'ok'}"><small>계획 도착</small><b>${fmt(st.plan)}</b></div></div>
-      <div class="mp-now"><b>현재 위치 ${st.state === 'move' ? '(추정)' : ''}</b><br>${where}<br>${st.state === 'done' ? '' : `<span class="mp-unit">${st.state === 'move' ? '운송수단' : '다음 운송수단'}: ${uInfo(o, Math.min(st.leg, st.n - 1))}</span><br>`}<span style="color:${bad ? '#c0392b' : '#1a4fa0'};font-weight:700">${dtxt}</span></div>
-      <div class="mp-note">※ 마지막 거점 이벤트(IN/OUT)와 구간 표준시간 비율로 위치를 추정합니다. 기준시각 ${fmt(st.now)} (${DC.refNow().live ? '현재 시각' : '마지막 이벤트 시각'}) · 지도 수단: 🚛 차량 실선 · ✈️ 항공 곡선 · 🚢 선박 점선</div>
+      <div class="mp-now"><b title="마지막 거점 이벤트(IN/OUT)와 구간 표준시간 비율로 위치를 추정합니다. 기준시각 ${fmt(st.now)} (${DC.refNow().live ? '현재 시각' : '마지막 이벤트 시각'})">현재 위치 ${st.state === 'move' ? '(추정)' : ''}</b><br>${where}<br>${nowUnit(o, st)}<span style="color:${bad ? '#c0392b' : '#1a4fa0'};font-weight:700">${dtxt}</span></div>
+
       ${evHtml(o)}
       <div class="mp-tl">${tl}</div>`;
   }
