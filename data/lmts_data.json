@@ -700,8 +700,17 @@
       "event": "OUT",
       "person": "배차담당",
       "note": "차량 출발"
+    },
+    {
+      "time": "2026-11-21 07:58",
+      "orderNo": "ORD-260420-002",
+      "customer": "LG Display",
+      "hub": "안성허브터미널",
+      "event": "IN",
+      "person": "Kang",
+      "note": ""
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-20 14:35"
+  "lastUpdated": "2026-11-21 08:00"
 }
