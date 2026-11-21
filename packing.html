@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - Packing 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260594">
-  <link rel="stylesheet" href="css/theme.css?v=20260594">
-  <script src="js/i18n-dict.js?v=20260594"></script>
-  <script src="js/i18n.js?v=20260594"></script>
-  <script src="js/theme.js?v=20260594"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260596">
+  <link rel="stylesheet" href="css/theme.css?v=20260596">
+  <script src="js/i18n-dict.js?v=20260596"></script>
+  <script src="js/i18n.js?v=20260596"></script>
+  <script src="js/theme.js?v=20260596"></script>
 </head>
 <body>
 
@@ -76,9 +76,12 @@
 
 <div class="page" style="display:block;padding:16px 20px;max-width:none;margin:0">
 
-  <div class="mst-tabs" id="pk-tabs" style="margin-bottom:12px">
-    <button class="btn btn-primary btn-sm" onclick="pkView('in',this)">📥 창고 입고</button>
-    <button class="btn btn-ghost btn-sm" onclick="pkView('out',this)">📦 Packing 출고</button>
+  <div class="mst-head">
+    <div class="sec-title" id="pk-title">입고·Packing 관리</div>
+    <div class="mst-tabs" id="pk-tabs">
+      <button class="btn btn-primary btn-sm" onclick="pkView('in',this)">📥 창고 입고</button>
+      <button class="btn btn-ghost btn-sm" onclick="pkView('out',this)">📦 Packing 출고</button>
+    </div>
   </div>
 
   <div id="pk-view-in">
@@ -90,7 +93,7 @@
       <div class="fb-step"><b>⑤ 출하오더 → Packing</b><span>재고가 있는 제품만 담기 가능</span></div>
     </div>
     <div class="grid2" style="grid-template-columns:minmax(0,3.5fr) minmax(0,8.5fr)">
-      <div class="card"><div class="card-head">📥 창고 입고 등록</div><div class="card-body">
+      <div class="card"><div class="card-head">📥 창고 입고 등록</div><div class="card-body" id="rc-form-body">
         <div class="form-group"><label>입고 일시</label><input id="rc-time" type="datetime-local"></div>
         <div class="form-group"><label>입고 구분</label><select id="rc-type"><option>생산공장</option><option>협력사</option><option>반품</option><option>거점 이동</option><option>기타</option></select></div>
         <div class="form-group"><label>출처 (공장·업체명)</label><input id="rc-src" placeholder="예: UTI VINA 생산라인"></div>
@@ -103,7 +106,7 @@
           <div class="form-group" style="flex:1"><label>적치 위치</label><input id="rc-loc" placeholder="A-01-02"></div>
           <div class="form-group" style="flex:1"><label>담당자</label><input id="rc-person" value="창고담당"></div>
         </div>
-        <div class="form-group"><label>비고</label><input id="rc-note" placeholder="수입검사 결과 등"></div>
+        <div class="form-group rc-wide"><label>비고</label><input id="rc-note" placeholder="수입검사 결과 등"></div>
         <button type="button" class="btn btn-primary" style="width:100%;padding:12px;font-size:19px" onclick="rcAdd()">📥 입고 등록</button>
         <div id="rc-msg" style="margin-top:8px;font-size:15.5px;font-weight:700"></div>
       </div></div>
@@ -113,7 +116,7 @@
           <tbody id="rc-stock-body"></tbody></table></div>
         </div></div>
         <div class="card" style="margin-top:12px"><div class="card-head">📥 입고 내역</div><div class="card-body">
-          <div class="tbl-wrap" style="max-height:300px;overflow:auto"><table><thead><tr><th>입고번호</th><th>일시</th><th>구분</th><th>출처</th><th>제품</th><th>수량</th><th>LOT</th><th>적치위치</th><th>담당</th><th>비고</th><th>라벨</th><th>취소</th></tr></thead>
+          <div class="tbl-wrap" style="max-height:170px;overflow:auto"><table><thead><tr><th>입고번호</th><th>일시</th><th>구분</th><th>출처</th><th>제품</th><th>수량</th><th>LOT</th><th>적치위치</th><th>담당</th><th>비고</th><th>라벨</th><th>취소</th></tr></thead>
           <tbody id="rc-body"></tbody></table></div>
         </div></div>
       </div>
@@ -121,7 +124,6 @@
   </div>
 
   <div id="pk-view-out" style="display:none">
-  <div class="sec-title">박스 Packing 관리</div>
   <div class="grid2" style="grid-template-columns:minmax(0,3.5fr) minmax(0,8.5fr)">
     <div class="card"><div class="card-head">📦 Packing 처리</div><div class="card-body">
       <div class="form-group" style="margin-bottom:12px"><label>① 출하오더 선택 (대기)</label>
@@ -154,12 +156,12 @@
   </div>
 </div>
 
-<script src="js/common.js?v=20260594"></script>
-<script src="js/evidence.js?v=20260594"></script>
-<script src="js/qrcode.js?v=20260594"></script>
-<script src="js/label.js?v=20260594"></script>
+<script src="js/common.js?v=20260596"></script>
+<script src="js/evidence.js?v=20260596"></script>
+<script src="js/qrcode.js?v=20260596"></script>
+<script src="js/label.js?v=20260596"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260594"></script>
-<script src="js/packing.js?v=20260594"></script>
+<script src="js/export.js?v=20260596"></script>
+<script src="js/packing.js?v=20260596"></script>
 </body>
 </html>
