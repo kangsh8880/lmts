@@ -730,5 +730,34 @@
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-21 11:48"
+  "scans": [],
+  "receipts": [],
+  "routes": [
+    {
+      "code": "RT-001",
+      "name": "S사 납품경로 A",
+      "customer": "Samsung Electronics",
+      "note": "",
+      "origin": "자사물류창고 (화성)",
+      "originStdTime": "50",
+      "waypoints": [
+        {
+          "name": "안성허브터미널",
+          "stdTime": "20",
+          "transport": "truck",
+          "transportNo": "",
+          "destChange": ""
+        },
+        {
+          "name": "수도권물류센터 (용인)",
+          "stdTime": "30",
+          "transport": "truck",
+          "transportNo": "",
+          "destChange": ""
+        }
+      ],
+      "destination": "Samsung Electronics 수원"
+    }
+  ],
+  "lastUpdated": "2026-11-21 12:12"
 }
