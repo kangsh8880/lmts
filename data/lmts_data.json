@@ -718,8 +718,17 @@
       "event": "IN",
       "person": "Kim",
       "note": ""
+    },
+    {
+      "time": "2026-11-21 11:48",
+      "orderNo": "ORD-260420-001",
+      "customer": "Samsung Electronics",
+      "hub": "인천국제공항 (ICN)",
+      "event": "OUT",
+      "person": "Kim",
+      "note": ""
     }
   ],
   "alarms": [],
-  "lastUpdated": "2026-11-21 11:47"
+  "lastUpdated": "2026-11-21 11:48"
 }
