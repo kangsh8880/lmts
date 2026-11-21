@@ -143,7 +143,7 @@ const GH = {
 // ══════════════════════════════════════════════════════════════════
 const DB = {
   customers:[], products:[], vehicles:[], hubs:[],
-  orders:[], packings:[], dispatches:[], events:[], alarms:[],
+  orders:[], packings:[], dispatches:[], events:[], alarms:[], scans:[],
   lastUpdated: ''
 };
 
@@ -159,7 +159,7 @@ function cleanDeep(o){
 // 컬렉션별 식별 키 — 동시 저장 병합·삭제 추적용
 const KEYFN = {
   customers:r=>r.code, products:r=>r.code, vehicles:r=>r.no, hubs:r=>r.code||r.name, orders:r=>r.no, packings:r=>r.orderNo,
-  dispatches:r=>r.orderNo+'#'+r.legIdx, events:r=>[r.time,r.orderNo,r.hub,r.event].join('|'), alarms:r=>r.id
+  dispatches:r=>r.orderNo+'#'+r.legIdx, events:r=>[r.time,r.orderNo,r.hub,r.event].join('|'), alarms:r=>r.id, scans:r=>[r.time,r.code,r.hub,r.event].join('|')
 };
 const _KS = {}, _DEL = {};     // 마지막 확인 시점의 키 목록 / 이 세션에서 지운 키
 function snapKeys(){ Object.keys(KEYFN).forEach(k=>{ _KS[k] = new Set((DB[k]||[]).map(KEYFN[k])); _DEL[k] = _DEL[k] || new Set(); }); }
@@ -209,6 +209,7 @@ const S = {
   dispatches: () => S.get('dispatches'),
   events:     () => S.get('events'),
   alarms:     () => S.get('alarms'),
+  scans:      () => S.get('scans'),
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -331,7 +332,7 @@ async function loadFromGitHub() {
 
 function loadFromLocalStorage() {
   // localStorage 캐시에서 데이터 로드 (오프라인 모드)
-  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms'];
+  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms','scans'];
   keys.forEach(k => {
     const raw = localStorage.getItem('lmts_' + k);
     if (raw) { try { DB[k] = JSON.parse(raw); } catch(e) {} }

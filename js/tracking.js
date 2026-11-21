@@ -229,4 +229,5 @@ if(window.EV) EV.onChange(()=>{ try{ if(v('tr-order')) onOrderPick(); }catch(e){
 window.lmtsReady = function() {
   initNav();
   fillTrackingSelects(); onOrderPick(); renderHubPanel();
+  if(window.HS) HS.init();
 };

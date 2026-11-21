@@ -24,7 +24,7 @@ function fillPackingSelects() {
   loadPackingOrder();   // 브라우저가 선택값을 복원했거나 목록이 갱신된 경우에도 제품 목록을 바로 표시
 }
 function loadPackingOrder() {
-  pkLines=[];
+  pkLines=[]; if(el('pk-way')) el('pk-way').value='';
   const o=curOrder();
   if (!o) { el('pk-info').style.display='none'; el('pk-empty').style.display=''; return; }
   el('pk-detail').textContent = `${o.no} | ${o.customer} | ${ordText(o)}`;
@@ -78,12 +78,12 @@ function doPacking() {
   if (S.packings().some(p=>p.orderNo===no)) return alert('이미 Packing 완료된 오더입니다');
   if (!pkNeed(o).every(n=>n.left===0)) return alert('출하 요구 수량을 모두 담아야 완료 처리할 수 있습니다');
   const arr=S.packings();
-  arr.push({orderNo:no, customer:o.customer||'', boxes:new Set(pkLines.map(l=>l.packNo)).size, lines:pkLines.map(l=>({...l})), doneAt:now(), person:'창고담당'});
+  arr.push({orderNo:no, customer:o.customer||'', boxes:new Set(pkLines.map(l=>l.packNo)).size, lines:pkLines.map(l=>({...l})), waybill:(v('pk-way')||'').trim(), doneAt:now(), person:'창고담당'});
   S.set('packings', arr); { const _o=S.orders().find(x=>x.no===no); if(!_o || ['대기','패킹완료',undefined,''].includes(_o.status)) updateOrderStatus(no,'패킹완료'); }
   pkLines=[]; fillPackingSelects();
   el('pk-order').value=''; loadPackingOrder();
-  const m=el('pk-msg'); if(m){ m.style.color='#1a4fa0'; m.textContent=`✅ [${no}] Packing 완료 — 오른쪽 "Packing 완료 현황"에 등록되었습니다`; }
-  setTimeout(()=>{ const m2=el('pk-msg'); if(m2) m2.textContent=''; }, 6000);
+  const m=el('pk-msg'); if(m){ m.style.color='#1a4fa0'; m.innerHTML=`✅ [${no}] Packing 완료 — 오른쪽 "Packing 완료 현황"에 등록되었습니다 <button type="button" class="btn btn-ghost btn-sm" onclick="LBL.print('${no}')">🏷 라벨 인쇄</button>`; }
+  setTimeout(()=>{ const m2=el('pk-msg'); if(m2) m2.textContent=''; }, 20000);
   if(window.EV) setTimeout(()=>EV.ask('Packing 사진 증빙 (선택)',[{orderNo:no,hub:(o.route&&o.route.origin)||'',kind:'PACKING'}],'창고담당'),300);
 }
 function packSummary(p){
@@ -111,7 +111,7 @@ function delPacking(i){
 function renderPackingDone() {
   const all=S.packings();
   el('packing-done-body').innerHTML = all.map((p,i)=>({p,i})).reverse().map(({p,i})=>
-    `<tr><td>${p.orderNo}</td><td>${p.customer}</td><td>${p.boxes}</td><td style="font-size:13px">${packSummary(p)}</td><td>${p.doneAt} ${window.EV?EV.badge(p.orderNo,'','PACKING'):''}</td><td>${p.person}</td><td>${packLockReason(p.orderNo)?'<span class="lock-chip" title="'+packLockReason(p.orderNo)+'">🔒 출고됨</span>':`<button class="btn btn-danger btn-xs" onclick="delPacking(${i})">삭제</button>`}</td></tr>`
+    `<tr><td>${p.orderNo}</td><td>${p.customer}</td><td>${p.boxes}</td><td style="font-size:13px">${packSummary(p)}</td><td>${p.doneAt} ${window.EV?EV.badge(p.orderNo,'','PACKING'):''}</td><td>${p.person}</td><td><button type="button" class="btn btn-ghost btn-xs" onclick="LBL.print('${p.orderNo}')" title="포장 상자별 QR 라벨 인쇄">🏷 라벨</button> ${packLockReason(p.orderNo)?'<span class="lock-chip" title="'+packLockReason(p.orderNo)+'">🔒 출고됨</span>':`<button class="btn btn-danger btn-xs" onclick="delPacking(${i})">삭제</button>`}</td></tr>`
   ).join('') || '<tr><td colspan="7" class="empty">없음</td></tr>';
 }
 
