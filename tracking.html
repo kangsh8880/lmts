@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 거점 In/Out</title>
-  <link rel="stylesheet" href="css/style.css?v=20260588">
-  <link rel="stylesheet" href="css/onepage.css?v=20260588">
-  <link rel="stylesheet" href="css/theme.css?v=20260588">
-  <script src="js/i18n-dict.js?v=20260588"></script>
-  <script src="js/i18n.js?v=20260588"></script>
-  <script src="js/theme.js?v=20260588"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260589">
+  <link rel="stylesheet" href="css/onepage.css?v=20260589">
+  <link rel="stylesheet" href="css/theme.css?v=20260589">
+  <script src="js/i18n-dict.js?v=20260589"></script>
+  <script src="js/i18n.js?v=20260589"></script>
+  <script src="js/theme.js?v=20260589"></script>
 </head>
 <body class="one">
 
@@ -97,10 +97,32 @@
   </div>
 </div>
 
+<div class="modal-bg hidden" id="scan-modal">
+  <div class="modal">
+    <div class="modal-title">📡 거점 스캔 현황 <button type="button" class="btn btn-ghost btn-sm lg-close" onclick="document.getElementById('scan-modal').classList.add('hidden')">✕ 닫기</button></div>
+    <div id="sc-body"></div>
+    <div class="pop-hint" style="float:none;padding-top:8px">박스를 일부만 스캔한 오더가 60분 이상 남아 있으면 ⚠ 로 표시합니다 · 제목줄을 끌어 이동 · 우측 아래 모서리를 끌어 크기 조절</div>
+  </div>
+</div>
+<div class="hs-cam hidden" id="hs-cam-ov"><video id="hs-video" playsinline muted></video><div class="hs-cam-t">QR·바코드를 화면 가운데에 비추세요 (연속 스캔)</div><button type="button" class="btn btn-primary" onclick="HS.camClose()">✕ 카메라 닫기</button></div>
+
 <div class="page op-page">
 
   <div class="sec-title lg-titlebar"><span>거점별 In/Out 이벤트 관리</span>
+    <span class="md-ctl" id="md-ctl"><button type="button" data-v="ctl" onclick="HS.setView('ctl')" title="상황실·중앙 처리 화면">🖥 상황실</button><button type="button" data-v="hub" onclick="HS.setView('hub')" title="거점 담당자용 스캔 화면">🏭 거점 현장</button></span>
+    <button type="button" class="lg-tab" id="sc-tab" onclick="HS.openStatus()" title="거점 스캔 진행 현황(부분 입고·미완료)">📡 스캔 현황 <b id="sc-n"></b></button>
     <button type="button" class="lg-tab" id="lg-tab" onclick="openLog()" title="전체 이벤트 로그를 보조창으로 열기">📋 이벤트 로그 전체 <b id="lg-n"></b><span class="lg-dup hidden" id="lg-dup"></span></button></div>
+  <div class="hs hidden-by-mode" id="hub-scan">
+    <div class="hs-top">
+      <div class="hs-f"><label>내 거점</label><select id="hs-hub" onchange="HS.setHub(this.value)"></select></div>
+      <div class="hs-f"><label>처리자</label><input id="hs-person" placeholder="담당자명" maxlength="20"></div>
+      <div class="hs-f"><label>처리 구분</label><span class="hs-seg" id="hs-mode"><button type="button" data-m="auto" onclick="HS.setMode('auto')">자동</button><button type="button" data-m="IN" onclick="HS.setMode('IN')">IN</button><button type="button" data-m="OUT" onclick="HS.setMode('OUT')">OUT</button></span></div>
+      <div class="hs-kpi" id="hs-kpi"></div>
+    </div>
+    <div class="hs-scan"><input id="hs-in" type="text" autocomplete="off" inputmode="none" placeholder="포장번호 QR · 운송장을 스캔하세요 (스캐너로 찍으면 자동 입력 후 Enter)"><button type="button" class="btn btn-primary" onclick="HS.submit()">확인</button><button type="button" class="btn btn-ghost" onclick="HS.cam()">📷 카메라 스캔</button><button type="button" class="btn btn-ghost" onclick="HS.undo()">↩ 마지막 스캔 취소</button></div>
+    <div class="hs-msg" id="hs-msg">거점을 선택하고 박스 라벨(QR) 또는 운송장을 스캔하면 오더가 자동으로 IN/OUT 처리됩니다.</div>
+    <div class="hs-body" id="hs-body"></div>
+  </div>
   <div class="op-track">
     <div class="card"><div class="card-head">📍 In/Out 이벤트 등록</div><div class="card-body">
       <div class="trk-log-t mode-t">📋 오더 중심 처리 <span class="hp-sub">— 오더를 먼저 고르고, 그 오더의 거점 이벤트를 처리</span></div>
@@ -137,10 +159,12 @@
   </div>
 </div>
 
-<script src="js/common.js?v=20260588"></script>
-<script src="js/evidence.js?v=20260588"></script>
+<script src="js/common.js?v=20260589"></script>
+<script src="js/evidence.js?v=20260589"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260588"></script>
-<script src="js/tracking.js?v=20260588"></script>
+<script src="js/export.js?v=20260589"></script>
+<script src="js/tracking.js?v=20260589"></script>
+<script src="js/label.js?v=20260589"></script>
+<script src="js/hubscan.js?v=20260589"></script>
 </body>
 </html>

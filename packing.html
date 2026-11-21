@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - Packing 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260588">
-  <link rel="stylesheet" href="css/theme.css?v=20260588">
-  <script src="js/i18n-dict.js?v=20260588"></script>
-  <script src="js/i18n.js?v=20260588"></script>
-  <script src="js/theme.js?v=20260588"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260589">
+  <link rel="stylesheet" href="css/theme.css?v=20260589">
+  <script src="js/i18n-dict.js?v=20260589"></script>
+  <script src="js/i18n.js?v=20260589"></script>
+  <script src="js/theme.js?v=20260589"></script>
 </head>
 <body>
 
@@ -95,6 +95,7 @@
         <div style="margin:12px 0 4px;font-size:15.5px"><b>④ 담은 내역</b></div>
         <div style="border:1px solid #aaa;border-radius:6px;background:#fff;max-height:170px;overflow:auto"><table style="font-size:14.5px"><thead><tr><th>#</th><th>포장 상자</th><th>보관 Box No</th><th>제품</th><th>수량</th><th>시각</th><th></th></tr></thead><tbody id="pk-lines"></tbody></table></div>
         <div style="margin:12px 0 6px;font-size:15.5px"><b>⑤ 요구 수량을 모두 담은 뒤 완료 처리</b> <span id="pk-count" style="margin-left:8px;font-weight:700;color:#c0392b"></span></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><label style="font-size:14.5px;white-space:nowrap">운송장번호 <span style="color:#666;font-size:12.5px">(선택)</span></label><input id="pk-way" type="text" placeholder="택배·항공 운송장번호" style="flex:1" maxlength="40"></div>
         <button type="button" id="pk-done-btn" onclick="doPacking()" disabled style="width:100%;padding:14px 12px;font-size:21.5px;font-weight:700;color:#1f3a63;background:#cfe0f5;border:2px solid #222;border-radius:8px;cursor:pointer">✅ Packing 완료 처리</button>
       </div>
       <div id="pk-msg" style="margin-top:10px;font-size:17px;font-weight:700"></div>
@@ -107,10 +108,12 @@
   </div>
 </div>
 
-<script src="js/common.js?v=20260588"></script>
-<script src="js/evidence.js?v=20260588"></script>
+<script src="js/common.js?v=20260589"></script>
+<script src="js/evidence.js?v=20260589"></script>
+<script src="js/qrcode.js?v=20260589"></script>
+<script src="js/label.js?v=20260589"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260588"></script>
-<script src="js/packing.js?v=20260588"></script>
+<script src="js/export.js?v=20260589"></script>
+<script src="js/packing.js?v=20260589"></script>
 </body>
 </html>
