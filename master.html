@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMTS - 기준정보 관리</title>
-  <link rel="stylesheet" href="css/style.css?v=20260591">
-  <link rel="stylesheet" href="css/onepage.css?v=20260591">
-  <link rel="stylesheet" href="css/theme.css?v=20260591">
-  <script src="js/i18n-dict.js?v=20260591"></script>
-  <script src="js/i18n.js?v=20260591"></script>
-  <script src="js/theme.js?v=20260591"></script>
+  <link rel="stylesheet" href="css/style.css?v=20260594">
+  <link rel="stylesheet" href="css/onepage.css?v=20260594">
+  <link rel="stylesheet" href="css/theme.css?v=20260594">
+  <script src="js/i18n-dict.js?v=20260594"></script>
+  <script src="js/i18n.js?v=20260594"></script>
+  <script src="js/theme.js?v=20260594"></script>
 </head>
 <body class="one">
 
@@ -182,21 +182,20 @@
         </div>
         <div class="route-preview"><div class="rp-title">📋 Route 미리보기</div><div class="route-chips" id="rt-chips"></div></div>
       </div>
-      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <div class="btn-row-rt">
         <button class="btn btn-primary btn-sm" id="rt-save" onclick="saveRoute()">+ Route 등록</button>
         <button class="btn btn-ghost btn-sm" onclick="rtFromOrders()" title="지금까지 등록된 오더의 경로를 중복 없이 Route로 만듭니다">📥 기존 오더에서 Route 자동 생성</button>
       </div>
     </div></div>
-    <div class="card" style="margin-top:12px"><div class="card-head">🛣 등록된 Route</div><div class="card-body">
-      <div class="tbl-wrap"><table><thead><tr><th>코드</th><th>Route 명</th><th>주 고객사</th><th>경로</th><th>사용 오더</th><th>비고</th><th>수정 / 삭제</th></tr></thead>
-      <tbody id="route-table-body"></tbody></table></div>
+    <div class="card"><div class="card-head">🛣 등록된 Route</div><div class="card-body">
+      <div id="route-list"></div>
     </div></div>
   </div>
 </div>
 
-<script src="js/common.js?v=20260591"></script>
+<script src="js/common.js?v=20260594"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="js/export.js?v=20260591"></script>
-<script src="js/master.js?v=20260591"></script>
+<script src="js/export.js?v=20260594"></script>
+<script src="js/master.js?v=20260594"></script>
 </body>
 </html>
