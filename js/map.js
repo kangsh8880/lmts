@@ -304,7 +304,7 @@ const MP = (() => {
     const R = DC.refNow().t; let list = unitData(R); S_.units = list;
     const cnt = { truck: 0, air: 0, sea: 0 }; list.forEach(u => cnt[u.type]++);
     const f = S_.uf || 'all', vis = list.filter(u => f === 'all' || u.type === f), sel = S_.unit && vis.find(u => u.key === S_.unit) ? S_.unit : null; if (!sel) S_.unit = null;
-    const all = unitDraw(vis, sel);
+    const all = unitDraw(sel ? vis.filter(u => u.key === sel) : vis, sel);
     if (!keep && all.length) { S_.map.invalidateSize(); const sp = sel ? unitPts(vis.find(u => u.key === sel)) : all; S_.map.fitBounds(L_.latLngBounds(sp), { padding: [50, 50], maxZoom: sel ? 10 : 8, animate: false }); }
     el('mp-warn').classList.add('hidden');
     const sl = el('mp-u'); sl.innerHTML = `<option value="">🚚 운송수단 전체 (${list.length}대)</option>` + ['truck', 'air', 'sea'].map(t => { const g = list.filter(u => u.type === t); return g.length ? `<optgroup label="${ICON[t]} ${TLAB[t]}">${g.map(u => `<option value="${esc(u.key)}" ${u.key === sel ? 'selected' : ''}>${esc(u.id)} · ${esc(DC.shortName(u.L.from))}→${esc(DC.shortName(u.L.to))} (${u.rows.length}건)</option>`).join('')}</optgroup>` : ''; }).join('');
