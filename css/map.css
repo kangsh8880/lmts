@@ -77,3 +77,22 @@ body.one .mp-page{padding-top:8px !important;gap:8px !important}
 .mp-ovc.bad{border-color:#d9a3a0}
 .mp-ovc .mp-sub{margin:2px 0 4px}
 .mp-ovr{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14.5px;color:#333}
+
+/* 운송수단별 조회 */
+.mp-seg{display:inline-flex;border:1px solid #9aa0a6;border-radius:8px;overflow:hidden}
+.mp-seg button{border:0;background:#fff;padding:6px 14px;font-size:15px;cursor:pointer;color:#333}
+.mp-seg button.on{background:#d9e6f5;font-weight:700;color:#000;box-shadow:inset 0 -3px 0 #365C89}
+.mp-fchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.mp-fchips button{border:1px solid #b5b9be;background:#fff;border-radius:14px;padding:3px 11px;font-size:14px;cursor:pointer}
+.mp-fchips button.on{background:#e3ecf7;border-color:#222;font-weight:700}
+.mp-kv{display:flex;justify-content:space-between;gap:8px;font-size:14.5px;padding:3px 0;border-bottom:1px dashed #d5d8dc}
+.mp-kv span{color:#666}
+.mp-tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+.mp-tbl th{background:#eef2f7;border:1px solid #c9cdd2;padding:4px;text-align:center}
+.mp-tbl td{border:1px solid #d5d8dc;padding:4px}
+.mp-tbl tr.lk{cursor:pointer}.mp-tbl tr.lk:hover td{background:#f3f7fc}
+.mp-mk.wait{filter:grayscale(.5)}
+.mp-seg button{white-space:nowrap}
+.mp-ctl select{max-width:420px}
+.mp-ev{width:24px;height:24px;border-radius:12px;background:#e3ecf7;border:2px solid #365C89;text-align:center;line-height:20px;font-size:13px}.mp-ev.far{border-color:#c0392b;background:#fbe3e0}.mp-ev.ok{border-color:#2e7d4f;background:#dcefe3}
+.mp-seg{flex:none}.mp-seg button{flex:none}

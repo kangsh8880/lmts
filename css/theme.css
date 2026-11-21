@@ -287,3 +287,23 @@ html[data-theme="dark"] .nav-tools .lang-sel{background:#1E293B;color:#E5E7EB;bo
   html:not([lang="ko"]) .nav-tools{padding-left:6px;gap:4px;}
   html:not([lang="ko"]) .nav-tools .lang-sel{max-width:106px;font-size:12px;padding:0 3px;}
 }
+
+/* 사진·GPS 증빙 */
+.ev-box{width:560px;max-width:96vw}.ev-wide{width:820px}
+.ev-row{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:15px;flex-wrap:wrap}.ev-row>label{min-width:64px;color:#555;flex:none}
+.ev-row input[type=text],.ev-row select{flex:1;min-width:0;padding:6px 8px;border:1px solid #9aa0a6;border-radius:6px;font-size:15px}
+.ev-sub{font-size:13px;color:#666}
+.ev-prev{height:190px;border:1px dashed #9aa0a6;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#f6f8fb;color:#888;overflow:hidden;margin:6px 0}
+.ev-prev img{max-width:100%;max-height:100%}
+.ev-gpsrow{font-size:14px;background:#f3f6fa;border:1px solid #c9cdd2;border-radius:6px;padding:6px 8px}
+.ev-v{font-weight:700;padding:1px 6px;border-radius:8px;font-size:13.5px}
+.ev-v.ok{background:#dcefe3;color:#1d5a35}.ev-v.far{background:#fbe3e0;color:#b03a2e}.ev-v.nogps,.ev-v.nohub{background:#eceff3;color:#555}
+.ev-warn{color:#b03a2e}.ev-lk{border:0;background:none;color:#1a4fa0;text-decoration:underline;cursor:pointer;font-size:13.5px}
+.ev-msg{min-height:20px;font-size:14px}.ev-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.ev-bd{border:1px solid #9aa0a6;background:#eef2f7;border-radius:10px;padding:0 7px;font-size:13px;cursor:pointer}
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;max-height:60vh;overflow:auto}
+.ev-card{border:1px solid #c9cdd2;border-radius:8px;overflow:hidden;background:#fff}
+.ev-img{height:150px;background:#f1f3f6;display:flex;align-items:center;justify-content:center}.ev-img img{max-width:100%;max-height:150px}
+.ev-meta{padding:7px 9px;font-size:13px;line-height:1.5}
+.ev-toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:#2b3a4f;color:#fff;padding:10px 18px;border-radius:20px;z-index:99999;font-size:15px}
+.ev-ask{display:inline-block;margin-left:8px}
