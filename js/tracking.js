@@ -108,6 +108,7 @@ function saveTracking() {
   } else { alert(`✅ [${orderNo}] ${hub} ${eventType}`); }
 
   fillTrackingSelects(); onOrderPick(); renderHubPanel();
+  if(window.EV) setTimeout(()=>EV.ask(hub+' '+eventType+' 사진 증빙 (선택)',[{orderNo,hub,kind:eventType}],v('tr-person')),300);
 }
 function showOrderTrack() {
   const no=v('tr-order'), o=S.orders().find(x=>x.no===no);
@@ -116,7 +117,7 @@ function showOrderTrack() {
   const ps=S.products();
   let html=buildTrackerCard(o, ps);
   html+='<div class="trk-log-t">📋 이벤트 이력 <span class="hp-sub">('+evts.length+'건)</span></div><div class="trk-log-wrap"><table class="trk-log" data-xl="skip" id="trk-hist"><thead><tr><th>일시</th><th>이벤트</th><th>거점</th><th>처리자</th><th>비고</th></tr></thead><tbody>';
-  evts.forEach(e=>{ html+=`<tr><td>${e.time.replace('T',' ')}</td><td><span class="trk-ev ${e.event}">${e.event}</span></td><td>${e.hub}</td><td>${e.person||'-'}</td><td>${e.note||''}</td></tr>`; });
+  evts.forEach(e=>{ html+=`<tr><td>${e.time.replace('T',' ')}</td><td><span class="trk-ev ${e.event}">${e.event}</span></td><td>${e.hub}</td><td>${e.person||'-'}</td><td>${e.note||''} ${window.EV?EV.badge(e.orderNo,e.hub,e.event):''}</td></tr>`; });
   if (!evts.length) html+='<tr><td colspan="5" style="text-align:center;color:var(--gray)">이벤트 없음</td></tr>';
   html+='</tbody></table></div>';
   el('order-track-display').innerHTML=html;
@@ -220,9 +221,11 @@ function processHubBatch(){
   el('hp-time').value=localDT();
   fillTrackingSelects(); onOrderPick(); renderHubPanel();
   alert(`✅ ${hub} — ${items.length}건 처리 완료`);
+  if(window.EV) setTimeout(()=>EV.ask(hub+' 사진 증빙 (선택)',items.map(p=>({orderNo:p.no,hub,kind:p.event})),person),300);
 }
 
 // ── 페이지 초기화 ───────────────────────────────────────────────
+if(window.EV) EV.onChange(()=>{ try{ if(v('tr-order')) onOrderPick(); }catch(e){} });
 window.lmtsReady = function() {
   initNav();
   fillTrackingSelects(); onOrderPick(); renderHubPanel();

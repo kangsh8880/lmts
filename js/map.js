@@ -4,7 +4,7 @@ const MP = (() => {
   const esc = DC.esc;
   const ICON = { truck: '🚛', air: '✈️', sea: '🚢' }, LABEL = { truck: '차량', air: '항공', sea: '선박' };
   const C_DONE = '#365C89', C_TODO = '#9fb3cc', C_BAD = '#c0392b';
-  const S_ = { map: null, lg: null, mk: null, order: null, legs: [], st: null, pos: null, timer: null, raf: null, fitted: false };
+  const S_ = { mode: 'order', map: null, lg: null, mk: null, order: null, legs: [], st: null, pos: null, timer: null, raf: null, fitted: false };
   const rad = Math.PI / 180;
   const fmt = d => d ? `${DC.pad(d.getMonth()+1)}-${DC.pad(d.getDate())} ${DC.pad(d.getHours())}:${DC.pad(d.getMinutes())}` : '-';
   const dur = m => { m = Math.round(Math.abs(m)); const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), r = m % 60; return d ? `${d}일 ${h}시간` : h ? `${h}시간 ${r}분` : `${r}분`; };
@@ -159,6 +159,18 @@ const MP = (() => {
   }
 
   // ── 우측 패널 ─────────────────────────────────────────
+  function evHtml(o) {
+    if (!window.EV) return ''; const rows = EV.of(o.no);
+    if (!rows.length) return '<div class="mp-note">📷 증빙 사진 없음 (Packing·거점 처리 시 선택적으로 촬영)</div>';
+    const ok = rows.filter(r => EV.verdict(r).k === 'ok').length;
+    return `<div class="mp-now" style="margin-top:8px"><b>📷 사진·GPS 증빙 ${rows.length}건</b> ${EV.badge(o.no)}<br>거점 위치 확인 <b>${ok}건</b>${rows.length - ok ? ` · 미확인 ${rows.length - ok}건` : ''} <span class="mp-sub" style="margin:0">(최근: ${esc(rows[rows.length - 1].hub)} ${esc(rows[rows.length - 1].time.slice(5))})</span></div>`;
+  }
+  function evMarks() {      // 증빙 사진을 찍은 실제 위치(GPS)를 지도에 표시
+    if (!window.EV || !S_.order || !S_.lg) return;
+    EV.of(S_.order.no).filter(r => r.lat != null).forEach(r => { const v = EV.verdict(r);
+      L_.marker([r.lat, r.lng], { icon: L_.divIcon({ className: '', html: `<div class="mp-ev ${v.k}">📷</div>`, iconSize: [24, 24], iconAnchor: [12, 12] }), zIndexOffset: 800 })
+        .bindTooltip(`<b>📷 ${esc(r.hub)} ${esc(r.kind)}</b><br>${esc(r.time)}<br>${esc(v.t)}`, { className: 'mp-tip', direction: 'top', offset: [0, -10] }).on('click', () => EV.view(r.orderNo, r.hub, r.kind)).addTo(S_.lg); });
+  }
   function panel() {
     const o = S_.order, st = S_.st; if (!o || !st) return;
     const bad = st.over > 0 || st.delta > 30 || o.status === '지연', D = st.D;
@@ -192,6 +204,7 @@ const MP = (() => {
         <div class="mp-kpi ${bad ? 'bad' : 'ok'}"><small>계획 도착</small><b>${fmt(st.plan)}</b></div></div>
       <div class="mp-now"><b>현재 위치 ${st.state === 'move' ? '(추정)' : ''}</b><br>${where}<br><span style="color:${bad ? '#c0392b' : '#1a4fa0'};font-weight:700">${dtxt}</span></div>
       <div class="mp-note">※ 마지막 거점 이벤트(IN/OUT)와 구간 표준시간 비율로 위치를 추정합니다. 기준시각 ${fmt(st.now)} (${DC.refNow().live ? '현재 시각' : '마지막 이벤트 시각'}) · 지도 수단: 🚛 차량 실선 · ✈️ 항공 곡선 · 🚢 선박 점선</div>
+      ${evHtml(o)}
       <div class="mp-tl">${tl}</div>`;
   }
 
@@ -242,6 +255,99 @@ const MP = (() => {
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
   }
 
+
+  // ── 운송수단별 조회 ───────────────────────────────────
+  const TLAB = { truck: '차량', air: '항공', sea: '선박' };
+  function unitIdOf(d) { return d.transportType === 'air' ? `${d.airline || ''} ${d.flightNo || ''}`.trim() : d.transportType === 'sea' ? (d.vessel || '').trim() : (d.vehicleNo || '').trim(); }
+  function unitData(R) {
+    const map = {};
+    S.orders().filter(o => o.status !== '도착완료').forEach(o => {
+      const ds = S.dispatches().filter(d => d.orderNo === o.no); if (!ds.length) return;
+      const st = calc(o, R); if (st.state === 'done') return;
+      st.legs.forEach(L => { if (L.mode === 'truck' && L.a && L.b) { const c = roadCache()[roadKey(L.a, L.b)]; if (c) { setPts(L, c); L.road = true; } } });
+      const L = st.legs[Math.min(st.leg, st.n - 1)], d = L && ds.find(x => x.legIdx === L.i); if (!d) return;
+      const id = unitIdOf(d); if (!id) return;
+      const key = d.transportType + '|' + id, move = st.state === 'move';
+      const u = map[key] || (map[key] = { key, type: d.transportType, id, d, rows: [], move: false, L });
+      u.rows.push({ o, st, L, d, move }); if (move) { u.move = true; u.L = L; u.d = d; }
+    });
+    return Object.values(map).sort((a, b) => (b.move - a.move) || a.id.localeCompare(b.id));
+  }
+  const uSub = u => { const d = u.d; return u.type === 'truck' ? `${d.driver || '-'} ${d.dphone && d.dphone !== '-' ? '· ' + d.dphone : ''}` : u.type === 'air' ? `${d.depAirport || ''}${d.depAirport || d.arrAirport ? ' → ' : ''}${d.arrAirport || ''}` : `${d.shippingCo || ''} ${d.depPort ? '· ' + d.depPort + ' → ' + (d.arrPort || '') : ''}`; };
+  const uPct = u => { const r = u.rows.find(x => x.move); return r ? Math.min(99, Math.round(r.st.raw * 100)) : 0; };
+  const uEta = u => { const r = u.rows.find(x => x.move); if (r && r.L.tOut) return new Date(DC.toDate(r.L.tOut).getTime() + r.L.std * 60000); return DC.toDate(u.d.eta); };
+  const uDep = u => { const r = u.rows.find(x => x.move); return r && r.L.tOut ? DC.toDate(r.L.tOut) : DC.toDate(u.d.departPlan); };
+  function unitPos(u) { const r = u.rows.find(x => x.move) || u.rows[0]; return r.L.pts ? (r.move ? pointAt(r.L, r.st.prog) : r.L.a) : null; }
+  function unitDraw(list, sel) {
+    S_.lg.clearLayers(); const all = [], t = S_.token;
+    list.forEach(u => {
+      const on = !sel || sel === u.key, r = u.rows.find(x => x.move) || u.rows[0], L = r.L; if (!L.pts) return;
+      const bad = u.rows.some(x => x.st.over > 0);
+      if (u.move) { const [a, b] = split(L, r.st.prog); [L_.polyline(a, Object.assign(styleOf(L.mode, true, bad), { opacity: on ? .95 : .25 })), L_.polyline(b, Object.assign(styleOf(L.mode, false), { opacity: on ? .85 : .2 }))].forEach(x => x.addTo(S_.lg)); }
+      else L_.polyline(L.pts, Object.assign(styleOf(L.mode, false), { opacity: on ? .85 : .2 })).addTo(S_.lg);
+      all.push(...L.pts);
+      [[L.a, L.from], [L.b, L.to]].forEach(([ll, nm]) => { if (ll && on) L_.marker(ll, { icon: L_.divIcon({ className: '', html: `<div class="mp-hub pass">${DC.HUBMODE_ICON[DC.hubMode(nm)] || '📍'}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }) }).bindTooltip(esc(nm), { className: 'mp-tip', direction: 'top', offset: [0, -12] }).addTo(S_.lg); });
+      const p = unitPos(u);
+      if (p) { const mk = L_.marker(p, { icon: L_.divIcon({ className: '', html: `<div class="mp-mk ${bad ? 'bad' : ''} ${u.move ? '' : 'wait'}" style="${on ? '' : 'opacity:.45'}"><span>${ICON[u.type]}</span><em class="mp-mk-no">${esc(u.id.slice(-7))}</em></div>`, iconSize: [38, 38], iconAnchor: [19, 19] }), zIndexOffset: on ? 1500 : 500 });
+        mk.bindTooltip(`<b>${ICON[u.type]} ${esc(u.id)}</b><br>${esc(DC.shortName(L.from))} → ${esc(DC.shortName(L.to))}<br>${u.rows.length}건 적재`, { className: 'mp-tip', direction: 'top', offset: [0, -18] });
+        mk.on('click', () => unitPick(u.key)); mk.addTo(S_.lg); all.push(p); }
+      if (L.mode === 'truck' && L.a && L.b && !L.road && t) loadRoad(L, t).then(ok => { if (ok && t === S_.token && S_.mode === 'unit') unitOverview(true); });
+    });
+    return all;
+  }
+  function unitOverview(keep) {
+    if (!S_.map) return;
+    cancelAnimationFrame(S_.raf); S_.touring = false;
+    if (S_.trail) { S_.map.removeLayer(S_.trail); S_.trail = null; }
+    if (S_.mk) { S_.map.removeLayer(S_.mk); S_.mk = null; } S_.pos = null; S_.order = null; S_.st = null;
+    if (!keep) S_.token = Math.random();
+    const R = DC.refNow().t; let list = unitData(R); S_.units = list;
+    const cnt = { truck: 0, air: 0, sea: 0 }; list.forEach(u => cnt[u.type]++);
+    const f = S_.uf || 'all', vis = list.filter(u => f === 'all' || u.type === f), sel = S_.unit && vis.find(u => u.key === S_.unit) ? S_.unit : null; if (!sel) S_.unit = null;
+    const all = unitDraw(vis, sel);
+    if (!keep && all.length) { S_.map.invalidateSize(); const sp = sel ? unitPts(vis.find(u => u.key === sel)) : all; S_.map.fitBounds(L_.latLngBounds(sp), { padding: [50, 50], maxZoom: sel ? 10 : 8, animate: false }); }
+    el('mp-warn').classList.add('hidden');
+    const sl = el('mp-u'); sl.innerHTML = `<option value="">🚚 운송수단 전체 (${list.length}대)</option>` + ['truck', 'air', 'sea'].map(t => { const g = list.filter(u => u.type === t); return g.length ? `<optgroup label="${ICON[t]} ${TLAB[t]}">${g.map(u => `<option value="${esc(u.key)}" ${u.key === sel ? 'selected' : ''}>${esc(u.id)} · ${esc(DC.shortName(u.L.from))}→${esc(DC.shortName(u.L.to))} (${u.rows.length}건)</option>`).join('')}</optgroup>` : ''; }).join('');
+    sl.value = sel || '';
+    const chipH = `<div class="mp-fchips">${[['all', '전체', list.length], ['truck', '🚛 차량', cnt.truck], ['air', '✈️ 항공', cnt.air], ['sea', '🚢 선박', cnt.sea]].map(([k, n, c]) => `<button class="${f === k ? 'on' : ''}" onclick="MP.unitFilter('${k}')">${n} ${c}</button>`).join('')}</div>`;
+    if (sel) { const u = vis.find(x => x.key === sel); el('mp-head').textContent = `${ICON[u.type]} ${u.id}`; el('mp-side').innerHTML = unitDetail(u); }
+    else {
+      el('mp-head').textContent = `🚚 운송수단별 현황 (${vis.length}대)`;
+      el('mp-side').innerHTML = chipH + (vis.length ? vis.map(u => unitCard(u)).join('') : '<div class="empty">배차된 운송수단이 없습니다.<br>[차량배차]에서 구간별 운송수단을 배차하면 표시됩니다.</div>');
+    }
+    el('mp-all').style.display = sel ? '' : 'none';
+  }
+  function unitPts(u) { const L = u.L, a = []; if (L.pts) a.push(...L.pts); return a.length ? a : [[36.5, 127.8]]; }
+  function unitCard(u) {
+    const L = u.L, bad = u.rows.some(x => x.st.over > 0), pct = uPct(u);
+    return `<div class="mp-ovc ${bad ? 'bad' : ''}" onclick="MP.unitPick('${esc(u.key)}')"><div class="mp-ord" style="font-size:inherit">${ICON[u.type]} ${esc(u.id)} <span class="status" style="font-size:13px">${u.move ? '이동중' : '출발대기'}</span></div>
+      <div class="mp-sub">${esc(uSub(u))}</div>
+      <div class="mp-ovr"><span>${esc(DC.shortName(L.from))} → ${esc(DC.shortName(L.to))}</span><span>적재 <b>${u.rows.length}건</b></span><span>도착 <b>${fmt(uEta(u))}</b></span></div>
+      <div class="mp-bar"><i style="width:${pct}%"></i></div></div>`;
+  }
+  function unitDetail(u) {
+    const L = u.L, pct = uPct(u), boxes = u.rows.reduce((a, r) => a + (+((S.packings().find(p => p.orderNo === r.o.no) || {}).boxes) || 0), 0);
+    return `<div class="mp-sec"><div class="mp-ord">${ICON[u.type]} ${esc(u.id)} <span class="status">${u.move ? '이동중' : '출발대기'}</span></div><div class="mp-sub">${TLAB[u.type]} · ${esc(uSub(u))}</div></div>
+      <div class="mp-kv"><span>구간</span><b>${esc(L.from)} → ${esc(L.to)}</b></div>
+      <div class="mp-kv"><span>출발</span><b>${fmt(uDep(u))} ${u.move && u.rows[0].L.tOut ? '(실적)' : '(계획)'}</b></div>
+      <div class="mp-kv"><span>도착 예정</span><b>${fmt(uEta(u))}</b></div>
+      <div class="mp-kv"><span>구간 진행</span><b>${pct}%</b></div><div class="mp-bar"><i style="width:${pct}%"></i></div>
+      <div class="mp-sec" style="margin-top:12px"><div class="mp-ord" style="font-size:15px">적재 내역 (오더 ${u.rows.length}건 · 박스 ${boxes}개)</div></div>
+      <table class="mp-tbl"><thead><tr><th>오더</th><th>고객</th><th>제품·수량</th><th>박스</th></tr></thead><tbody>${u.rows.map(r => { const pk = S.packings().find(p => p.orderNo === r.o.no); return `<tr class="lk" onclick="MP.setMode('order');MP.pick('${esc(r.o.no)}')" title="오더 위치 보기"><td>${esc(r.o.no)}</td><td>${esc(r.o.customer)}</td><td>${esc(ordText(r.o))}</td><td>${pk ? esc(pk.boxes) : '-'} ${window.EV ? EV.badge(r.o.no) : ''}</td></tr>`; }).join('')}</tbody></table>
+      <div class="mp-note">오더 행을 누르면 해당 오더의 전체 경로(오더별 보기)로 이동합니다.</div>`;
+  }
+  function unitPick(key) { S_.unit = key || null; unitOverview(false); }
+  function unitFilter(f) { S_.uf = f; S_.unit = null; unitOverview(false); }
+  function setMode(m) {
+    if (m === S_.mode) { if (m === 'unit') { S_.unit = null; unitOverview(false); } return; }
+    S_.mode = m; const u = m === 'unit';
+    el('mp-m-o').classList.toggle('on', !u); el('mp-m-u').classList.toggle('on', u);
+    el('mp-q').style.display = u ? 'none' : ''; el('mp-u').style.display = u ? '' : 'none';
+    ['mp-rep', 'mp-foc', 'mp-tour'].forEach(i => el(i).style.display = u ? 'none' : '');
+    if (u) { S_.unit = null; unitOverview(false); } else { el('mp-all').style.display = 'none'; overview(); }
+    try { history.replaceState(null, '', location.pathname + (u ? '?mode=unit' : '')); } catch (e) {}
+  }
+
   // ── 제어 ──────────────────────────────────────────────
   const el = id => document.getElementById(id);
   let L_ = null;
@@ -262,12 +368,12 @@ const MP = (() => {
     const o = S.orders().find(x => x.no === no); if (!o) { alert('오더번호를 찾을 수 없습니다: ' + no); return; }
     S_.touring = false; S_.order = o; S_.fitted = false; S_.mk && S_.map.removeLayer(S_.mk); S_.mk = null; S_.pos = null; S_.token = Math.random();
     el('mp-q').value = no; el('mp-all').style.display = ''; S_.lg.clearLayers(); refresh(false); chips();
-    const t = S_.token; S_.st.legs.filter(L => L.mode === 'truck' && L.a && L.b).forEach(L => loadRoad(L, t).then(ok => { if (ok && t === S_.token) { drawRoute(); placeMarker(0); if (!S_.fitted) fit(); } }));
+    const t = S_.token; S_.st.legs.filter(L => L.mode === 'truck' && L.a && L.b).forEach(L => loadRoad(L, t).then(ok => { if (ok && t === S_.token) { drawRoute(); evMarks(); placeMarker(0); if (!S_.fitted) fit(); } }));
     try { history.replaceState(null, '', '?order=' + encodeURIComponent(no)); } catch (e) {}
   }
   function refresh(anim) {
     if (!S_.order) return; const st = S_.st ? calcKeep() : null;
-    S_.st = calcWithPts(S_.order); drawRoute(); placeMarker(anim ? 1400 : 0); panel(); warn(S_.st);
+    S_.st = calcWithPts(S_.order); drawRoute(); evMarks(); placeMarker(anim ? 1400 : 0); panel(); warn(S_.st);
     if (!S_.fitted && S_.map) { fit(); S_.fitted = true; }
   }
   const calcKeep = () => null;
@@ -310,10 +416,11 @@ const MP = (() => {
     const q = new URLSearchParams(location.search).get('order');
     const first = q && S.orders().find(o => o.no === q);
     if (!S.orders().length) el('mp-side').innerHTML = '<div class="empty">등록된 오더가 없습니다</div>';
-    else if (S_.map) { if (first) pick(first.no); else overview(); }
-    clearInterval(S_.timer); S_.timer = setInterval(() => { if (document.hidden || S_.touring) return; if (S_.order) { chips(); refresh(true); } else if (S_.map) { const c = S_.map.getCenter(), z = S_.map.getZoom(); overview(); S_.map.setView(c, z, { animate: false }); } }, 20000);
+    else if (S_.map) { if (new URLSearchParams(location.search).get('mode') === 'unit') { S_.mode = 'order'; setMode('unit'); } else if (first) pick(first.no); else overview(); }
+    if (window.EV) EV.onChange(() => { if (S_.order) { panel(); S_.lg && drawRoute(); evMarks(); } else if (S_.mode === 'unit' && S_.map) unitOverview(true); });
+    clearInterval(S_.timer); S_.timer = setInterval(() => { if (document.hidden || S_.touring) return; if (S_.mode === 'unit') { if (S_.map) unitOverview(true); } else if (S_.order) { chips(); refresh(true); } else if (S_.map) { const c = S_.map.getCenter(), z = S_.map.getZoom(); overview(); S_.map.setView(c, z, { animate: false }); } }, 20000);
     window.addEventListener('resize', () => S_.map && S_.map.invalidateSize());
   }
-  return { init, pick, overview, search, replay, tour, fit: () => fit(), focusNow, _s: S_, _calc: calc };
+  return { init, pick, allBtn: () => S_.mode === 'unit' ? unitPick(null) : overview(), setMode, unitPick, unitFilter, overview, search, replay, tour, fit: () => fit(), focusNow, _s: S_, _calc: calc };
 })();
 window.lmtsReady = function () { MP.init(); };
