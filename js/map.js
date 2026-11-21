@@ -159,6 +159,11 @@ const MP = (() => {
   }
 
   // ── 우측 패널 ─────────────────────────────────────────
+  function uOf(o, i) { const d = S.dispatches().find(x => x.orderNo === o.no && x.legIdx === i); return d ? { d, id: unitIdOf(d) } : null; }
+  function uTag(o, i) { const u = uOf(o, i); return u && u.id ? `<b>${esc(u.id)}</b>` : '<span style="color:#c0392b">배차 미등록</span>'; }
+  function uInfo(o, i) { const u = uOf(o, i); if (!u || !u.id) return '<span style="color:#c0392b">배차 미등록</span>'; const d = u.d, ic = ICON[d.transportType] || '';
+    const sub = d.transportType === 'truck' ? [d.driver, d.dphone && d.dphone !== '-' ? d.dphone : ''] : d.transportType === 'air' ? [d.depAirport && d.arrAirport ? d.depAirport + ' → ' + d.arrAirport : ''] : [d.shippingCo, d.depPort && d.arrPort ? d.depPort + ' → ' + d.arrPort : ''];
+    return `${ic} <b>${esc(u.id)}</b>${sub.filter(Boolean).length ? ' · ' + sub.filter(Boolean).map(esc).join(' · ') : ''}`; }
   function evHtml(o) {
     if (!window.EV) return ''; const rows = EV.of(o.no);
     if (!rows.length) return '<div class="mp-note">📷 증빙 사진 없음 (Packing·거점 처리 시 선택적으로 촬영)</div>';
@@ -192,7 +197,7 @@ const MP = (() => {
         const Lg = st.legs[i], done = i < st.leg || st.state === 'done', curL = i === st.leg && st.state === 'move';
         const pr = done ? 100 : curL ? Math.min(100, Math.round(st.raw * 1000) / 10) : 0;
         const act = (Lg.tOut && Lg.tIn) ? DC.mins(DC.toDate(Lg.tOut), DC.toDate(Lg.tIn)) : null;
-        tl += `<div class="mp-leg ${done ? 'done' : ''} ${curL ? 'cur' + (bad ? '' : ' ok') : ''}">${ICON[Lg.mode]} ${LABEL[Lg.mode]} · 표준 ${Lg.std}분${Lg.stdEst ? '(미입력→기본값)' : ''}${act != null ? ` · 실적 <b>${act}분</b>` : ''}${curL ? ` · 진행 <b>${pr.toFixed(1)}%</b>${st.over > 0 ? ` <span style="color:#c0392b">(+${dur(st.over)} 초과)</span>` : ''}` : ''}
+        tl += `<div class="mp-leg ${done ? 'done' : ''} ${curL ? 'cur' + (bad ? '' : ' ok') : ''}">${ICON[Lg.mode]} ${LABEL[Lg.mode]} ${uTag(o, Lg.i)} · 표준 ${Lg.std}분${Lg.stdEst ? '(미입력→기본값)' : ''}${act != null ? ` · 실적 <b>${act}분</b>` : ''}${curL ? ` · 진행 <b>${pr.toFixed(1)}%</b>${st.over > 0 ? ` <span style="color:#c0392b">(+${dur(st.over)} 초과)</span>` : ''}` : ''}
           <div class="mp-bar"><i style="width:${Math.min(100, pr)}%"></i></div></div>`;
       }
     });
@@ -202,7 +207,7 @@ const MP = (() => {
       <div class="mp-kpis"><div class="mp-kpi"><small>진행률</small><b>${st.pct.toFixed(1)}%</b></div>
         <div class="mp-kpi ${bad ? 'bad' : 'ok'}"><small>${st.state === 'done' ? '도착 시각' : '도착 예상(ETA)'}</small><b>${fmt(st.eta)}</b></div>
         <div class="mp-kpi ${bad ? 'bad' : 'ok'}"><small>계획 도착</small><b>${fmt(st.plan)}</b></div></div>
-      <div class="mp-now"><b>현재 위치 ${st.state === 'move' ? '(추정)' : ''}</b><br>${where}<br><span style="color:${bad ? '#c0392b' : '#1a4fa0'};font-weight:700">${dtxt}</span></div>
+      <div class="mp-now"><b>현재 위치 ${st.state === 'move' ? '(추정)' : ''}</b><br>${where}<br>${st.state === 'done' ? '' : `<span class="mp-unit">${st.state === 'move' ? '운송수단' : '다음 운송수단'}: ${uInfo(o, Math.min(st.leg, st.n - 1))}</span><br>`}<span style="color:${bad ? '#c0392b' : '#1a4fa0'};font-weight:700">${dtxt}</span></div>
       <div class="mp-note">※ 마지막 거점 이벤트(IN/OUT)와 구간 표준시간 비율로 위치를 추정합니다. 기준시각 ${fmt(st.now)} (${DC.refNow().live ? '현재 시각' : '마지막 이벤트 시각'}) · 지도 수단: 🚛 차량 실선 · ✈️ 항공 곡선 · 🚢 선박 점선</div>
       ${evHtml(o)}
       <div class="mp-tl">${tl}</div>`;
@@ -233,12 +238,12 @@ const MP = (() => {
       if (p) {
         const Lg = st.legs[Math.min(st.leg, st.n - 1)], ic = st.state === 'move' ? ICON[Lg.mode] : '📍';
         const mk = L_.marker(p, { icon: L_.divIcon({ className: '', html: `<div class="mp-mk ${bad ? 'bad' : ''}"><span>${ic}</span><em class="mp-mk-no">${esc(o.no.slice(-7))}</em></div>`, iconSize: [38, 38], iconAnchor: [19, 19] }), zIndexOffset: 1000 });
-        mk.bindTooltip(`<b>${esc(o.no)}</b><br>${esc(o.customer)}<br>진행 ${st.pct.toFixed(1)}%`, { className: 'mp-tip', direction: 'top', offset: [0, -18] });
+        mk.bindTooltip(`<b>${esc(o.no)}</b><br>${esc(o.customer)}${(() => { const u = uOf(o, Math.min(st.leg, st.n - 1)); return u && u.id ? '<br>' + esc(u.id) : ''; })()}<br>진행 ${st.pct.toFixed(1)}%`, { className: 'mp-tip', direction: 'top', offset: [0, -18] });
         mk.on('click', () => pick(o.no)); mk.addTo(S_.lg); all.push(p);
       }
       st.D.stops.forEach(s => { if (s.ll) all.push(s.ll); });
       const where = st.state === 'move' ? `${esc(DC.shortName(st.legs[st.leg].from))} → ${esc(DC.shortName(st.legs[st.leg].to))} ${ICON[st.legs[st.leg].mode]}` : st.state === 'at' ? `${esc(DC.shortName(st.D.stops[st.leg].name))} 체류` : '-';
-      rows.push({ o, st, bad, where });
+      const _u = st.state === 'done' ? null : uOf(o, Math.min(st.leg, st.n - 1)); rows.push({ o, st, bad, where, uid: _u && _u.id });
       if (st.state === 'move') st.legs.filter(L => L.mode === 'truck' && L.a && L.b && !L.road).forEach(L => loadRoad(L, t).then(ok => { if (ok && t === S_.token && !S_.order) overview(); }));
     });
     // 전체 경로가 지도에 보이도록 맞춤 (가장 처음 한 번)
@@ -248,7 +253,7 @@ const MP = (() => {
     el('mp-side').innerHTML = rows.length ? `<div class="mp-note" style="margin-top:0">지도의 오더를 누르거나 아래 목록을 선택하면 해당 오더만 자세히 보여줍니다.</div>` +
       rows.map(r => `<div class="mp-ovc ${r.bad ? 'bad' : ''}" onclick="MP.pick('${esc(r.o.no)}')"><div class="mp-ord" style="font-size:inherit">${esc(r.o.no)} <span class="status" style="font-size:13px">${esc(r.o.status)}</span></div>
         <div class="mp-sub">${esc(r.o.customer)} · ${esc(ordText(r.o))}</div>
-        <div class="mp-ovr"><span>${r.where}</span><span>진행 <b>${r.st.pct.toFixed(1)}%</b></span><span>ETA <b>${fmt(r.st.eta)}</b></span></div>
+        <div class="mp-ovr"><span>${r.where}${r.uid ? ' · ' + esc(r.uid) : ''}</span><span>진행 <b>${r.st.pct.toFixed(1)}%</b></span><span>ETA <b>${fmt(r.st.eta)}</b></span></div>
         <div class="mp-bar"><i style="width:${Math.min(100, r.st.pct)}%"></i></div></div>`).join('')
       : '<div class="empty">현재 운송 중인 오더가 없습니다.<br>상단 목록에서 오더를 선택하면 위치를 볼 수 있습니다.</div>';
     el('mp-all').style.display = 'none'; chips();
