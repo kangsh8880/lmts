@@ -360,3 +360,5 @@ body.one .op-page > #master-route{flex:1;min-height:0;flex-direction:column;over
 body.one .op-page > #master-route > .card{flex:0 0 auto;margin:0}
 body.one .op-page > #master-route .card-body{overflow:visible}
 body.one .op-page > #master-route .card-body > .tbl-wrap{overflow:visible}
+/* KPI 박스 9개까지 한 줄 (1366 기준) */
+.kpi-grid{grid-template-columns:repeat(auto-fit,minmax(122px,1fr)) !important;gap:8px !important}
