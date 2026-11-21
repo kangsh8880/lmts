@@ -96,3 +96,4 @@ body.one .mp-page{padding-top:8px !important;gap:8px !important}
 .mp-ctl select{max-width:420px}
 .mp-ev{width:24px;height:24px;border-radius:12px;background:#e3ecf7;border:2px solid #365C89;text-align:center;line-height:20px;font-size:13px}.mp-ev.far{border-color:#c0392b;background:#fbe3e0}.mp-ev.ok{border-color:#2e7d4f;background:#dcefe3}
 .mp-seg{flex:none}.mp-seg button{flex:none}
+.mp-unit{display:inline-block;margin-top:2px;padding:1px 6px;border:1px solid #9aa0a6;border-radius:6px;background:#fff}
