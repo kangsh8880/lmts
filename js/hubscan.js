@@ -96,7 +96,7 @@ const HS = (() => {
   function render() {
     if (!document.getElementById('hub-scan')) return;
     const hubs = S.hubs(), sel = document.getElementById('hs-hub');
-    if (sel) { const todoN = n => hubTodo(n).length; sel.innerHTML = '<option value="">-- 내 거점 선택 --</option>' + hubs.map(h => `<option value="${esc(h.name)}"${h.name === cfg.hub ? ' selected' : ''}>${esc(h.name)}${todoN(h.name) ? ` — 처리 ${todoN(h.name)}건` : ''}</option>`).join(''); }
+    if (sel) { const todoN = n => hubTodo(n).length; const hubsSorted = hubs.slice().sort((a, b) => (todoN(b.name) > 0) - (todoN(a.name) > 0) || String(a.name).localeCompare(String(b.name), 'ko')); sel.innerHTML = '<option value="">-- 내 거점 선택 --</option>' + hubsSorted.map(h => `<option value="${esc(h.name)}"${h.name === cfg.hub ? ' selected' : ''}>${esc(h.name)}${todoN(h.name) ? ` — 처리 ${todoN(h.name)}건` : ''}</option>`).join(''); }
     const pi = document.getElementById('hs-person'); if (pi && pi.value !== cfg.person) pi.value = cfg.person;
     document.querySelectorAll('#hs-mode button').forEach(b => b.classList.toggle('on', b.dataset.m === cfg.mode));
     const body = document.getElementById('hs-body'); if (!cfg.hub) { body.innerHTML = '<div class="empty">위에서 내 거점을 선택하면 처리할 오더와 스캔 현황이 나타납니다.</div>'; kpi([]); return; }
