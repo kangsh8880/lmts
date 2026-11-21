@@ -210,13 +210,14 @@ function delRoute(i) {
   arr.splice(i,1); S.set('routes', arr); if (rtEdit===i) rtReset(); renderRoutes();
 }
 function renderRoutes() {
-  const O = S.orders();
-  el('route-table-body').innerHTML = S.routes().map((r,i)=>{
-    const sg = x => [x.origin,(x.waypoints||[]).map(w=>w.name+'/'+(w.transport||'')).join('>'),x.destination].join('|'), rs = sg(r);
-    const n = O.filter(o=>o.routeCode===r.code || (o.route && sg(o.route)===rs)).length;
-    return `<tr><td><b>${r.code}</b></td><td>${r.name}</td><td>${r.customer||'<span style="color:#6B7280">공통</span>'}</td><td style="min-width:260px">${rtChips(r)}</td><td>${n}</td><td>${r.note||'-'}</td>
-    <td><button class="btn btn-ghost btn-xs" onclick="editRoute(${i})">수정</button> <button class="btn btn-danger btn-xs" onclick="delRoute(${i})">삭제</button></td></tr>`;
-  }).join('') || '<tr><td colspan="7" class="empty">등록된 Route 없음 — 위에서 등록하거나 [기존 오더에서 Route 자동 생성]을 누르세요</td></tr>';
+  const O = S.orders(), sg = x => [x.origin,(x.waypoints||[]).map(w=>w.name+'/'+(w.transport||'')).join('>'),x.destination].join('|');
+  el('route-list').innerHTML = S.routes().map((r,i)=>{
+    const rs = sg(r), n = O.filter(o=>o.routeCode===r.code || (o.route && sg(o.route)===rs)).length;
+    return `<div class="rt-item"><div class="rt-h"><b class="rt-cd">${r.code}</b><span class="rt-nm" title="${r.name}">${r.name}</span>
+      <span class="rt-tag">${r.customer||'공통'}</span><span class="rt-use">사용 ${n}건</span>
+      <span class="rt-btn"><button class="btn btn-ghost btn-xs" onclick="editRoute(${i})">수정</button> <button class="btn btn-danger btn-xs" onclick="delRoute(${i})">삭제</button></span></div>
+      ${rtChips(r)}${r.note?`<div class="rt-note">${r.note}</div>`:''}</div>`;
+  }).join('') || '<div class="empty-n" style="padding:20px;text-align:center;color:var(--gray)">등록된 Route 없음 — 왼쪽에서 등록하거나 [기존 오더에서 Route 자동 생성]을 누르세요</div>';
 }
 // 기존 오더의 경로를 (출발·경유·도착·운송수단) 기준으로 중복 없이 Route 후보로 만든다
 function rtFromOrders() {
@@ -226,8 +227,8 @@ function rtFromOrders() {
     const r = o.route; if (!r || !r.origin || !r.destination) return;
     const cand = {origin:r.origin, originStdTime:r.originStdTime||'', waypoints:(r.waypoints||[]).map(w=>({name:w.name, stdTime:w.stdTime||'', transport:w.transport||'', transportNo:'', destChange:''})), destination:r.destination};
     const k = sig(cand); if (have.has(k)) return; have.add(k);
-    const code = rtNextCode(), via = cand.waypoints.map(w=>w.name.replace(/\s*\(.*\)/,'')).join('·');
-    arr.push(Object.assign({code, name:`${(o.customer && !cand.destination.startsWith(o.customer)) ? o.customer+' · ' : ''}${cand.destination}${via?' ('+via+' 경유)':' 직송'}`.trim(), customer:o.customer||'', note:'기존 오더에서 자동 생성'}, cand)); add++;
+    const code = rtNextCode(), via = cand.waypoints.length;
+    arr.push(Object.assign({code, name:`${(o.customer && !cand.destination.startsWith(o.customer)) ? o.customer+' · ' : ''}${cand.destination}${via?' ('+via+'곳 경유)':' 직송'}`.trim(), customer:o.customer||'', note:'기존 오더에서 자동 생성'}, cand)); add++;
   });
   if (!add) return alert('새로 만들 Route가 없습니다. (이미 모두 등록되었거나 경로가 있는 오더가 없습니다)');
   S.set('routes', arr); rtReset(); renderRoutes(); alert(`✅ Route ${add}건을 만들었습니다.\n이름·고객사·비고는 목록에서 [수정]으로 다듬을 수 있습니다.`);
