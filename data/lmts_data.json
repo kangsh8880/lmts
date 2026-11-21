@@ -731,7 +731,22 @@
   ],
   "alarms": [],
   "scans": [],
-  "receipts": [],
+  "receipts": [
+    {
+      "no": "RCV-261121-001",
+      "time": "2026-11-21 12:20",
+      "boxNo": "P004",
+      "product": "Phone Glass",
+      "qty": 20,
+      "lot": "LOT-20261121001",
+      "srcType": "생산공장",
+      "src": "UTI VINA 생산라인",
+      "loc": "A-03-10",
+      "person": "창고담당",
+      "note": "검사 완료",
+      "status": "입고완료"
+    }
+  ],
   "routes": [
     {
       "code": "RT-001",
@@ -863,5 +878,5 @@
       "destination": "SK Hynix 이천캠퍼스"
     }
   ],
-  "lastUpdated": "2026-11-21 12:14"
+  "lastUpdated": "2026-11-21 12:21"
 }
