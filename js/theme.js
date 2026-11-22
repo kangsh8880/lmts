@@ -51,6 +51,18 @@
     const tabs = nav.querySelector('.nav-tabs');
     if (tabs) { const sep = () => { const e = document.createElement('i'); e.className = 'nav-sep'; return e; };
       ['master.html', 'analytics.html'].forEach(pg => { const t = tabs.querySelector(`.nav-tab[data-page="${pg}"]`); if (t) tabs.insertBefore(sep(), t); }); }
+    // 모바일: ☰ 메뉴 버튼 + 현재 화면 이름 (CSS는 900px 이하에서만 표시)
+    const lg = nav.querySelector('.nav-logo');
+    if (lg && tabs && !nav.querySelector('.nav-burger')) {
+      const bg = document.createElement('button'); bg.type = 'button'; bg.className = 'nav-burger'; bg.setAttribute('aria-label', '메뉴'); bg.innerHTML = '☰';
+      const cur = document.createElement('span'); cur.className = 'nav-cur';
+      const act = tabs.querySelector('.nav-tab.active') || tabs.querySelector('.nav-tab[href="' + (location.pathname.split('/').pop() || 'ceodash.html') + '"]');
+      cur.textContent = act ? act.textContent.trim() : '';
+      lg.after(bg); bg.after(cur);
+      const tg = () => { const o = nav.classList.toggle('open'); bg.innerHTML = o ? '✕' : '☰'; };
+      bg.onclick = tg; cur.onclick = tg;
+      document.addEventListener('click', e => { if (nav.classList.contains('open') && !nav.contains(e.target)) { nav.classList.remove('open'); bg.innerHTML = '☰'; } });
+    }
     const bar = document.createElement('div'); bar.id = 'newsbar'; bar.className = 'newsbar';
     bar.innerHTML = '<div class="nb-label">📰 뉴스</div><div class="nb-view"></div><button class="nb-x" title="뉴스바 닫기" onclick="lmtsNews(false)">✕</button>';
     nav.after(bar); apply(get()); renderNews();
