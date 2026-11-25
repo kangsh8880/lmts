@@ -167,4 +167,4 @@ function openKpi(k) {
       tb(['오더', '고객사', '구간', '표준(분)', '실적(분)', '초과(분)'], L.map(({ o, l }) => [`<b>${E(o.no)}</b>`, E(o.customer), `${E(DC.shortName(l.from))} ➜ ${E(DC.shortName(l.to))}`, l.std, l.act, `<b style="color:#C0392B">+${l.act - l.std}</b>`])), 'dispatch.html', '차량배차');
   }
 }
-window.lmtsReady = function () { initNav(); renderCEO(); };
+window.lmtsReady = function () { initNav(); renderCEO(); if (typeof CM !== 'undefined') CM.render(); };
