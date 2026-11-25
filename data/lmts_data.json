@@ -880,6 +880,26 @@
   ],
   "directives": [
     {
+      "id": "DIR-261125-002",
+      "time": "2026-11-25 13:24",
+      "from": "CEO",
+      "status": "지시",
+      "log": [
+        {
+          "time": "2026-11-25 13:24",
+          "who": "CEO",
+          "status": "지시",
+          "memo": "원인 파악 후 보고"
+        }
+      ],
+      "to": "배차",
+      "priority": "오늘",
+      "text": "원인 파악 후 보고",
+      "ref": "표준시간 초과 · ORD-260419-001",
+      "orderNo": "ORD-260419-001",
+      "customer": "SK Hynix"
+    },
+    {
       "id": "DIR-261125-001",
       "time": "2026-11-25 13:16",
       "from": "CEO",
@@ -900,5 +920,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-25 13:16"
+  "lastUpdated": "2026-11-25 13:24"
 }
