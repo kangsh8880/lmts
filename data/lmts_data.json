@@ -878,5 +878,27 @@
       "destination": "SK Hynix 이천캠퍼스"
     }
   ],
-  "lastUpdated": "2026-11-21 12:21"
+  "directives": [
+    {
+      "id": "DIR-261125-001",
+      "time": "2026-11-25 13:16",
+      "from": "CEO",
+      "status": "지시",
+      "log": [
+        {
+          "time": "2026-11-25 13:16",
+          "who": "CEO",
+          "status": "지시",
+          "memo": "원인 파악 후 보고"
+        }
+      ],
+      "to": "배차",
+      "priority": "오늘",
+      "text": "원인 파악 후 보고",
+      "ref": "표준시간 초과 · ORD-260420-001",
+      "orderNo": "ORD-260420-001",
+      "customer": "Samsung Electronics"
+    }
+  ],
+  "lastUpdated": "2026-11-25 13:16"
 }
