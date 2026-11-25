@@ -78,15 +78,35 @@ function renderOps() {
     kbox('c5', '지연', kv(n('지연'), '건', n('지연') > 0 ? 'bad' : ''), '즉시 조치', '상태가 지연인 오더', 'js:openOpsKpi(\'delay\')'),
     kbox('c5', '비지정 이벤트', kv(K.off, '건', K.off > 0 ? 'bad' : ''), '확인 필요', '지정 경로 외 거점 이벤트 알람', 'js:openOpsKpi(\'off\')'),
     kbox('c4', '재고 부족', kv(K.stockShort, '품목', K.stockShort > 0 ? 'bad' : ''), K.stockShort ? '입고 등록 필요' : '대기 오더 충족', '창고 현재고 < Packing 전(대기) 오더 필요 수량인 제품 수', 'js:openOpsKpi(\'stock\')'),
+    kbox('c5', 'CEO 지시', kv(dirOpenN(), '건', S.directives().some(d => d.status !== '완료' && d.priority === '긴급') ? 'bad' : ''), dirOpenN() ? '처리 대기' : '미완료 없음', '대표이사가 보낸 조치 지시 중 완료되지 않은 건수. 알람·조치 목록 맨 위에서 접수·처리·완료', 'js:document.getElementById(\'acts\').scrollIntoView({behavior:\'smooth\'})'),
     kbox('c2', '거점 체류', kv(K.inHub, '곳'), `전체 ${K.hubs}곳`, '진행 오더가 입고된 상태로 머무는 거점 수', 'js:openOpsKpi(\'hub\')'),
     kbox('c1', '기준일 이벤트', kv(dc.inn + dc.out, '건'), `IN ${dc.inn} · OUT ${dc.out}`, `데이터 기준일 ${a}의 IN/OUT 합계`, 'js:openOpsKpi(\'ev\')')
   ].join('');
   const ac2 = ac; el('act-n').textContent = ac2.length + '건';
-  el('acts').innerHTML = ac2.length ? ac2.map(x => `<div class="al ${x.lv === 0 ? '' : x.lv === 1 ? 'warn' : 'info'}"><b>${DC.esc(x.t)}</b><p>사실: ${DC.esc(x.fact)}<br>원인 후보: ${DC.esc(x.cause)}<br><em>대안: ${DC.esc(x.act)}</em> · <a href="${x.go}">화면 이동</a></p></div>`).join('')
-    : '<div class="empty-n">조치가 필요한 항목이 없습니다</div>';
+  el('acts').innerHTML = dirsHtml() + (ac2.length ? ac2.map(x => `<div class="al ${x.lv === 0 ? '' : x.lv === 1 ? 'warn' : 'info'}"><b>${DC.esc(x.t)}</b><p>사실: ${DC.esc(x.fact)}<br>원인 후보: ${DC.esc(x.cause)}<br><em>대안: ${DC.esc(x.act)}</em> · <a href="${x.go}">화면 이동</a></p></div>`).join('')
+    : '<div class="empty-n">조치가 필요한 항목이 없습니다</div>');
   el('asof').textContent = `데이터 기준일 ${a}`;
   el('cover').innerHTML = `<b>데이터 확보 현황</b> · 연계: 출하오더·패킹·배차·거점이벤트·알람 · <b>연계 예정</b>: 운송비 · 차량 위치`;
   calToday();
+}
+// ── CEO 조치 지시: 접수 · 처리중 · 완료 ──────────────────────
+const dirOpenN = () => S.directives().filter(d => d.status !== '완료').length;
+function dirsHtml() {
+  const E = DC.esc, L = S.directives().slice().sort((a, b) => (a.status === '완료') - (b.status === '완료') || (a.priority === '긴급' ? 0 : 1) - (b.priority === '긴급' ? 0 : 1) || (b.time || '').localeCompare(a.time || ''));
+  if (!L.length) return '';
+  const ic = { 지시: '📌', 접수: '👀', 처리중: '🛠', 완료: '✅' };
+  const one = d => {
+    const open = d.status !== '완료', last = (d.log || []).slice(-1)[0];
+    const btns = !open ? `<span class="dir-done">완료 ${E((d.doneTime || '').slice(5, 16))}</span>` : [['접수', d.status === '지시'], ['처리중', d.status !== '처리중'], ['완료', true]].filter(x => x[1]).map(x => `<button class="btn btn-ghost dir-b" onclick="opsDir('${E(d.id)}','${x[0]}')">${x[0]}</button>`).join('');
+    return `<div class="al ${d.priority === '긴급' && open ? '' : open ? 'warn' : 'info'} dir-it"><b>${ic[d.status]} CEO 지시 · ${E(d.priority)} → ${E(d.to)}</b><p>${E(d.ref || '')}${d.customer ? ' · ' + E(d.customer) : ''}<br><em>${E(d.text)}</em><br><small>${E((d.time || '').slice(5, 16))} · 현재 <b>${E(d.status)}</b>${last && last.memo && last.status !== '지시' ? ' · ' + E(last.memo) : ''}</small></p><div class="dir-bt">${btns}</div></div>`;
+  };
+  const shown = L.slice(0, 8);
+  return `<div class="dir-hd">📌 CEO 지시 <span class="chip red">미완료 ${dirOpenN()}건</span></div>` + shown.map(one).join('') + (L.length > 8 ? `<div class="empty-n">이전 지시 ${L.length - 8}건은 생략</div>` : '');
+}
+function opsDir(id, st) {
+  let memo = '';
+  if (st === '완료') { memo = prompt('처리 결과를 간단히 적어 주세요 (CEO 휴대폰에 표시됩니다)', '') ; if (memo === null) return; }
+  setDirectiveStatus(id, st, memo, '운영관제'); renderOps();
 }
 // ── KPI 클릭 → 해당 목록 보조창 ────────────────────────────
 function openPop(title, sub, html, go, goLabel) {

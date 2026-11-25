@@ -143,7 +143,7 @@ const GH = {
 // ══════════════════════════════════════════════════════════════════
 const DB = {
   customers:[], products:[], vehicles:[], hubs:[],
-  orders:[], packings:[], dispatches:[], events:[], alarms:[], scans:[], receipts:[], routes:[],
+  orders:[], packings:[], dispatches:[], events:[], alarms:[], scans:[], receipts:[], routes:[], directives:[],
   lastUpdated: ''
 };
 
@@ -159,7 +159,7 @@ function cleanDeep(o){
 // 컬렉션별 식별 키 — 동시 저장 병합·삭제 추적용
 const KEYFN = {
   customers:r=>r.code, products:r=>r.code, vehicles:r=>r.no, hubs:r=>r.code||r.name, orders:r=>r.no, packings:r=>r.orderNo,
-  dispatches:r=>r.orderNo+'#'+r.legIdx, events:r=>[r.time,r.orderNo,r.hub,r.event].join('|'), alarms:r=>r.id, scans:r=>[r.time,r.code,r.hub,r.event].join('|'), receipts:r=>r.no, routes:r=>r.code
+  dispatches:r=>r.orderNo+'#'+r.legIdx, events:r=>[r.time,r.orderNo,r.hub,r.event].join('|'), alarms:r=>r.id, scans:r=>[r.time,r.code,r.hub,r.event].join('|'), receipts:r=>r.no, routes:r=>r.code, directives:r=>r.id
 };
 const _KS = {}, _DEL = {};     // 마지막 확인 시점의 키 목록 / 이 세션에서 지운 키
 function snapKeys(){ Object.keys(KEYFN).forEach(k=>{ _KS[k] = new Set((DB[k]||[]).map(KEYFN[k])); _DEL[k] = _DEL[k] || new Set(); }); }
@@ -202,6 +202,24 @@ function nextReceiptNo(){
 function localDateStr(d){ d=d||new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function ordCodes(o, ps){ return ordItems(o).map(i=>(ps.find(p=>p.name===i.product)||{}).code||'').filter(Boolean); }
 
+// CEO 조치 지시 — 번호·등록·상태 변경 (상태: 지시 → 접수 → 처리중 → 완료)
+const DIR_STATUS = ['지시', '접수', '처리중', '완료'];
+function nextDirectiveNo() {
+  const d = new Date(), pre = 'DIR-' + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-';
+  const max = S.directives().reduce((m, r) => { const x = String(r.id || ''); if (!x.startsWith(pre)) return m; const n = parseInt(x.slice(pre.length), 10); return isNaN(n) ? m : Math.max(m, n); }, 0);
+  return pre + String(max + 1).padStart(3, '0');
+}
+function addDirective(o) {
+  const arr = S.directives().slice(), t = now();
+  const r = Object.assign({ id: nextDirectiveNo(), time: t, from: 'CEO', status: '지시', log: [{ time: t, who: 'CEO', status: '지시', memo: o.text || '' }] }, o);
+  arr.unshift(r); S.set('directives', arr); return r;
+}
+function setDirectiveStatus(id, status, memo, who) {
+  const arr = S.directives().slice(), r = arr.find(x => x.id === id); if (!r) return null;
+  r.status = status; r.log = (r.log || []).concat([{ time: now(), who: who || '운영관제', status, memo: memo || '' }]);
+  if (status === '완료') r.doneTime = now();
+  S.set('directives', arr); return r;
+}
 // 오더 상태 변경 — Packing·배차·거점 In/Out 화면 공용
 function updateOrderStatus(no, status) {
   const arr=S.orders(), idx=arr.findIndex(o=>o.no===no);
@@ -236,6 +254,7 @@ const S = {
   scans:      () => S.get('scans'),
   receipts:   () => S.get('receipts'),
   routes:     () => S.get('routes'),
+  directives: () => S.get('directives'),
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -358,7 +377,7 @@ async function loadFromGitHub() {
 
 function loadFromLocalStorage() {
   // localStorage 캐시에서 데이터 로드 (오프라인 모드)
-  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms','scans','receipts','routes'];
+  const keys = ['customers','products','vehicles','hubs','orders','packings','dispatches','events','alarms','scans','receipts','routes','directives'];
   keys.forEach(k => {
     const raw = localStorage.getItem('lmts_' + k);
     if (raw) { try { DB[k] = JSON.parse(raw); } catch(e) {} }
