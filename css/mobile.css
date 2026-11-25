@@ -157,3 +157,16 @@
   .ms-dir.st-처리중{background:#FFFBEA}.ms-dir.st-완료{background:#F0FAF3}.ms-dir.st-접수{background:#F1F7FD}
   .ms-log{margin-top:4px;padding-top:4px;border-top:1px dashed #D1D5DB;font-size:12.5px;color:#4B5563}
 }
+
+/* ── 핵심 문구 강조 (일반=검정, 강조=빨강·파랑) ── */
+.hl-r{color:#B91C1C;font-weight:800}
+.hl-b{color:#1D4ED8;font-weight:800}
+.hl-g{color:#6B7280;font-weight:500;font-size:.9em}
+@media (max-width:900px){
+  .mc-cust{font-size:16.5px;margin-top:4px;line-height:1.35}
+  .mc-cs b{color:#111827}
+  .mc-cf{font-size:14px}
+  .ms-cust .big{font-size:19px}
+  .ms-cause{background:#FFF1F1;border-radius:8px;padding:8px 10px;border:1px solid #E5B4B4;border-top:1px solid #E5B4B4;margin-top:6px}
+  .ms-act b.hl-b{display:inline-block;margin-top:2px}
+}
