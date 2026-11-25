@@ -63,6 +63,37 @@
       bg.onclick = tg; cur.onclick = tg;
       document.addEventListener('click', e => { if (nav.classList.contains('open') && !nav.contains(e.target)) { nav.classList.remove('open'); bg.innerHTML = '☰'; } });
     }
+    // 모바일: 하단 탭바(자주 쓰는 4개 + 전체 메뉴) — CSS는 900px 이하에서만 표시
+    if (tabs && !document.querySelector('.m-tabbar')) {
+      const here = location.pathname.split('/').pop() || 'ceodash.html';
+      const tb = document.createElement('nav'); tb.className = 'm-tabbar';
+      ['ops.html', 'order.html', 'packing.html', 'tracking.html'].forEach(h => {
+        const t = tabs.querySelector('.nav-tab[href="' + h + '"]'); if (!t) return;
+        const ic = t.querySelector('.ti'), icT = ic ? ic.textContent.trim() : '';
+        const a = document.createElement('a'); a.href = h; a.className = 'm-tab' + (h === here ? ' on' : '');
+        const i1 = document.createElement('span'); i1.className = 'mi'; i1.textContent = icT;
+        const l1 = document.createElement('span'); l1.className = 'ml'; l1.textContent = t.textContent.replace(icT, '').trim();
+        a.appendChild(i1); a.appendChild(l1); tb.appendChild(a);
+      });
+      const mb = document.createElement('button'); mb.type = 'button'; mb.className = 'm-tab';
+      mb.innerHTML = '<span class="mi">☰</span><span class="ml">전체</span>';
+      mb.onclick = ev => { ev.stopPropagation(); window.scrollTo(0, 0); nav.classList.add('open'); const b2 = nav.querySelector('.nav-burger'); if (b2) b2.innerHTML = '✕'; };
+      tb.appendChild(mb); document.body.appendChild(tb);
+    }
+    // 모바일: 카드 머리글을 눌러 접기/펼치기 (표·내역 카드는 처음에 접음)
+    (function () {
+      const mq = window.matchMedia('(max-width:900px)'); if (!mq.matches) return;
+      const init = () => document.querySelectorAll('.page .card, .op-page .card').forEach(c => {
+        if (c.dataset.mf) return; const h = c.querySelector(':scope > .card-head'), b = c.querySelector(':scope > .card-body');
+        if (!h || !b) return; c.dataset.mf = '1'; c.classList.add('m-fold-ok');
+        if (b.querySelector('.tbl-wrap') && !c.closest('.modal, .pop')) c.classList.add('m-fold');
+      });
+      init(); setTimeout(init, 1500);
+      document.addEventListener('click', e => {
+        const h = e.target.closest('.m-fold-ok > .card-head'); if (!h || e.target.closest('button,a,select,input,label')) return;
+        h.parentElement.classList.toggle('m-fold');
+      });
+    })();
     const bar = document.createElement('div'); bar.id = 'newsbar'; bar.className = 'newsbar';
     bar.innerHTML = '<div class="nb-label">📰 뉴스</div><div class="nb-view"></div><button class="nb-x" title="뉴스바 닫기" onclick="lmtsNews(false)">✕</button>';
     nav.after(bar); apply(get()); renderNews();
