@@ -30,6 +30,12 @@ const CM = (() => {
   const dirOpen = () => S.directives().filter(d => d.status !== '완료');
   const stIc = { 지시: '📌', 접수: '👀', 처리중: '🛠', 완료: '✅' };
   let sel = { to: '', pr: '오늘', text: '' };
+  // ── 핵심 문구 강조: 고객·최종 도착지=파랑 굵게, 원인·지연 수치=빨강 굵게, 조치=굵게 ──
+  const E2 = t => DC.esc(t || '');
+  const hlFact = t => E2(t).replace(/(\(\+\d+분\))/g, '<b class="hl-r">$1</b>').replace(/(실적 )(\d+분)/g, '$1<b class="hl-r">$2</b>').replace(/(\d+ 부족)/g, '<b class="hl-r">$1</b>').replace(/(지연 상태|지정 경로 외 거점)/g, '<b class="hl-r">$1</b>');
+  const hlCause = t => { const g = /\(가설\)/.test(t || ''); return (t || '').replace(/\(가설\)/g, '').split(/\s*(?:또는|\/)\s*/).filter(Boolean).map(x => `<b class="hl-r">${E2(x.trim())}</b>`).join(' <span class="hl-g">또는</span> ') + (g ? ' <span class="hl-g">(추정)</span>' : ''); };
+  const hlAct = t => (t || '').split(/\s*[,，]\s*/).filter(Boolean).map((x, i) => `<b class="hl-b">${i + 1}. ${E2(x.trim())}</b>`).join('<br>');
+  const dest = o => { const ns = o ? DC.nodes(o) : []; let d = ns.length ? DC.shortName(ns[ns.length - 1]) : ''; if (o && d && o.customer && d.indexOf(o.customer) === 0 && d.length > o.customer.length) d = d.slice(o.customer.length).trim() + ' 도착'; return d; };
   function build() {
     list = DC.actions().filter(a => a.lv <= 1).sort((a, b) => a.lv - b.lv || rank[cat(a)] - rank[cat(b)]);
     return list;
@@ -46,8 +52,8 @@ const CM = (() => {
     const cards = shown.map((a, i) => {
       const o = ordOf(a);
       return `<div class="mc-card lv${a.lv}" onclick="CM.open(${i})"><div class="mc-ct">${lvIc[a.lv]} ${DC.esc(a.t)}</div>` +
-        (o ? `<div class="mc-cs">${DC.esc(o.customer)} · ${DC.esc(whereOf(o))}</div>` : '') +
-        `<div class="mc-cf">${DC.esc(a.fact)}</div><div class="mc-go">${(() => { const d = dirsOf(a)[0]; return d ? `<span class="mc-dir st-${d.status}">${stIc[d.status]} ${d.status}</span> ` : ''; })()}자세히·조치 ›</div></div>`;
+        (o ? `<div class="mc-cust"><b class="hl-b">${DC.esc(o.customer)}</b>${dest(o) ? ' <span class="hl-g">→ ' + DC.esc(dest(o)) + '</span>' : ''}</div><div class="mc-cs"><b>${DC.esc(whereOf(o))}</b></div>` : '') +
+        `<div class="mc-cf">${hlFact(a.fact)}</div><div class="mc-go">${(() => { const d = dirsOf(a)[0]; return d ? `<span class="mc-dir st-${d.status}">${stIc[d.status]} ${d.status}</span> ` : ''; })()}자세히·조치 ›</div></div>`;
     }).join('');
     const more = list.length > 3 && !showAll ? `<button type="button" class="mc-more" onclick="CM.all()">나머지 ${list.length - 3}건 더 보기</button>` : '';
     host.innerHTML = `<div class="mc-banner lv${lv}"><div class="mc-bi">${lvIc[lv]}</div><div><div class="mc-bt">${head[0]}</div><div class="mc-bs">${head[1]}</div></div></div>` + chips +
@@ -70,8 +76,8 @@ const CM = (() => {
   function drawDetail() {
     const a = cur, o = ordOf(a), ph = phones(o), ds = dirsOf(a);
     sheet(`<div class="ms-box"><div class="ms-h"><b>${lvIc[a.lv]} ${DC.esc(a.t)}</b><button type="button" onclick="CM.close()">닫기 ✕</button></div>` +
-      (o ? `<div class="ms-r"><span>고객</span>${DC.esc(o.customer)}</div><div class="ms-r"><span>현재 위치</span>${DC.esc(whereOf(o))}</div>` : '') +
-      `<div class="ms-r"><span>상황</span>${DC.esc(a.fact)}</div><div class="ms-r"><span>추정 원인</span>${DC.esc(a.cause)}</div><div class="ms-r ms-act"><span>권장 조치</span>${DC.esc(a.act)}</div>` +
+      (o ? `<div class="ms-r ms-cust"><span>고객 · 최종 도착</span><b class="hl-b big">${DC.esc(o.customer)}</b>${dest(o) ? ' <span class="hl-g">→ ' + DC.esc(dest(o)) + '</span>' : ''}</div><div class="ms-r"><span>현재 위치</span><b>${DC.esc(whereOf(o))}</b></div>` : '') +
+      `<div class="ms-r"><span>상황</span>${hlFact(a.fact)}</div><div class="ms-r ms-cause"><span>추정 원인</span>${hlCause(a.cause)}</div><div class="ms-r ms-act"><span>권장 조치</span>${hlAct(a.act)}</div>` +
       (ds.length ? `<div class="ms-r"><span>보낸 지시</span>${ds.map(d => `<div class="ms-dir st-${d.status}"><b>${stIc[d.status]} ${d.status}</b> · ${DC.esc(d.to)} · ${DC.esc(d.priority)}<br>${DC.esc(d.text)}${logHtml(d)}</div>`).join('')}</div>` : '') +
       `<div class="ms-form"><div class="ms-ft">📌 조치 지시 보내기</div>` +
       `<div class="ms-fl">누구에게</div><div class="ms-chips" id="cm-to">${chips(TO, sel.to, 'CM.pickTo')}</div>` +
