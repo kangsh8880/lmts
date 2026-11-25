@@ -138,3 +138,22 @@
   .ms-btns{display:flex;flex-direction:column;gap:8px;margin-top:12px}
   .ms-btns .btn{min-height:46px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:15px}
 }
+
+/* ══ 조치 지시 (휴대폰 입력창) ══ */
+.mc-dir{display:inline-block;padding:1px 8px;border:1px solid #6B7280;border-radius:10px;font-size:12px;font-weight:700;background:#fff;color:#374151;margin-right:4px}
+.mc-dir.st-처리중{background:#FFF3CD}.mc-dir.st-완료{background:#DDF3E4}.mc-dir.st-접수{background:#E3EEF9}
+@media (max-width:900px){
+  .ms-form{margin-top:10px;padding:10px;border:1.5px solid #334155;border-radius:12px;background:#F8FAFC}
+  .ms-ft{font-size:15.5px;font-weight:800;margin-bottom:6px}
+  .ms-fl{font-size:12px;font-weight:700;color:#6B7280;margin:8px 0 4px}
+  .ms-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .ms-chip{padding:8px 12px;border:1.5px solid #9CA3AF;border-radius:18px;background:#fff;font-size:14px;font-weight:600;color:#111827;min-height:38px}
+  .ms-chip.on{background:#D6E4F0;border-color:#334155;font-weight:800}
+  .ms-chip.q{border-style:dashed}
+  #cm-text{width:100%;margin-top:8px;padding:10px;border:1.5px solid #9CA3AF;border-radius:10px;font-size:16px;font-family:inherit;box-sizing:border-box}
+  .ms-send{width:100%;margin-top:8px;min-height:48px;font-size:16px;font-weight:800}
+  .ms-done{padding:8px 10px;margin-bottom:8px;border:1px solid #16A34A;border-radius:8px;background:#DDF3E4;font-size:14px;font-weight:700}
+  .ms-dir{padding:8px 10px;border:1px solid #9CA3AF;border-radius:8px;background:#fff;font-size:13.5px;line-height:1.45;margin-top:4px}
+  .ms-dir.st-처리중{background:#FFFBEA}.ms-dir.st-완료{background:#F0FAF3}.ms-dir.st-접수{background:#F1F7FD}
+  .ms-log{margin-top:4px;padding-top:4px;border-top:1px dashed #D1D5DB;font-size:12.5px;color:#4B5563}
+}
