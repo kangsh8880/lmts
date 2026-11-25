@@ -102,3 +102,39 @@
   .m-tab.on{background:#D6E4F0;color:#14284A;outline:1.5px solid #334155}
 }
 @media (min-width:901px){.m-tabbar{display:none !important}}
+
+/* ══ CEO 휴대폰 첫 화면 (상태 한 줄 + 문제 건 카드) ══ */
+.m-ceo,#m-sheet{display:none}
+@media (max-width:900px){
+  .m-ceo{display:block;margin:0 0 12px}
+  .mc-banner{display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid #334155;border-radius:14px}
+  .mc-banner.lv0{background:#FBE3E3}.mc-banner.lv1{background:#FFF3CD}.mc-banner.lv2{background:#DDF3E4}
+  .mc-bi{font-size:34px;line-height:1}
+  .mc-bt{font-size:24px;font-weight:800;color:#111827;line-height:1.15}
+  .mc-banner.lv0 .mc-bt{color:#B91C1C}
+  .mc-bs{font-size:14.5px;color:#374151;margin-top:2px}
+  .mc-chips{display:flex;gap:6px;margin:8px 0}
+  .mc-chips span{flex:1;text-align:center;padding:6px 4px;border:1px solid #9CA3AF;border-radius:10px;background:#fff;font-size:13.5px;color:#374151}
+  .mc-chips b{font-size:16px;color:#111827}
+  .mc-cards{display:flex;flex-direction:column;gap:8px}
+  .mc-card{border:1px solid #9CA3AF;border-left:6px solid #9CA3AF;border-radius:12px;padding:10px 12px;background:#fff;cursor:pointer}
+  .mc-card.lv0{border-left-color:#B91C1C;background:#FFF7F7}.mc-card.lv1{border-left-color:#B45309;background:#FFFCF2}
+  .mc-ct{font-size:15.5px;font-weight:800;color:#111827;word-break:keep-all}
+  .mc-cs{font-size:13.5px;color:#374151;margin-top:3px}
+  .mc-cf{font-size:13.5px;color:#4B5563;margin-top:3px;line-height:1.4}
+  .mc-go{text-align:right;font-size:13px;font-weight:700;color:#1D4ED8;margin-top:4px}
+  .mc-more{width:100%;margin-top:8px;padding:10px;border:1px solid #9CA3AF;border-radius:10px;background:#fff;font-size:14px;font-weight:700}
+  .mc-ok{padding:14px;text-align:center;font-size:15px;line-height:1.6;border:1px solid #9CA3AF;border-radius:12px;background:#fff;margin-top:8px}
+  .mc-sub{margin-top:8px;text-align:center;font-size:13px;color:#6B7280}
+  .mc-sub b{color:#111827}
+  #m-sheet{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.4);align-items:flex-end}
+  #m-sheet.on{display:flex}
+  .ms-box{width:100%;max-height:86dvh;overflow:auto;background:#fff;border-radius:18px 18px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom))}
+  .ms-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:16px}
+  .ms-h button{border:1px solid #9CA3AF;border-radius:8px;background:#F3F4F6;padding:6px 10px;font-size:13px;white-space:nowrap}
+  .ms-r{padding:8px 0;border-top:1px solid #E5E7EB;font-size:14.5px;line-height:1.5;color:#111827}
+  .ms-r span{display:block;font-size:12px;font-weight:700;color:#6B7280;margin-bottom:1px}
+  .ms-act{background:#EEF4FB;border-radius:8px;padding:8px 10px;border:1px solid #9CA3AF}
+  .ms-btns{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .ms-btns .btn{min-height:46px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:15px}
+}
