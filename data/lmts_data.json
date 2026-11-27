@@ -692,6 +692,21 @@
       "vehicleNo": "서울 9012다",
       "driver": "이재훈",
       "dphone": "010-5555-7777"
+    },
+    {
+      "orderNo": "ORD-261127-0001",
+      "legIdx": 1,
+      "fromHub": "수원 중간집하장",
+      "toHub": "SK Hynix 이천캠퍼스",
+      "transportType": "truck",
+      "departPlan": "2026-11-27T21:31",
+      "eta": "2026-11-27T22:31",
+      "savedAt": "2026-11-27 16:32",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "인천 3847나",
+      "driver": "김영수",
+      "dphone": "010-9876-5432"
     }
   ],
   "events": [
@@ -1013,5 +1028,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-27 16:31"
+  "lastUpdated": "2026-11-27 16:32"
 }
