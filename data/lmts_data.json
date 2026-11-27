@@ -835,6 +835,15 @@
       "event": "OUT",
       "person": "배차담당",
       "note": "차량 출발"
+    },
+    {
+      "time": "2026-11-27 21:32",
+      "orderNo": "ORD-261127-0001",
+      "customer": "SK Hynix",
+      "hub": "수원 중간집하장",
+      "event": "IN",
+      "person": "",
+      "note": ""
     }
   ],
   "alarms": [],
@@ -1028,5 +1037,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-27 16:32"
+  "lastUpdated": "2026-11-27 21:33"
 }
