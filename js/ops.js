@@ -76,6 +76,8 @@ function renderOps() {
     kbox('c4', '배차 완료', kv(n('배차완료'), '건'), '출발 대기', '배차 지정 후 미출발 오더', 'js:openOpsKpi(\'disp\')'),
     kbox('c1', '운송 중', kv(DC.moving().length, '건'), '거점 이동', '거점 OUT 후 다음 거점 IN 전 오더', 'js:openOpsKpi(\'mv\')'),
     kbox('c5', '지연', kv(n('지연'), '건', n('지연') > 0 ? 'bad' : ''), '즉시 조치', '상태가 지연인 오더', 'js:openOpsKpi(\'delay\')'),
+    kbox('c5', '지연 예상', kv(K.etaWarn, '건', K.etaWarn > 0 ? 'bad' : ''), K.etaWarn ? '도착 전 사전경보' : '표준 내 진행', `운송 중·거점 체류 오더 중 표준시간의 ${DC.CFG.warnPct}% 이상 경과했거나 이미 초과한 건수 (마지막 거점 이벤트 + 남은 구간 표준시간으로 도착 예상시각 산출)`, 'js:openOpsKpi(\'eta\')'),
+    kbox('c4', '스캔 누락', kv(K.scanMiss, '건', K.scanMiss > 0 ? 'bad' : ''), K.scanMiss ? '현장 확인 필요' : '이상 없음', `OUT 후 표준시간의 ${DC.CFG.silentFactor}배(또는 +${DC.CFG.silentMin}분)가 지나도 도착 IN이 없거나, IN 후 ${DC.CFG.dwellWarn}분 넘게 OUT이 없는 오더`, 'js:openOpsKpi(\'scan\')'),
     kbox('c5', '비지정 이벤트', kv(K.off, '건', K.off > 0 ? 'bad' : ''), '확인 필요', '지정 경로 외 거점 이벤트 알람', 'js:openOpsKpi(\'off\')'),
     kbox('c4', '재고 부족', kv(K.stockShort, '품목', K.stockShort > 0 ? 'bad' : ''), K.stockShort ? '입고 등록 필요' : '대기 오더 충족', '창고 현재고 < Packing 전(대기) 오더 필요 수량인 제품 수', 'js:openOpsKpi(\'stock\')'),
     kbox('c5', 'CEO 지시', kv(dirOpenN(), '건', S.directives().some(d => d.status !== '완료' && d.priority === '긴급') ? 'bad' : ''), dirOpenN() ? '처리 대기' : '미완료 없음', '대표이사가 보낸 조치 지시 중 완료되지 않은 건수. 알람·조치 목록 맨 위에서 접수·처리·완료', 'js:openOpsKpi(\'dir\')'),
@@ -137,6 +139,16 @@ function openOpsKpi(k) {
     openPop('지연 상세', `상태가 <b>지연</b>인 오더 <b>${L.length}</b>건 · 아래에 표준시간 초과 알람 <b>${ac.length}</b>건`,
       tb(['오더', '고객사', '제품·수량', '출하예정일', '현재 위치'], L.map(o => [...base(o), where(o)])) +
       (ac.length ? `<div class="pop-sub" style="margin-top:10px"><b>표준시간 초과 알람</b></div>` + tb(['알람', '사실', '대안'], ac.map(a => [E(a.t), E(a.fact), E(a.act)])) : ''), 'tracking.html', '거점In/Out');
+  }
+  else if (k === 'eta') {
+    const L = DC.kpi().etaWarnList, lvC = f => f.lv === 0 ? '<span class="chip red">지연</span>' : '<span class="chip">곧 지연</span>';
+    openPop('지연 예상 상세', `표준시간의 <b>${DC.CFG.warnPct}%</b> 이상 경과했거나 이미 초과한 오더 <b>${L.length}</b>건 · 예상 도착 = 마지막 거점 이벤트 + 남은 구간 표준시간${L.some(f => f.partial) ? ' (표준시간 미등록 구간은 제외)' : ''}`,
+      tb(['오더', '고객사', '현재 구간', '경과/표준', '예상 도착', '표준 대비', '구분'], L.map(f => [`<b>${E(f.o.no)}</b>`, E(f.o.customer), E(DC.shortName(f.from) + ' → ' + DC.shortName(f.to)), `${DC.fmtDur(f.el)} / ${f.curStd}분 (${f.pct}%)`, `<b>${E(f.eta)}</b>`, f.delta > 0 ? `<b style="color:#C0392B">+${DC.fmtDur(f.delta)}</b>` : '±0', lvC(f)])), 'map.html', '위치추적');
+  }
+  else if (k === 'scan') {
+    const L = DC.kpi().scanMissList;
+    openPop('스캔 누락 의심 상세', `이벤트가 멈춘 지 오래된 오더 <b>${L.length}</b>건 · 실제 지연이거나 스캔을 빠뜨렸을 수 있어 현장 확인이 필요합니다`,
+      tb(['오더', '고객사', '마지막 이벤트', '경과', '의심 내용', '조치'], L.map(g => [`<b>${E(g.o.no)}</b>`, E(g.o.customer), E(g.last.slice(5, 16)), `<b style="color:#C0392B">${DC.fmtDur(g.el)}</b>`, g.kind === 'arrive' ? E(`${DC.shortName(g.from)}→${DC.shortName(g.to)} 도착 IN 없음 (표준 ${g.std}분)`) : E(`${DC.shortName(g.from)} OUT 없음`), '현장 확인 후 누락이면 거점 In/Out에서 보정'])), 'tracking.html', '거점In/Out');
   }
   else if (k === 'off') { const L = S.alarms().filter(a => a.type === 'OFF_ROUTE'); openPop('비지정 이벤트 상세', `오더의 지정 경로에 없는 거점에서 등록된 이벤트 <b>${L.length}</b>건`, tb(['시각', '오더', '거점', '구분', '조치'], L.map(a => [DC.hhmm(a.time), `<b>${E(a.orderNo)}</b>`, E(a.hub), `<span class="chip red">${E(a.event)}</span>`, '경로 변경 또는 이벤트 정정'])), 'order.html', '출하오더'); }
   else if (k === 'hub') {

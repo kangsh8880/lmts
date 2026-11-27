@@ -1,8 +1,8 @@
 // ══ LMTS ceomobile.js — CEO 휴대폰 첫 화면: 상태 한 줄 + 문제 건 카드(최대 3) + 상세·연락 ══
 // 폭 900px 이하에서만 보임(css/mobile.css). PC 화면에는 영향 없음.
 const CM = (() => {
-  const lvIc = ['🔴', '🟡', '🟢'], cat = a => /재고 부족/.test(a.t) ? 'stock' : /비지정/.test(a.t) ? 'route' : 'late';
-  const rank = { late: 0, stock: 1, route: 2 };
+  const lvIc = ['🔴', '🟡', '🟢'], cat = a => /재고 부족/.test(a.t) ? 'stock' : /비지정/.test(a.t) ? 'route' : /스캔 누락/.test(a.t) ? 'scan' : 'late';
+  const rank = { late: 0, stock: 1, route: 2, scan: 3 };
   let list = [], showAll = false;
 
   function ordOf(a) { const m = (a.t || '').match(/ORD-[\w-]+/); return m ? S.orders().find(o => o.no === m[0]) : null; }
@@ -24,7 +24,7 @@ const CM = (() => {
     return out;
   }
   const TO = ['운영관제', '배차', '입고·재고', '고객응대'];
-  const QUICK = { late: ['원인 파악 후 보고', '고객에게 지연 안내', '대체 차량 재배차', '오늘 중 처리'], stock: ['입고 일정 확인', '입고 등록 즉시', '출하 우선순위 조정', '오늘 중 처리'], route: ['이벤트 정정', '경로 변경 확인', '원인 파악 후 보고', '오늘 중 처리'] };
+  const QUICK = { late: ['원인 파악 후 보고', '고객에게 지연 안내', '대체 차량 재배차', '오늘 중 처리'], stock: ['입고 일정 확인', '입고 등록 즉시', '출하 우선순위 조정', '오늘 중 처리'], route: ['이벤트 정정', '경로 변경 확인', '원인 파악 후 보고', '오늘 중 처리'], scan: ['현재 위치 확인', '스캔 보정 등록', '원인 파악 후 보고', '오늘 중 처리'] };
   const defTo = a => cat(a) === 'stock' ? '입고·재고' : cat(a) === 'late' && /표준시간/.test(a.t) ? '배차' : '운영관제';
   const dirsOf = a => S.directives().filter(d => d.ref === a.t);
   const dirOpen = () => S.directives().filter(d => d.status !== '완료');
@@ -32,10 +32,10 @@ const CM = (() => {
   let sel = { to: '', pr: '오늘', text: '' };
   // ── 핵심 문구 강조: 고객·최종 도착지=파랑 굵게, 원인·지연 수치=빨강 굵게, 조치=굵게 ──
   const E2 = t => DC.esc(t || '');
-  const hlFact = t => E2(t).replace(/(\(\+\d+분\))/g, '<b class="hl-r">$1</b>').replace(/(실적 )(\d+분)/g, '$1<b class="hl-r">$2</b>').replace(/(\d+ 부족)/g, '<b class="hl-r">$1</b>').replace(/(지연 상태|지정 경로 외 거점)/g, '<b class="hl-r">$1</b>');
+  const hlFact = t => E2(t).replace(/(\(\+\d+분\)|\(표준 대비 \+[^)]*\))/g, '<b class="hl-r">$1</b>').replace(/(실적 )(\d+분)/g, '$1<b class="hl-r">$2</b>').replace(/(\d+ 부족)/g, '<b class="hl-r">$1</b>').replace(/(지연 상태|지정 경로 외 거점)/g, '<b class="hl-r">$1</b>');
   const hlCause = t => { const g = /\(가설\)/.test(t || ''); return (t || '').replace(/\(가설\)/g, '').split(/\s*(?:또는|\/)\s*/).filter(Boolean).map(x => `<b class="hl-r">${E2(x.trim())}</b>`).join(' <span class="hl-g">또는</span> ') + (g ? ' <span class="hl-g">(추정)</span>' : ''); };
   const hlAct = t => (t || '').split(/\s*[,，]\s*/).filter(Boolean).map((x, i) => `<b class="hl-b">${i + 1}. ${E2(x.trim())}</b>`).join('<br>');
-  const dest = o => { const ns = o ? DC.nodes(o) : []; let d = ns.length ? DC.shortName(ns[ns.length - 1]) : ''; if (o && d && o.customer && d.indexOf(o.customer) === 0 && d.length > o.customer.length) d = d.slice(o.customer.length).trim() + ' 도착'; return d; };
+  const dest = o => { const ns = o ? DC.nodes(o) : []; let d = ns.length ? DC.shortName(ns[ns.length - 1]) : ''; if (o && d && o.customer && d.indexOf(o.customer) === 0 && d.length > o.customer.length) d = d.slice(o.customer.length).trim(); return d; };
   function build() {
     list = DC.actions().filter(a => a.lv <= 1).sort((a, b) => a.lv - b.lv || rank[cat(a)] - rank[cat(b)]);
     return list;
@@ -45,9 +45,10 @@ const CM = (() => {
     const K = DC.kpi(); build();
     const red = list.filter(a => a.lv === 0).length, yel = list.filter(a => a.lv === 1).length;
     const lv = red ? 0 : yel ? 1 : 2;
-    const head = lv === 0 ? ['결정 필요', `${red}건 즉시 확인`] : lv === 1 ? ['확인 필요', `${yel}건 점검`] : ['정상', '지연·위험 없음'];
-    const nLate = list.filter(a => cat(a) === 'late').length, nStock = list.filter(a => cat(a) === 'stock').length, nRoute = list.filter(a => cat(a) === 'route').length;
-    const chips = lv === 2 ? '' : `<div class="mc-chips"><span>납기 <b>${nLate}</b></span><span>재고 <b>${nStock}</b></span><span>경로 <b>${nRoute}</b></span></div>`;
+    const sp = (n, w) => `<span>${n}</span><span>건</span> <span>${w}</span>`;
+    const head = lv === 0 ? ['결정 필요', sp(red, '즉시 확인')] : lv === 1 ? ['확인 필요', sp(yel, '점검')] : ['정상', '지연·위험 없음'];
+    const nScan = list.filter(a => cat(a) === 'scan').length, nLate = list.filter(a => cat(a) === 'late').length, nStock = list.filter(a => cat(a) === 'stock').length, nRoute = list.filter(a => cat(a) === 'route').length;
+    const chips = lv === 2 ? '' : `<div class="mc-chips"><span>납기 <b>${nLate}</b></span><span>재고 <b>${nStock}</b></span><span>경로 <b>${nRoute}</b></span>${nScan ? `<span>스캔 <b>${nScan}</b></span>` : ''}</div>`;
     const shown = showAll ? list : list.slice(0, 3);
     const cards = shown.map((a, i) => {
       const o = ordOf(a);

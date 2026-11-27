@@ -443,6 +443,9 @@ function buildTrackerCard(o, ps) {
     else if (currentHub) trackerHtml+=`<div class="trk-sum"><div><em>현재 위치</em><b>${currentHub}</b></div><div><em>다음 거점</em><b>${nextHub||'-'}</b></div><div><em>최종 도착지</em><b class="dst">${finalDest}</b></div></div>`;
     else trackerHtml+=`<div class="trk-sum wait"><div><em>현재 위치</em><b>출발 전</b></div><div><em>다음 거점</em><b>${allHubs[0]||'-'}</b></div><div><em>최종 도착지</em><b class="dst">${finalDest}</b></div></div>`;
 
+    // 도착 예상 시각(ETA) — 대시보드 공통 모듈이 로드된 화면에서만
+    try { const f=(typeof DC!=='undefined')?DC.forecast(o):null; if (f) trackerHtml+=`<div class="trk-eta${f.kind==='over'?' bad':f.kind==='near'?' warn':''}">⏱ <b>예상 도착 ${f.eta}</b> <span>(표준 ${f.stdEta}${f.delta>0?` · <b>+${DC.fmtDur(f.delta)}</b>`:''})</span>${f.kind==='over'?' · 지연 진행 중':f.kind==='near'?' · 곧 지연 예상':''}${f.partial?` <em>표준시간 미등록 ${f.partial}구간 제외</em>`:''}</div>`; } catch(e){}
+
     // 세로 단계
     trackerHtml+='<ol class="trk-steps">';
     allHubs.forEach((hub,i)=>{

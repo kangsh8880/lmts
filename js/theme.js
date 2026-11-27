@@ -14,6 +14,7 @@
       const O = S.orders(), E = S.events(), A = S.alarms();
       O.filter(o => o.status === '지연').forEach(o => items.push({ c: 'red', h: `🔴 <b>지연</b> ${esc(o.no)} · ${esc(o.customer)}` }));
       A.filter(a => a.type === 'OFF_ROUTE').forEach(a => items.push({ c: 'red', h: `⚠️ <b>비지정 거점</b> ${esc(a.orderNo)} · ${esc(a.hub)} ${esc(a.event)}` }));
+      try { if (typeof DC !== 'undefined') { const K = DC.kpi(); K.etaWarnList.forEach(f => items.push({ c: 'red', h: `⏱ <b>${f.lv === 0 ? '지연 진행' : '지연 예상'}</b> ${esc(f.o.no)} · 예상 도착 ${esc(f.eta)}${f.delta > 0 ? ` (+${DC.fmtDur(f.delta)})` : ''}` })); K.scanMissList.forEach(g => items.push({ c: 'red', h: `🔍 <b>스캔 누락 의심</b> ${esc(g.o.no)} · ${DC.fmtDur(g.el)}째 ${g.kind === 'arrive' ? '도착 IN 없음' : 'OUT 없음'}` })); } } catch (e) {}
       { const dn = S.directives().filter(d => d.status !== '완료'); if (dn.length) items.push({ c: dn.some(d => d.priority === '긴급') ? 'red' : '', h: `📌 <b>CEO 지시</b> 미완료 ${dn.length}건${dn.some(d => d.priority === '긴급') ? ' (긴급 포함)' : ''}` }); }
       stockShort().forEach(x => items.push({ c: 'red', h: `📉 <b>재고 부족</b> ${esc(x.name)} · 현재고 ${x.left} / 오더 필요 ${x.need}` }));
       E.slice().sort((a, b) => String(b.time).localeCompare(String(a.time))).slice(0, 15).forEach(e => {
