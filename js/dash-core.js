@@ -179,7 +179,7 @@ const DC = (() => {
         const w = ov[0], fcx = forecast(o), etaTx = fcx && fcx.delta > 0 ? ` · 예상 도착 ${fcx.eta} (표준 대비 +${fmtDur(fcx.delta)})` : '';
         out.push({
           lv: o.status === '지연' ? 0 : 1, t: `${o.status === '지연' ? '지연' : '표준시간 초과'} · ${o.no}`,
-          fact: (w ? `${shortName(w.from)}→${shortName(w.to)} 실적 ${w.act}분 / 표준 ${w.std}분 (+${w.act - w.std}분)` : `${o.customer} 지연 상태`) + etaTx,
+          fact: (w ? `${shortName(w.from)}→${shortName(w.to)} 실적 ${fmtDur(w.act)} / 표준 ${fmtDur(w.std)} (+${fmtDur(w.act - w.std)})` : `${o.customer} 지연 상태`) + etaTx,
           cause: '출발 대기·상차 지연 또는 표준시간 과소 설정(가설)', act: '구간 표준시간 재검토, 출발거점 OUT 시각 확인, 필요 시 차량 재배차', go: 'dispatch.html'
         });
       }
