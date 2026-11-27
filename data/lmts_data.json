@@ -853,6 +853,15 @@
       "event": "OUT",
       "person": "",
       "note": ""
+    },
+    {
+      "time": "2026-11-27 21:33",
+      "orderNo": "ORD-261127-0001",
+      "customer": "SK Hynix",
+      "hub": "SK Hynix 이천캠퍼스",
+      "event": "IN",
+      "person": "",
+      "note": ""
     }
   ],
   "alarms": [],
