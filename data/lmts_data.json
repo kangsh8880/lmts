@@ -444,7 +444,7 @@
       "product": "Camera Module C타입 / Phone Glass",
       "boxes": 8,
       "note": "긴급",
-      "status": "패킹완료",
+      "status": "운송중",
       "created": "2026-11-27 16:27",
       "routeCode": "RT-004",
       "route": {
@@ -677,6 +677,21 @@
       "vehicleNo": "88A-012365",
       "driver": "빈푹빈옌",
       "dphone": "039123456789"
+    },
+    {
+      "orderNo": "ORD-261127-0001",
+      "legIdx": 0,
+      "fromHub": "자사물류창고 (화성)",
+      "toHub": "수원 중간집하장",
+      "transportType": "truck",
+      "departPlan": "2026-11-27T16:31",
+      "eta": "2026-11-27T18:31",
+      "savedAt": "2026-11-27 16:31",
+      "note": "",
+      "status": "배차완료",
+      "vehicleNo": "서울 9012다",
+      "driver": "이재훈",
+      "dphone": "010-5555-7777"
     }
   ],
   "events": [
@@ -796,6 +811,15 @@
       "event": "OUT",
       "person": "Kim",
       "note": ""
+    },
+    {
+      "time": "2026-11-27 16:31",
+      "orderNo": "ORD-261127-0001",
+      "customer": "SK Hynix",
+      "hub": "자사물류창고 (화성)",
+      "event": "OUT",
+      "person": "배차담당",
+      "note": "차량 출발"
     }
   ],
   "alarms": [],
@@ -989,5 +1013,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-27 16:29"
+  "lastUpdated": "2026-11-27 16:31"
 }
