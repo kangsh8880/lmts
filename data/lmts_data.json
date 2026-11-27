@@ -444,7 +444,7 @@
       "product": "Camera Module C타입 / Phone Glass",
       "boxes": 8,
       "note": "긴급",
-      "status": "대기",
+      "status": "패킹완료",
       "created": "2026-11-27 16:27",
       "routeCode": "RT-004",
       "route": {
@@ -504,6 +504,40 @@
         }
       ],
       "doneAt": "2026-11-20 13:23",
+      "person": "창고담당"
+    },
+    {
+      "orderNo": "ORD-261127-0001",
+      "customer": "SK Hynix",
+      "boxes": 1,
+      "lines": [
+        {
+          "seq": 1,
+          "packNo": "1",
+          "boxNo": "P003",
+          "product": "Camera Module C타입",
+          "qty": 3,
+          "at": "16:28"
+        },
+        {
+          "seq": 2,
+          "packNo": "1",
+          "boxNo": "P004",
+          "product": "Phone Glass",
+          "qty": 3,
+          "at": "16:28"
+        },
+        {
+          "seq": 3,
+          "packNo": "1",
+          "boxNo": "P003",
+          "product": "Camera Module C타입",
+          "qty": 2,
+          "at": "16:28"
+        }
+      ],
+      "waybill": "SK-202611270001",
+      "doneAt": "2026-11-27 16:29",
       "person": "창고담당"
     }
   ],
@@ -955,5 +989,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-27 16:27"
+  "lastUpdated": "2026-11-27 16:29"
 }
