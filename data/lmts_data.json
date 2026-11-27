@@ -426,6 +426,41 @@
         ],
         "destination": "SK Hynix 이천캠퍼스"
       }
+    },
+    {
+      "no": "ORD-261127-0001",
+      "date": "2026-11-28",
+      "customer": "SK Hynix",
+      "items": [
+        {
+          "product": "Camera Module C타입",
+          "qty": 5
+        },
+        {
+          "product": "Phone Glass",
+          "qty": 3
+        }
+      ],
+      "product": "Camera Module C타입 / Phone Glass",
+      "boxes": 8,
+      "note": "긴급",
+      "status": "대기",
+      "created": "2026-11-27 16:27",
+      "routeCode": "RT-004",
+      "route": {
+        "origin": "자사물류창고 (화성)",
+        "originStdTime": "20",
+        "waypoints": [
+          {
+            "name": "수원 중간집하장",
+            "stdTime": "35",
+            "transport": "truck",
+            "transportNo": "",
+            "destChange": ""
+          }
+        ],
+        "destination": "SK Hynix 이천캠퍼스"
+      }
     }
   ],
   "packings": [
@@ -920,5 +955,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-25 13:24"
+  "lastUpdated": "2026-11-27 16:27"
 }
