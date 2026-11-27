@@ -143,7 +143,7 @@ function openOpsKpi(k) {
   else if (k === 'eta') {
     const L = DC.kpi().etaWarnList, lvC = f => f.lv === 0 ? '<span class="chip red">지연</span>' : '<span class="chip">곧 지연</span>';
     openPop('지연 예상 상세', `표준시간의 <b>${DC.CFG.warnPct}%</b> 이상 경과했거나 이미 초과한 오더 <b>${L.length}</b>건 · 예상 도착 = 마지막 거점 이벤트 + 남은 구간 표준시간${L.some(f => f.partial) ? ' (표준시간 미등록 구간은 제외)' : ''}`,
-      tb(['오더', '고객사', '현재 구간', '경과/표준', '예상 도착', '표준 대비', '구분'], L.map(f => [`<b>${E(f.o.no)}</b>`, E(f.o.customer), E(DC.shortName(f.from) + ' → ' + DC.shortName(f.to)), `${DC.fmtDur(f.el)} / ${f.curStd}분 (${f.pct}%)`, `<b>${E(f.eta)}</b>`, f.delta > 0 ? `<b style="color:#C0392B">+${DC.fmtDur(f.delta)}</b>` : '±0', lvC(f)])), 'map.html', '위치추적');
+      tb(['오더', '고객사', '현재 구간', '경과/표준', '예상 도착', '표준 대비', '구분'], L.map(f => [`<b>${E(f.o.no)}</b>`, E(f.o.customer), E(DC.shortName(f.from) + ' → ' + DC.shortName(f.to)), `${DC.fmtDur(f.el)} / ${DC.fmtDur(f.curStd)} (${f.pct}%)`, `<b>${E(f.eta)}</b>`, f.delta > 0 ? `<b style="color:#C0392B">+${DC.fmtDur(f.delta)}</b>` : '±0', lvC(f)])), 'map.html', '위치추적');
   }
   else if (k === 'scan') {
     const L = DC.kpi().scanMissList;

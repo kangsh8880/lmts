@@ -146,10 +146,10 @@ function rtFill() {
 function rtChips(r) {
   const p = [];
   if (r.origin) p.push(`<span class="r-chip r-chip-origin">🏭 ${r.origin}</span>`);
-  if (r.originStdTime) p.push(`<span class="r-chip r-chip-time">⏱ ${r.originStdTime}분</span>`);
+  if (r.originStdTime) p.push(`<span class="r-chip r-chip-time">⏱ ${fmtMin(r.originStdTime)}</span>`);
   (r.waypoints||[]).forEach((w,i) => {
     p.push(`<span class="r-arrow">${w.transport?RT_ICON[w.transport]:'→'}</span><span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}</span>`);
-    if (w.stdTime) p.push(`<span class="r-chip r-chip-time">⏱ ${w.stdTime}분</span>`);
+    if (w.stdTime) p.push(`<span class="r-chip r-chip-time">⏱ ${fmtMin(w.stdTime)}</span>`);
   });
   if (r.destination) p.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-dest">🏢 ${r.destination}</span>`);
   return p.length ? `<div class="route-chips">${p.join('')}</div>` : '<span style="color:var(--gray);font-size:13px">출발지와 도착지를 선택하세요</span>';

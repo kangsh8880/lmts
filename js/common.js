@@ -829,3 +829,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if (bk && !document.getElementById('set-sec2')) { const h = document.createElement('div'); h.id = 'set-sec2'; h.className = 'set-sec'; h.textContent = '② 데이터 관리'; bk.insertBefore(h, bk.firstChild); }
   });
 })();
+
+
+// ── 시간 표시 공통: 분 숫자 대신 체감하기 쉬운 '일·시간·분'으로 표시 (60분 미만=분 / 24시간 미만=시간·분 / 이상=일·시간) ──
+window.fmtMin = function (m) {
+  if (m == null || isNaN(m)) return '-';
+  const neg = m < 0 ? '-' : ''; m = Math.round(Math.abs(m));
+  if (m < 60) return neg + m + '분';
+  if (m < 1440) { const h = Math.floor(m / 60), r = m % 60; return neg + h + '시간' + (r ? ' ' + r + '분' : ''); }
+  const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60); return neg + d + '일' + (h ? ' ' + h + '시간' : '');
+};

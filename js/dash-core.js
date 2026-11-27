@@ -47,7 +47,13 @@ const DC = (() => {
   try { Object.assign(CFG, JSON.parse(localStorage.getItem('lmts_cfg') || '{}')); } catch (e) {}
   let _forceLive = false;                       // 자동 알림(서버 실행)에서는 항상 현재 시각 기준
   const setLive = v => { _forceLive = !!v; };
-  const fmtDur = m => m < 120 ? `${m}분` : m < 2880 ? `${Math.floor(m / 60)}시간${m % 60 ? ' ' + (m % 60) + '분' : ''}` : `${Math.floor(m / 1440)}일 ${Math.floor(m % 1440 / 60)}시간`;
+  const fmtDur = m => {                         // 일·시간·분 표시 (common.js fmtMin과 동일 규칙 — 서버(알림) 실행 시에도 동작하도록 자체 구현)
+    if (m == null || isNaN(m)) return '-';
+    const neg = m < 0 ? '-' : ''; m = Math.round(Math.abs(m));
+    if (m < 60) return neg + m + '분';
+    if (m < 1440) { const h = Math.floor(m / 60), r = m % 60; return neg + h + '시간' + (r ? ' ' + r + '분' : ''); }
+    const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60); return neg + d + '일' + (h ? ' ' + h + '시간' : '');
+  };
   const fmtEta = (d, base) => {                 // HH:MM (+N일)
     const dd = Math.round((toDate(dstr(d) + ' 00:00') - toDate(dstr(base) + ' 00:00')) / 864e5);
     return pad(d.getHours()) + ':' + pad(d.getMinutes()) + (dd > 0 ? ` (+${dd}일)` : '');
@@ -212,7 +218,7 @@ const DC = (() => {
     const sgs = scanGaps(), sgNo = new Set(sgs.map(x => x.o.no));
     sgs.forEach(g => { const fx = forecast(g.o), fxT = fx && fx.delta > 0 ? ` · 예상 도착 ${fx.eta} (표준 대비 +${fmtDur(fx.delta)})` : ''; out.push({
       lv: g.kind === 'arrive' && fx && fx.delta >= CFG.bigDelay ? 0 : 1, t: `${g.kind === 'arrive' ? '지연·스캔 누락 의심' : '스캔 누락 의심'} · ${g.o.no}`,
-      fact: (g.kind === 'arrive' ? `${shortName(g.from)}→${shortName(g.to)} OUT 후 ${fmtDur(g.el)} 경과 (표준 ${g.std}분), 도착 IN 스캔 없음` : `${shortName(g.from)} IN 후 ${fmtDur(g.el)}째 OUT 스캔 없음`) + fxT,
+      fact: (g.kind === 'arrive' ? `${shortName(g.from)}→${shortName(g.to)} OUT 후 ${fmtDur(g.el)} 경과 (표준 ${fmtDur(g.std)}), 도착 IN 스캔 없음` : `${shortName(g.from)} IN 후 ${fmtDur(g.el)}째 OUT 스캔 없음`) + fxT,
       cause: g.kind === 'arrive' ? '도착 스캔 누락 또는 실제 운송 지연(가설)' : '출발 스캔 누락 또는 거점 체류 지연(가설)',
       act: g.kind === 'arrive' ? '기사·거점 담당에게 현재 위치 확인, 누락이면 거점 In/Out에서 보정 등록' : '거점 담당에게 출발 여부 확인, 누락이면 OUT 등록', go: 'tracking.html'
     }); });
@@ -220,7 +226,7 @@ const DC = (() => {
       const f = forecast(o); if (!f || f.lv == null) return;
       out.push({
         lv: f.lv, t: `${f.kind === 'over' ? '지연 진행 중' : '지연 예상'} · ${o.no}`,
-        fact: `${shortName(f.from)}→${shortName(f.to)} 표준 ${f.curStd}분 중 ${fmtDur(f.el)} 경과(${f.pct}%) · 예상 도착 ${f.eta}${f.delta > 0 ? ` (표준 대비 +${fmtDur(f.delta)})` : ''}`,
+        fact: `${shortName(f.from)}→${shortName(f.to)} 표준 ${fmtDur(f.curStd)} 중 ${fmtDur(f.el)} 경과(${f.pct}%) · 예상 도착 ${f.eta}${f.delta > 0 ? ` (표준 대비 +${fmtDur(f.delta)})` : ''}`,
         cause: f.kind === 'over' ? '출발 후 운송 지연 또는 표준시간 과소 설정(가설)' : '표준시간 임박 — 도착 지연 가능성(가설)', act: '운송 상황 확인, 고객 사전 안내, 필요 시 대체 수단 검토', go: 'map.html'
       });
     });

@@ -138,7 +138,7 @@ function renderAnalytics() {
   const predAlarms = generatePredictAlarms();
 
   el('ana-kpi-ontime').textContent = orders.length > 0 ? ontime + '%' : '--%';
-  el('ana-kpi-tat').textContent    = avgTAT > 0 ? (avgTAT >= 60 ? Math.round(avgTAT/60) + 'h' : avgTAT + 'm') : '--';
+  el('ana-kpi-tat').textContent    = avgTAT > 0 ? fmtMin(avgTAT) : '--';
   el('ana-kpi-risk').textContent   = riskOrders.length;
   el('ana-kpi-delay').textContent  = predAlarms.length + '건';
 
@@ -161,7 +161,7 @@ function renderAnalytics() {
         <div style="text-align:right;flex-shrink:0;min-width:90px">
           ${r.score > 0
             ? `<div style="font-size:21.5px;font-weight:800;color:${r.color}">${r.score}%</div>
-               <div style="font-size:11px;color:var(--gray)">실제 ${r.elapsed}분 / 표준 ${r.std}분</div>`
+               <div style="font-size:11px;color:var(--gray)">실제 ${fmtMin(r.elapsed)} / 표준 ${fmtMin(r.std)}</div>`
             : `<div style="font-size:12px;color:var(--gray)">${r.std > 0 ? '이벤트 수집 중' : '표준시간 미설정'}</div>`}
         </div>
         <span class="status ${stMap[o.status]||'s-ready'}" style="flex-shrink:0">${o.status}</span>
@@ -187,7 +187,7 @@ function renderAnalytics() {
           <div style="font-size:19px;font-weight:800;color:${a.sevColor}">${a.ratio}%</div>
         </div>
         <div style="font-size:13px;color:var(--gray);margin-top:5px">📍 ${a.fromHub} → ${a.toHub}</div>
-        <div style="font-size:12px;color:var(--gray);margin-top:2px">⏱ 경과 ${a.elapsed}분 / 표준 ${a.std}분 (표준대비 ${a.ratio}%)</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:2px">⏱ 경과 ${fmtMin(a.elapsed)} / 표준 ${fmtMin(a.std)} (표준대비 ${a.ratio}%)</div>
       </div>`).join('');
   }
 
@@ -212,11 +212,11 @@ function renderAnalytics() {
       tatDiv.innerHTML = `
         <div class="alert alert-info" style="margin-bottom:10px">ℹ️ 아직 완료된 구간이 없습니다. 아래는 표준시간 기준 예상 TAT입니다.</div>
         <div class="tbl-wrap"><table>
-        <thead><tr><th>오더번호</th><th>고객사</th><th>구간</th><th>표준(분)</th><th>실제(분)</th><th>달성률</th></tr></thead>
+        <thead><tr><th>오더번호</th><th>고객사</th><th>구간</th><th>표준</th><th>실제</th><th>달성률</th></tr></thead>
         <tbody>${stdRows.map(t=>`<tr>
           <td><b>${t.orderNo}</b></td><td>${t.customer}</td>
           <td style="font-size:13px">${t.fromHub} → ${t.toHub}</td>
-          <td style="text-align:center">${t.std||'-'}</td>
+          <td style="text-align:center">${t.std ? fmtMin(t.std) : '-'}</td>
           <td style="text-align:center;color:var(--gray)">미완료</td>
           <td style="text-align:center;color:var(--gray)">-</td>
         </tr>`).join('')}</tbody></table></div>`;
@@ -225,13 +225,13 @@ function renderAnalytics() {
     const cMap2 = { ok:'#27AE60', warn:'#E6A817', over:'#C0392B', na:'var(--gray)' };
     const icn   = { ok:'✅', warn:'⚠️', over:'🚨', na:'-' };
     tatDiv.innerHTML = `<div class="tbl-wrap"><table>
-      <thead><tr><th>오더번호</th><th>고객사</th><th>구간</th><th>표준(분)</th><th>실제(분)</th><th>달성률</th><th>평가</th></tr></thead>
+      <thead><tr><th>오더번호</th><th>고객사</th><th>구간</th><th>표준</th><th>실제</th><th>달성률</th><th>평가</th></tr></thead>
       <tbody>
       ${tatList.map(t=>`<tr>
         <td><b>${t.orderNo}</b></td><td>${t.customer}</td>
         <td style="font-size:13px">${t.fromHub} → ${t.toHub}</td>
-        <td style="text-align:center">${t.std||'-'}</td>
-        <td style="text-align:center;font-weight:700">${t.actual}</td>
+        <td style="text-align:center">${t.std ? fmtMin(t.std) : '-'}</td>
+        <td style="text-align:center;font-weight:700">${fmtMin(t.actual)}</td>
         <td style="text-align:center">
           ${t.ratio!==null?`<span style="color:${cMap2[t.status]};font-weight:700">${t.ratio}%</span>`:'-'}
         </td>

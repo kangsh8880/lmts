@@ -32,7 +32,7 @@ const CM = (() => {
   let sel = { to: '', pr: '오늘', text: '' };
   // ── 핵심 문구 강조: 고객·최종 도착지=파랑 굵게, 원인·지연 수치=빨강 굵게, 조치=굵게 ──
   const E2 = t => DC.esc(t || '');
-  const hlFact = t => E2(t).replace(/(\(\+\d+분\)|\(표준 대비 \+[^)]*\))/g, '<b class="hl-r">$1</b>').replace(/(실적 )(\d+분)/g, '$1<b class="hl-r">$2</b>').replace(/(\d+ 부족)/g, '<b class="hl-r">$1</b>').replace(/(지연 상태|지정 경로 외 거점)/g, '<b class="hl-r">$1</b>');
+  const hlFact = t => E2(t).replace(/(\(\+[0-9일시간분 ]+\)|\(표준 대비 \+[^)]*\))/g, '<b class="hl-r">$1</b>').replace(/(실적 )([0-9일시간분 ]+)/g, '$1<b class="hl-r">$2</b>').replace(/(\d+ 부족)/g, '<b class="hl-r">$1</b>').replace(/(지연 상태|지정 경로 외 거점)/g, '<b class="hl-r">$1</b>');
   const hlCause = t => { const g = /\(가설\)/.test(t || ''); return (t || '').replace(/\(가설\)/g, '').split(/\s*(?:또는|\/)\s*/).filter(Boolean).map(x => `<b class="hl-r">${E2(x.trim())}</b>`).join(' <span class="hl-g">또는</span> ') + (g ? ' <span class="hl-g">(추정)</span>' : ''); };
   const hlAct = t => (t || '').split(/\s*[,，]\s*/).filter(Boolean).map((x, i) => `<b class="hl-b">${i + 1}. ${E2(x.trim())}</b>`).join('<br>');
   const dest = o => { const ns = o ? DC.nodes(o) : []; let d = ns.length ? DC.shortName(ns[ns.length - 1]) : ''; if (o && d && o.customer && d.indexOf(o.customer) === 0 && d.length > o.customer.length) d = d.slice(o.customer.length).trim(); return d; };

@@ -167,13 +167,13 @@ function updateRoutePreview() {
   const parts=[];
   if (origin) {
     parts.push(`<span class="r-chip r-chip-origin">🏭 ${origin}</span>`);
-    if (stdOrigin) parts.push(`<span class="r-chip r-chip-time">⏱ ${stdOrigin}분</span>`);
+    if (stdOrigin) parts.push(`<span class="r-chip r-chip-time">⏱ ${fmtMin(stdOrigin)}</span>`);
   }
   wpList.forEach((w,i)=>{
     const tIcon = w.transport ? TRANSPORT_ICON[w.transport] : '→';
     const tNo = w.transportNo ? ` (${w.transportNo})` : '';
     parts.push(`<span class="r-arrow">${tIcon}</span><span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}${tNo}</span>`);
-    if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${w.stdTime}분</span>`);
+    if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${fmtMin(w.stdTime)}</span>`);
     if (w.destChange && w.destChange !== '__pending__') {
       parts.push(`<span class="r-chip" style="background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;font-size:12px;">🔀→🏢 ${w.destChange}</span>`);
     }
@@ -408,11 +408,11 @@ function reUpdatePreview() {
   const parts = [];
   if (origin) {
     parts.push(`<span class="r-chip r-chip-origin">🏭 ${origin}</span>`);
-    if (stdOrigin) parts.push(`<span class="r-chip r-chip-time">⏱ ${stdOrigin}분</span>`);
+    if (stdOrigin) parts.push(`<span class="r-chip r-chip-time">⏱ ${fmtMin(stdOrigin)}</span>`);
   }
   reWpList.forEach((w, i) => {
     parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-wp">📍 ${i+1}. ${w.name}</span>`);
-    if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${w.stdTime}분</span>`);
+    if (w.stdTime) parts.push(`<span class="r-chip r-chip-time">⏱ ${fmtMin(w.stdTime)}</span>`);
   });
   if (dest) parts.push(`<span class="r-arrow">→</span><span class="r-chip r-chip-dest">🏢 ${dest}</span>`);
   el('re-route-preview').innerHTML = parts.length ? parts.join('') : '<span style="font-size:13px;color:var(--gray)">출발지와 도착지를 선택하세요</span>';

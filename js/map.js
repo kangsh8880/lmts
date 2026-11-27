@@ -203,7 +203,7 @@ const MP = (() => {
         const Lg = st.legs[i], done = i < st.leg || st.state === 'done', curL = i === st.leg && st.state === 'move';
         const pr = done ? 100 : curL ? Math.min(100, Math.round(st.raw * 1000) / 10) : 0;
         const act = (Lg.tOut && Lg.tIn) ? DC.mins(DC.toDate(Lg.tOut), DC.toDate(Lg.tIn)) : null;
-        tl += `<div class="mp-leg ${done ? 'done' : ''} ${curL ? 'cur' + (bad ? '' : ' ok') : ''}">${ICON[Lg.mode]} ${LABEL[Lg.mode]} ${uTag(o, Lg.i)} · 표준 ${Lg.std}분${Lg.stdEst ? '(미입력→기본값)' : ''}${act != null ? ` · 실적 <b>${act < 0 ? '-' : ''}${dur(act)}</b>${(act < 0 || act > Lg.std * 3) ? ` <span style="color:#c0392b;font-weight:700" title="표준 대비 비정상 구간 시간입니다. 출발(OUT)·도착(IN) 이벤트 시각(날짜)을 확인하세요">⚠ 시각 확인</span>` : ''}` : ''}${curL ? ` · 진행 <b>${pr.toFixed(1)}%</b>${st.over > 0 ? ` <span style="color:#c0392b">(+${dur(st.over)} 초과)</span>` : ''}` : ''}
+        tl += `<div class="mp-leg ${done ? 'done' : ''} ${curL ? 'cur' + (bad ? '' : ' ok') : ''}">${ICON[Lg.mode]} ${LABEL[Lg.mode]} ${uTag(o, Lg.i)} · 표준 ${dur(Lg.std)}${Lg.stdEst ? '(미입력→기본값)' : ''}${act != null ? ` · 실적 <b>${act < 0 ? '-' : ''}${dur(act)}</b>${(act < 0 || act > Lg.std * 3) ? ` <span style="color:#c0392b;font-weight:700" title="표준 대비 비정상 구간 시간입니다. 출발(OUT)·도착(IN) 이벤트 시각(날짜)을 확인하세요">⚠ 시각 확인</span>` : ''}` : ''}${curL ? ` · 진행 <b>${pr.toFixed(1)}%</b>${st.over > 0 ? ` <span style="color:#c0392b">(+${dur(st.over)} 초과)</span>` : ''}` : ''}
           <div class="mp-bar"><i style="width:${Math.min(100, pr)}%"></i></div></div>`;
       }
     });

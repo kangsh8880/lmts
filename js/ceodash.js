@@ -10,7 +10,7 @@ function renderCEO() {
     dp: '배차 필요 = 진행 오더 중 아직 이동하지 않은 구간에 배차(차량·선박·항공)가 지정되지 않은 오더 건수. 클릭하면 목록',
     st: '재고 부족 = 창고 현재고가 Packing 전(대기) 오더의 필요 수량보다 적은 제품 수. 클릭하면 목록',
     ov: '표준초과율 = 실적이 표준시간을 넘은 구간 ÷ 표준시간이 있고 실적이 측정된 구간 × 100',
-    lg: '평균 구간 소요 = 출발거점 OUT → 다음거점 IN 측정 구간의 평균(분)'
+    lg: '평균 구간 소요 = 출발거점 OUT → 다음거점 IN 측정 구간의 평균'
   };
   el('kpis').innerHTML = [
     kbox('c2', '정시납품율', kv(DC.fmtPct(K.onTime), '%', K.onTime != null && K.onTime < 95 ? 'bad' : 'good'), K.onTime == null ? '출발한 오더 없음' : `정시 ${K.onTimeN}건 · 지연 ${K.delay}건`, tip.ot, 'js:openKpi(\'ot\')'),
@@ -74,8 +74,8 @@ function renderHubDetail() {
     stay: '🏭 체류 오더', exp: '📥 입고 예정', arr: '✅ 도착완료 이력', in: '⬇️ 누적 IN 이력', out: '⬆️ 누적 OUT 이력', dwell: '⏱ 평균 체류 산출 이력 (IN→OUT)', all: '🔁 전체 IN/OUT 이력'
   };
   const box = (t, cls, name, val, unit, tip) => `<div class="mini ${cls} ${hdTab === t ? 'on' : ''}" onclick="pickHd('${t}')" title="${tip}"><span>${name}</span><b>${val}<u>${unit}</u></b></div>`;
-  const evTable = rows => `<table class="dt"><thead><tr><th>시각</th><th>오더</th><th>고객사</th><th>구분</th><th class="num">체류(분)</th><th>담당</th></tr></thead><tbody>${rows.map(e =>
-    `<tr><td>${e.time.slice(5, 16)}</td><td>${DC.esc(e.orderNo)}</td><td>${DC.esc(e.customer)}</td><td><span class="chip ${e.event === 'IN' ? 'blue' : e.event === 'OUT' ? 'red' : 'grn'}">${e.event}</span></td><td class="num">${e.dwell != null && e.dwell >= 0 ? e.dwell : '-'}</td><td>${DC.esc(e.person || '-')}</td></tr>`).join('')}</tbody></table>`;
+  const evTable = rows => `<table class="dt"><thead><tr><th>시각</th><th>오더</th><th>고객사</th><th>구분</th><th class="num">체류</th><th>담당</th></tr></thead><tbody>${rows.map(e =>
+    `<tr><td>${e.time.slice(5, 16)}</td><td>${DC.esc(e.orderNo)}</td><td>${DC.esc(e.customer)}</td><td><span class="chip ${e.event === 'IN' ? 'blue' : e.event === 'OUT' ? 'red' : 'grn'}">${e.event}</span></td><td class="num">${e.dwell != null && e.dwell >= 0 ? DC.fmtDur(e.dwell) : '-'}</td><td>${DC.esc(e.person || '-')}</td></tr>`).join('')}</tbody></table>`;
   let list;
   const rows = L[hdTab];
   if (!rows.length) list = '<div class="empty-n">해당 내역이 없습니다</div>';
@@ -83,7 +83,7 @@ function renderHubDetail() {
     const last = s.ev.filter(e => e.orderNo === o.no).slice(-1)[0];
     return `<tr><td><b>${DC.esc(o.no)}</b></td><td>${DC.esc(o.customer)}</td><td>${DC.esc(o.product)} (${ordQty(o)})</td><td><span class="chip blue">${DC.esc(o.status)}</span></td><td>${last ? last.event + ' ' + last.time.slice(5, 16) : '-'}</td></tr>`; }).join('')}</tbody></table>`;
   else if (hdTab === 'exp') list = `<table class="dt"><thead><tr><th>오더</th><th>고객사</th><th>출발 거점</th><th>수단</th><th>출고</th><th>예정 도착</th><th>상태</th></tr></thead><tbody>${rows.map(m =>
-    `<tr><td><b>${DC.esc(m.o.no)}</b></td><td>${DC.esc(m.o.customer)}</td><td>${DC.esc(DC.shortName(m.from))}</td><td>${DC.MODE[m.mode][0]} ${DC.MODE[m.mode][1]}</td><td>${DC.hhmm(m.outTime)}</td><td>${m.eta || '-'}</td><td>${m.over ? `<span class="chip red">표준 +${m.elapsed - m.std}분</span>` : `<span class="chip blue">${DC.esc(m.o.status)}</span>`}</td></tr>`).join('')}</tbody></table>`;
+    `<tr><td><b>${DC.esc(m.o.no)}</b></td><td>${DC.esc(m.o.customer)}</td><td>${DC.esc(DC.shortName(m.from))}</td><td>${DC.MODE[m.mode][0]} ${DC.MODE[m.mode][1]}</td><td>${DC.hhmm(m.outTime)}</td><td>${m.eta || '-'}</td><td>${m.over ? `<span class="chip red">표준 +${DC.fmtDur(m.elapsed - m.std)}</span>` : `<span class="chip blue">${DC.esc(m.o.status)}</span>`}</td></tr>`).join('')}</tbody></table>`;
   else list = evTable(rows);
   el('hub-detail').innerHTML = `
     <div class="hd-info">${DC.esc(h.code || '')} · ${DC.esc(h.addr || '주소 미등록')} · 담당 ${DC.esc(h.mgr || '-')}</div>
@@ -93,7 +93,7 @@ function renderHubDetail() {
       ${box('arr', 'c6', '도착완료', s.arrN, '건', '클릭: 도착완료 이력')}
       ${box('in', 'c2', '누적 IN', s.inN, '건', '클릭: IN 이력')}
       ${box('out', 'c5', '누적 OUT', s.outN, '건', '클릭: OUT 이력')}
-      ${box('dwell', 'c4', '평균 체류', s.avgDwell == null ? '<small>데이터 없음</small>' : s.avgDwell, s.avgDwell == null ? '' : '분', `IN → OUT 측정 ${s.dwN}건 평균 · 클릭: 산출 이력`)}
+      ${box('dwell', 'c4', '평균 체류', s.avgDwell == null ? '<small>데이터 없음</small>' : '<span style="font-size:.72em">' + DC.fmtDur(s.avgDwell) + '</span>', '', `IN → OUT 측정 ${s.dwN}건 평균 · 클릭: 산출 이력`)}
     </div>
     <div class="sub-ttl">${T[hdTab]} <b>${rows.length}건</b> <small class="hint">· 같은 박스를 다시 누르면 전체 이력</small></div>
     ${list}`;
@@ -118,9 +118,9 @@ function renderMoving(mv) {
   el('moving').innerHTML = `<div class="mk-grid">${kp}</div>
     <div class="sub-ttl">${DC.MODE[mvSel][0]} ${DC.MODE[mvSel][1]} 이동 중 상세 <b>${list.length}건</b></div>` +
     (list.length ? list.map(x => `<div class="mv ${x.over ? 'hot' : ''}">
-        <div class="mv-top"><span><b>${DC.esc(x.o.no)}</b> · ${DC.esc(x.o.customer)} · ${DC.esc(x.o.product)} (수량 ${ordQty(x.o)})</span><span style="display:flex;gap:6px;align-items:center;white-space:nowrap">${x.over ? `<span class="chip red">표준 +${x.elapsed - x.std}분</span>` : `<span class="chip blue">${DC.esc(x.o.status)}</span>`}<a class="btn btn-primary btn-sm" href="map.html?order=${encodeURIComponent(x.o.no)}">🗺️ 위치추적</a></span></div>
+        <div class="mv-top"><span><b>${DC.esc(x.o.no)}</b> · ${DC.esc(x.o.customer)} · ${DC.esc(x.o.product)} (수량 ${ordQty(x.o)})</span><span style="display:flex;gap:6px;align-items:center;white-space:nowrap">${x.over ? `<span class="chip red">표준 +${DC.fmtDur(x.elapsed - x.std)}</span>` : `<span class="chip blue">${DC.esc(x.o.status)}</span>`}<a class="btn btn-primary btn-sm" href="map.html?order=${encodeURIComponent(x.o.no)}">🗺️ 위치추적</a></span></div>
         <div class="mv-route"><span>${DC.esc(DC.shortName(x.from))}</span><i>➜</i><span>${DC.esc(DC.shortName(x.to))}</span></div>
-        <div class="mv-meta"><span>${detail(x)}</span><span>출고 <b>${DC.hhmm(x.outTime)}</b></span><span>표준 <b>${x.std != null ? x.std + '분' : '미설정'}</b></span><span>예정 도착 <b>${x.eta || '-'}</b></span>${x.elapsed != null ? `<span>경과 <b>${x.elapsed}분</b></span>` : ''}</div></div>`).join('')
+        <div class="mv-meta"><span>${detail(x)}</span><span>출고 <b>${DC.hhmm(x.outTime)}</b></span><span>표준 <b>${x.std != null ? DC.fmtDur(x.std) : '미설정'}</b></span><span>예정 도착 <b>${x.eta || '-'}</b></span>${x.elapsed != null ? `<span>경과 <b>${DC.fmtDur(x.elapsed)}</b></span>` : ''}</div></div>`).join('')
       : '<div class="mv-none">이동 중인 운송이 없습니다</div>') +
     (live ? '' : `<div class="mv-none">※ 데이터가 최근 48시간 이내가 아니어서 경과 시간은 표시하지 않습니다 (기준일 ${DC.anchorDate()})</div>`);
 }
@@ -164,7 +164,7 @@ function openKpi(k) {
   } else if (k === 'ov') {
     const L = O.flatMap(o => DC.legs(o).filter(l => l.over).map(l => ({ o, l })));
     openPop('구간 표준초과 상세', `표준초과율 = 표준시간 초과 구간 ÷ (표준시간 있고 실적 측정된 구간) × 100 · 측정 <b>${K.measStd}</b>구간 중 초과 <b>${L.length}</b>구간`,
-      tb(['오더', '고객사', '구간', '표준(분)', '실적(분)', '초과(분)'], L.map(({ o, l }) => [`<b>${E(o.no)}</b>`, E(o.customer), `${E(DC.shortName(l.from))} ➜ ${E(DC.shortName(l.to))}`, l.std, l.act, `<b style="color:#C0392B">+${l.act - l.std}</b>`])), 'dispatch.html', '차량배차');
+      tb(['오더', '고객사', '구간', '표준', '실적', '초과'], L.map(({ o, l }) => [`<b>${E(o.no)}</b>`, E(o.customer), `${E(DC.shortName(l.from))} ➜ ${E(DC.shortName(l.to))}`, DC.fmtDur(l.std), DC.fmtDur(l.act), `<b style="color:#C0392B">+${DC.fmtDur(l.act - l.std)}</b>`])), 'dispatch.html', '차량배차');
   }
 }
 window.lmtsReady = function () { initNav(); renderCEO(); if (typeof CM !== 'undefined') CM.render(); };
