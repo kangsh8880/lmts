@@ -4,8 +4,8 @@ let selHub = null;
 function renderCEO() {
   const K = DC.kpi(), tip = {
     act: '진행 오더 = 상태가 도착완료가 아닌 출하오더', mv: '운송 중 = 거점 이벤트 기준, 출발 거점 OUT 후 다음 거점 IN 전인 오더 수 (우측 이동 중 운송 현황과 동일 기준). 오더 상태값과 다를 수 있음',
-    al: '지연 상태 오더 + 비지정 거점 이벤트(알람) 건수',
-    ot: '(클릭: 목록) 정시납품율 = 도착완료 ÷ (도착완료 + 지연) × 100. 집계 대상이 없으면 표시하지 않음',
+    al: '계획 도착시각 초과(지연) 오더 + 비지정 거점 이벤트(알람) 건수',
+    ot: '(클릭: 목록) 정시납품율 = 계획 도착시각 이내 오더 ÷ (출발한 전체 오더) × 100. 계획 도착을 1초라도 넘기면 즉시 지연. 집계 대상이 없으면 표시하지 않음',
     pk: '패킹 미완료 = 진행 오더(도착완료 제외) 중 패킹 기록이 없는 오더 건수. 클릭하면 목록',
     dp: '배차 필요 = 진행 오더 중 아직 이동하지 않은 구간에 배차(차량·선박·항공)가 지정되지 않은 오더 건수. 클릭하면 목록',
     st: '재고 부족 = 창고 현재고가 Packing 전(대기) 오더의 필요 수량보다 적은 제품 수. 클릭하면 목록',
@@ -13,7 +13,7 @@ function renderCEO() {
     lg: '평균 구간 소요 = 출발거점 OUT → 다음거점 IN 측정 구간의 평균(분)'
   };
   el('kpis').innerHTML = [
-    kbox('c2', '정시납품율', kv(DC.fmtPct(K.onTime), '%', K.onTime != null && K.onTime < 95 ? 'bad' : 'good'), K.onTime == null ? '완료·지연 오더 없음' : `완료 ${K.done}건 · 지연 ${K.delay}건`, tip.ot, 'js:openKpi(\'ot\')'),
+    kbox('c2', '정시납품율', kv(DC.fmtPct(K.onTime), '%', K.onTime != null && K.onTime < 95 ? 'bad' : 'good'), K.onTime == null ? '출발한 오더 없음' : `정시 ${K.onTimeN}건 · 지연 ${K.delay}건`, tip.ot, 'js:openKpi(\'ot\')'),
     kbox('c1', '진행 오더', kv(K.active, '건'), `전체 ${K.orders}건 중`, tip.act, 'js:openKpi(\'act\')'),
     kbox('c3', '운송 중', kv(K.moving, '건'), 'OUT 후 다음 거점 IN 전', tip.mv, 'js:openKpi(\'mv\')'),
     kbox('c5', '지연 · 알람', kv(K.alarm, '건', K.alarm > 0 ? 'bad' : ''), `지연 ${K.delay} + 비지정 ${K.off}`, tip.al, 'js:openKpi(\'al\')'),
@@ -140,9 +140,9 @@ function openKpi(k) {
   const base = o => [`<b>${E(o.no)}</b>`, E(o.customer), `${E(o.product)} (${ordQty(o)})`, st(o)];
   const where = o => { const p = DC.position(o); return p.last ? `${E(DC.shortName(p.last.hub))} ${p.last.event} ${p.last.time.slice(5, 16)}` : '이벤트 없음'; };
   if (k === 'ot') {
-    const L = O.filter(o => o.status === '도착완료' || o.status === '지연');
-    openPop('정시납품율 상세', `정시납품율 = 도착완료 ÷ (도착완료 + 지연) × 100 · 완료 <b>${K.done}</b>건 · 지연 <b>${K.delay}</b>건`,
-      tb(['오더', '고객사', '제품(박스)', '상태', '출하예정일'], L.map(o => [...base(o), E(o.date || '-')])), 'order.html', '출하오더');
+    const L = K.onTimeList, fm = d => d ? DC.dstr(d).slice(5) + ' ' + DC.hhmm(DC.dstr(d) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')) : '-';
+    openPop('정시납품율 상세', `정시납품율 = 계획 도착시각 이내 ÷ 출발한 전체 오더 × 100 · 정시 <b>${K.onTimeN}</b>건(도착완료 ${K.onDone}) · 지연 <b>${K.delay}</b>건(도착완료 ${K.lateDone} · 진행 중 ${K.lateAct}) · <b>계획 도착을 1초라도 넘기면 즉시 지연</b>`,
+      tb(['오더', '고객사', '제품(박스)', '상태', '계획 도착', '실제 도착/현재', '판정'], L.map(x => [...base(x.o), fm(x.plan), x.done ? (x.arr || '-').slice(5, 16) : '진행 중', x.late ? `<span class="chip red">지연${x.over ? ' +' + DC.fmtDur(x.over) : ''}</span>` : '<span class="chip grn">정시</span>'])), 'order.html', '출하오더');
   } else if (k === 'act') {
     const L = O.filter(o => o.status !== '도착완료');
     openPop('진행 오더 상세', `도착완료가 아닌 출하오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '제품(박스)', '상태', '현재 위치'], L.map(o => [...base(o), where(o)])), 'order.html', '출하오더');
@@ -150,7 +150,7 @@ function openKpi(k) {
     const L = DC.moving();
     openPop('운송 중 상세', `거점 간 이동 중인 오더 <b>${L.length}</b>건`, tb(['오더', '고객사', '구간', '수단', '출고', '예정 도착', '배차'], L.map(m => [`<b>${E(m.o.no)}</b>`, E(m.o.customer), `${E(DC.shortName(m.from))} ➜ ${E(DC.shortName(m.to))}`, `${DC.MODE[m.mode][0]} ${DC.MODE[m.mode][1]}`, DC.hhmm(m.outTime), m.eta || '-', m.dp ? '지정' : '<span class="chip red">미지정</span>'])), 'tracking.html', '거점In/Out');
   } else if (k === 'al') {
-    const dl = O.filter(o => o.status === '지연'), al = S.alarms().filter(a => a.type === 'OFF_ROUTE');
+    const dl = K.lateList.map(x => x.o), al = S.alarms().filter(a => a.type === 'OFF_ROUTE');
     openPop('지연 · 알람 상세', `지연 오더 <b>${dl.length}</b>건 + 비지정 거점 이벤트 <b>${al.length}</b>건`,
       tb(['구분', '오더', '내용', '현재 위치'], [...dl.map(o => ['<span class="chip red">지연</span>', `<b>${E(o.no)}</b>`, `${E(o.customer)} · ${E(o.product)}`, where(o)]), ...al.map(a => ['<span class="chip ylw">비지정 거점</span>', `<b>${E(a.orderNo)}</b>`, `${E(a.hub)} ${E(a.event)} (${DC.hhmm(a.time)}) — 경로 외 거점`, E(a.hub)])]), 'order.html', '출하오더');
   } else if (k === 'st') {

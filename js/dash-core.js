@@ -98,6 +98,25 @@ const DC = (() => {
     return out;
   }
 
+  // ── 지연 판정 원칙: 계획 도착시각을 1초라도 넘기면 즉시 지연 ──
+  // 계획 도착 = 최초 출발(OUT) 시각 + 구간 표준시간 합 + 중간 거점 체류 허용(CFG.dwellAllow × 중간 거점 수)
+  // 도착완료 오더 = 실제 도착 시각과 비교 / 진행 오더 = 현재 시각(기준 시각)과 비교. 아직 출발 전이거나 표준시간이 없으면 판정 제외
+  function planArrival(o) {
+    const f = evsOf(o).find(e => e.event === 'OUT'), sd = stds(o).filter(v => v != null);
+    if (!f || !sd.length) return null;
+    const mid = Math.max(0, nodes(o).length - 2);
+    return new Date(toDate(f.time).getTime() + (sd.reduce((a, b) => a + b, 0) + CFG.dwellAllow * mid) * 60000);
+  }
+  function lateInfo(o) {
+    const plan = planArrival(o), done = o.status === '도착완료', ev = evsOf(o);
+    const arrEv = done ? ([...ev].reverse().find(e => e.event === '도착완료') || ev[ev.length - 1]) : null;
+    const ref = done ? (arrEv ? toDate(arrEv.time) : null) : refNow().t;
+    const flagged = o.status === '지연';                       // 사람이 지연으로 직접 지정한 오더도 지연으로 집계
+    if (!plan && !flagged) return { cnt: false };
+    const overMs = plan && ref ? ref - plan : 0;
+    return { cnt: true, done, plan, arr: arrEv ? arrEv.time : null, over: Math.max(0, Math.ceil(overMs / 60000)), late: flagged || overMs > 0 };
+  }
+
   function dispatchDone(o) {
     const need = Math.max(0, nodes(o).length - 1);
     const got = new Set(S.dispatches().filter(d => d.orderNo === o.no && d.legIdx != null).map(d => d.legIdx)).size;
@@ -109,7 +128,8 @@ const DC = (() => {
     const O = S.orders(), E = S.events(), P = S.packings(), A = S.alarms(), H = S.hubs();
     const active = O.filter(o => o.status !== '도착완료');
     const done = O.filter(o => o.status === '도착완료').length;
-    const delay = O.filter(o => o.status === '지연').length;
+    const LI = O.map(o => ({ o, ...lateInfo(o) })).filter(x => x.cnt), lateList = LI.filter(x => x.late);
+    const delay = lateList.length, onTimeN = LI.length - delay;
     const off = A.filter(a => a.type === 'OFF_ROUTE').length;
     const allLegs = O.flatMap(o => legs(o));
     const meas = allLegs.filter(l => l.act != null);
@@ -133,7 +153,7 @@ const DC = (() => {
       stockShort: ss.length, stockShortList: ss, packPend: packPend.length, packPendList: packPend, dispNeed: dispNeed.length, dispNeedList: dispNeed, dispNeedLegs: dispNeed.reduce((a, x) => a + x.miss.length, 0),
       orders: O.length, active: active.length, moving: moving().length,   // 이벤트 기준(거점 OUT 후 다음 거점 IN 전) — 우측 '이동 중 운송 현황'과 동일 기준
       done, delay, off, alarm: delay + off,
-      onTime: (done + delay) > 0 ? pct(done, done + delay) : null,
+      onTime: LI.length ? pct(onTimeN, LI.length) : null, onTimeN, onTimeD: LI.length, onDone: LI.filter(x => x.done && !x.late).length, lateDone: lateList.filter(x => x.done).length, lateAct: lateList.filter(x => !x.done).length, lateList, onTimeList: LI,
       packRate: pct(packed, O.length), packed,
       dispRate: pct(dispatched, O.length), dispatched,
       overRate: measStd.length ? pct(measStd.filter(l => l.over).length, measStd.length) : null, measStd: measStd.length,
@@ -251,7 +271,7 @@ const DC = (() => {
     };
   }
 
-  return { CFG, fmtDur, setLive, forecast, scanGaps, hubMode, MODE, HUBMODE_ICON, refNow, moving, hubStats, esc, pad, dstr, toDate, mins, pct, fmtPct, hhmm, shortName, nodes, stds, evsOf, position, legs, dispatchDone, kpi, anchorDate, TREND, trend, actions };
+  return { CFG, fmtDur, setLive, forecast, scanGaps, planArrival, lateInfo, hubMode, MODE, HUBMODE_ICON, refNow, moving, hubStats, esc, pad, dstr, toDate, mins, pct, fmtPct, hhmm, shortName, nodes, stds, evsOf, position, legs, dispatchDone, kpi, anchorDate, TREND, trend, actions };
 })();
 
 // ── 공통 UI 조각 ───────────────────────────────────────────────
