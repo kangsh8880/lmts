@@ -170,3 +170,4 @@
   .ms-cause{background:#FFF1F1;border-radius:8px;padding:8px 10px;border:1px solid #E5B4B4;border-top:1px solid #E5B4B4;margin-top:6px}
   .ms-act b.hl-b{display:inline-block;margin-top:2px}
 }
+@media (max-width:900px){.mc-bs span:nth-child(2){margin-left:.2em}.mc-bs span:nth-child(3){margin-left:.1em}}
