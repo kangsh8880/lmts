@@ -47,8 +47,8 @@
     const st = nav.querySelector('.nav-status'), tools = document.createElement('div'); tools.className = 'nav-tools';
     const mb = document.createElement('a');   // 사용 설명서(PDF) 열기 — 새 탭
     mb.id = 'manual-btn'; mb.className = 'theme-btn tool-ic'; mb.href = 'docs/LMTS_manual.pdf'; mb.target = '_blank'; mb.rel = 'noopener'; mb.textContent = '📖'; mb.title = '사용 설명서 보기 (PDF)'; mb.setAttribute('aria-label', '사용 설명서');
-    // 언어별 설명서: 영어 = 한국어·영어판, 한국어·베트남어 = 한국어·베트남어판 (언어를 바꾸면 즉시 반영)
-    const manualFor = L => L === 'en' ? 'docs/LMTS_manual_en.pdf' : 'docs/LMTS_manual.pdf';
+    // 언어별 설명서(화면 그림도 해당 언어): 영어 = 한국어·영어판, 베트남어 = 한국어·베트남어판(베트남어 화면), 한국어 = 한국어·베트남어판(한국어 화면) (언어를 바꾸면 즉시 반영)
+    const manualFor = L => L === 'en' ? 'docs/LMTS_manual_en.pdf' : L === 'vi' ? 'docs/LMTS_manual_vi.pdf' : 'docs/LMTS_manual.pdf';
     const setManual = () => { mb.href = manualFor(window.LMTS_I18N ? window.LMTS_I18N.lang() : 'ko'); };
     setManual(); document.addEventListener('lmts-lang', setManual);
     if (window.LMTS_I18N) tools.append(window.LMTS_I18N.makeSelect());
