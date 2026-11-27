@@ -444,7 +444,7 @@
       "product": "Camera Module C타입 / Phone Glass",
       "boxes": 8,
       "note": "긴급",
-      "status": "운송중",
+      "status": "도착완료",
       "created": "2026-11-27 16:27",
       "routeCode": "RT-004",
       "route": {
@@ -860,6 +860,15 @@
       "customer": "SK Hynix",
       "hub": "SK Hynix 이천캠퍼스",
       "event": "IN",
+      "person": "",
+      "note": ""
+    },
+    {
+      "time": "2026-11-27 21:33",
+      "orderNo": "ORD-261127-0001",
+      "customer": "SK Hynix",
+      "hub": "SK Hynix 이천캠퍼스",
+      "event": "도착완료",
       "person": "",
       "note": ""
     }
