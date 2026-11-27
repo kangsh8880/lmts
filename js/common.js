@@ -794,7 +794,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   .nav-status{font-size:14px !important;color:#1e293b !important;padding:0 3px !important}
   @media(min-width:901px){.nav-tools select{width:84px !important;padding-left:8px !important;padding-right:18px !important;background-position:right 5px center}.nav-status #gh-status-text{display:none !important}.nav-status .status-dot{width:12px;height:12px}}
   #token-modal .modal{max-width:none;width:min(1000px,96vw);padding:22px 28px;max-height:94vh;overflow:auto}
-  #token-modal .modal-title{font-size:23px;color:#0f172a}
+  #token-modal .modal{position:relative}
+  #token-modal .modal-title{font-size:23px;color:#0f172a;padding-right:48px}
+  #set-x{position:absolute;top:12px;right:14px;width:38px;height:38px;border:1.5px solid #64748b;border-radius:50%;background:#fff;color:#0f172a;font-size:22px;line-height:1;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+  #set-x:hover{background:#fee2e2;border-color:#b91c1c;color:#b91c1c}
+  html[data-theme="dark"] #set-x{background:#252E3F;color:#E2E8F0;border-color:#94a3b8}
   #token-modal .modal-desc{color:#1e293b !important;font-size:15.5px;margin-bottom:12px;line-height:1.6}
   #token-modal .modal-step{color:#0f172a !important;margin-bottom:12px;columns:2;column-gap:28px;line-height:1.8}
   #token-modal .modal-step b{color:#0f172a}
@@ -816,6 +820,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
       b.textContent = '⚙️ 설정'; b.onclick = openTokenModal; const sync = () => { const t = document.getElementById('gh-status-text'); if (t) { b.title = '설정 — GitHub: ' + t.textContent; ns.title = 'GitHub 연결: ' + t.textContent; } }; sync(); setInterval(sync, 2000); ns.parentNode.insertBefore(b, ns);
     }
     const t = document.querySelector('#token-modal .modal-title'); if (t) t.textContent = '⚙️ 설정';
+    const mm = document.querySelector('#token-modal .modal');
+    if (mm && !document.getElementById('set-x')) { const x = document.createElement('button'); x.id = 'set-x'; x.type = 'button'; x.title = '닫기 (Esc)'; x.setAttribute('aria-label', '닫기'); x.textContent = '✕'; x.onclick = closeTokenModal; mm.insertBefore(x, mm.firstChild); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { const tm = document.getElementById('token-modal'); if (tm && !tm.classList.contains('hidden')) closeTokenModal(); } });
     const d = document.querySelector('#token-modal .modal-desc');
     if (d && !document.getElementById('set-sec1')) { const h = document.createElement('div'); h.id = 'set-sec1'; h.className = 'set-sec'; h.textContent = '① GitHub 연결'; d.parentNode.insertBefore(h, d); }
     const bk = document.getElementById('bk-box');
