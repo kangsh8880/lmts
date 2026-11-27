@@ -844,6 +844,15 @@
       "event": "IN",
       "person": "",
       "note": ""
+    },
+    {
+      "time": "2026-11-27 21:33",
+      "orderNo": "ORD-261127-0001",
+      "customer": "SK Hynix",
+      "hub": "수원 중간집하장",
+      "event": "OUT",
+      "person": "",
+      "note": ""
     }
   ],
   "alarms": [],
