@@ -281,22 +281,13 @@ function saveLegDispatch() {
   else arr.push(base);
   S.set('dispatches', arr);
 
-  // 최초 배차(구간 0)이면 오더 상태 → 운송중, OUT 이벤트 추가
-  if (ldLegIdx === 0 && !['운송중','배차완료'].includes(o?.status)) {
-    updateOrderStatus(ldOrderNo, '운송중');
-    const events = S.events();
-    if (!events.some(e => e.orderNo === ldOrderNo && e.hub === leg.fromHub && e.event === 'OUT')) events.push({
-      time: now(), orderNo: ldOrderNo, customer: o?.customer||'',
-      hub: leg.fromHub, event: 'OUT', person: '배차담당',
-      note: `${TRANSPORT_LABEL[ldTransport]} 출발`
-    });
-    S.set('events', events);
-  }
+  // 배차 ≠ 출발: 배차 저장은 '배차완료'까지만 처리. OUT(실제 출발)은 거점 In/Out 또는 현장 스캔에서만 생성 → 그때 '운송중'
+  if (ldLegIdx === 0 && ['대기','패킹완료'].includes(o?.status)) updateOrderStatus(ldOrderNo, '배차완료');
 
   closeLegDispatchModal();
   renderDispatch();
   loadDispatchOrder(); // 구간 카드 갱신
-  alert(`✅ 구간 ${ldLegIdx+1} 배차 저장 완료\n${leg.fromHub} → ${leg.toHub}`);
+  alert(`✅ 구간 ${ldLegIdx+1} 배차 저장 완료\n${leg.fromHub} → ${leg.toHub}\n\n※ 출발(OUT)은 ${leg.fromHub}의 [거점 In/Out] 또는 현장 스캔에서 별도로 등록합니다.`);
 }
 
 function renderDispatch() {
@@ -344,6 +335,6 @@ window.lmtsReady = function() {
   initNav();
   // 경로 변경 등으로 현재 경로와 맞지 않게 남은 옛 배차 기록 정리
   const stale = cleanStaleDispatches();
-  if (stale.length) setTimeout(() => alert(`ℹ️ 경로가 변경되어 현재 경로와 맞지 않는 옛 배차 ${stale.length}건을 정리했습니다.\n새 경로 기준으로 다시 등록하세요.\n\n` + stale.map(d=>`· ${d.orderNo} 구간 ${d.legIdx+1}: ${d.fromHub} → ${d.toHub}`).join('\n')), 300);
+  if (stale.length) setTimeout(() => alert(`ℹ️ 경로가 변경되어 현재 경로와 맞지 않는 옛 배차 ${stale.length}건을 취소 처리했습니다(이력 보존).\n새 경로 기준으로 다시 등록하세요.\n\n` + stale.map(d=>`· ${d.orderNo} 구간 ${d.legIdx+1}: ${d.fromHub} → ${d.toHub}`).join('\n')), 300);
   fillDispatchSelects(); renderDispatch();
 };

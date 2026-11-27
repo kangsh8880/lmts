@@ -732,26 +732,93 @@ function cleanStaleDispatches(orderNo) {
     if (passed) return true;
     removed.push(d); return false;
   });
-  if (removed.length) S.set('dispatches', keep);
+  if (removed.length) {
+    S.set('dispatches', keep);
+    // 삭제하지 않고 취소 이력으로 보존 (alarms: DISPATCH_CANCEL) — 사고·정산 시 근거
+    const al = S.alarms(), t = now();
+    removed.forEach((d, i) => al.push({ id: 'ALM-DC-' + Date.now() + '-' + i, time: t, type: 'DISPATCH_CANCEL', orderNo: d.orderNo,
+      customer: (orders.find(x => x.no === d.orderNo) || {}).customer || '',
+      message: `[배차 취소·경로변경] ${d.orderNo} 구간 ${d.legIdx + 1}: ${d.fromHub} → ${d.toHub} (차량 ${d.vehicleNo || '-'} · 기사 ${d.driver || '-'} · 출발예정 ${(d.departPlan || '-').replace('T', ' ')})`,
+      record: d, read: true }));
+    S.set('alarms', al);
+  }
   return removed;
 }
 
 
-// ── 오더 상태 정합: 이벤트·배차·Packing 실적에 비해 상태가 뒤처진 오더를 올려 맞춤 (되돌림 없음) ──
-// 우선순위: 도착완료 이벤트 > 거점 OUT 이벤트(운송중) > 배차 기록(배차완료) > Packing 기록(패킹완료)
+// ── 오더 상태 정합: 이벤트·배차·Packing 실적에 맞춰 오더 상태를 올리거나 내림 (실적 = 기준) ──
+// 우선순위: 도착완료 이벤트 > 거점 OUT 이벤트(운송중) > 배차 기록(배차완료) > Packing 기록(패킹완료) > 대기
+// '지연'은 운송 단계의 표시 상태이므로 실적이 운송중 이상이면 유지, 그 아래로 내려갈 때만 정정
 function reconcileOrderStatus() {
   const RANK = {'대기':0, '패킹완료':1, '배차완료':2, '운송중':3, '지연':3, '도착완료':4};
   const orders = S.orders(), evs = S.events(), dps = S.dispatches(), pks = S.packings();
   let changed = 0;
   orders.forEach(o => {
     const my = evs.filter(e => e.orderNo === o.no);
-    let want = null;
+    let want = '대기';
     if (my.some(e => e.event === '도착완료')) want = '도착완료';
     else if (my.some(e => e.event === 'OUT')) want = '운송중';
     else if (dps.some(d => d.orderNo === o.no)) want = '배차완료';
     else if (pks.some(p => p.orderNo === o.no)) want = '패킹완료';
-    if (want && (RANK[want] > (RANK[o.status] ?? 0))) { o.status = want; changed++; }
+    const cur = RANK[o.status] ?? 0;
+    if (o.status === '지연' && RANK[want] >= 3) return;
+    if (RANK[want] !== cur) { o.status = want; changed++; }
   });
   if (changed) S.set('orders', orders);
   return changed;
 }
+
+
+// ── 테스트 데이터 초기화: 운영 데이터(오더·패킹·배차·이벤트·알람·스캔·입고)만 비우고 기준정보(고객사·제품·차량·거점·경로)는 유지 ──
+function resetTransactionData(){
+  if (!confirm('⚠️ 오더·패킹·배차·이벤트·알람·스캔·입고 기록을 모두 삭제합니다.\n(고객사·제품·차량·거점·경로 등 기준정보는 유지)\n\n삭제 전에 현재 데이터 백업(JSON)이 자동으로 내려받아집니다.\n계속할까요?')) return;
+  if (prompt('확인을 위해 "초기화"를 입력하세요.') !== '초기화') return alert('취소되었습니다.');
+  try { downloadBackup(); } catch (e) {}
+  ['orders','packings','dispatches','events','alarms','scans','receipts'].forEach(k => S.set(k, []));
+  alert('✅ 운영 데이터를 초기화했습니다. 화면을 새로고침합니다.');
+  setTimeout(() => location.reload(), 800);
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  const row = document.getElementById('bk-row'); if (!row || document.getElementById('rs-btn')) return;
+  const b = document.createElement('button'); b.id = 'rs-btn'; b.className = 'btn btn-ghost btn-sm'; b.style.cssText = 'border-color:#c0392b;color:#c0392b';
+  b.textContent = '🧹 테스트 데이터 초기화'; b.onclick = resetTransactionData; row.appendChild(b);
+});
+
+
+// ── 설정 버튼 + 설정창 정비: 메뉴줄에 "⚙️ 설정" 버튼, 흐릿한 글씨 진하게, 창을 키워 한 화면에 표시 ──
+(function(){
+  const css = `
+  #set-btn{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 9px;margin:0;border:1.5px solid #64748b;border-radius:18px;background:#fff;color:#0f172a;font-weight:700;font-size:14px;font-family:inherit;cursor:pointer;white-space:nowrap}
+  #set-btn:hover{background:#eef2f7;border-color:#0f172a}
+  .nav-status #gh-status-text{color:#1e293b !important;font-size:14px !important;font-weight:600}
+  .nav-status{font-size:14px !important;color:#1e293b !important;padding:0 3px !important}
+  @media(min-width:901px){.nav-tools select{width:84px !important;padding-left:8px !important;padding-right:18px !important;background-position:right 5px center}.nav-status #gh-status-text{display:none !important}.nav-status .status-dot{width:12px;height:12px}}
+  #token-modal .modal{max-width:none;width:min(1000px,96vw);padding:22px 28px;max-height:94vh;overflow:auto}
+  #token-modal .modal-title{font-size:23px;color:#0f172a}
+  #token-modal .modal-desc{color:#1e293b !important;font-size:15.5px;margin-bottom:12px;line-height:1.6}
+  #token-modal .modal-step{color:#0f172a !important;margin-bottom:12px;columns:2;column-gap:28px;line-height:1.8}
+  #token-modal .modal-step b{color:#0f172a}
+  #token-modal #token-status{color:#1e293b !important;font-weight:600;min-height:20px;margin-bottom:8px !important}
+  #token-modal .set-sec{font-size:16px;font-weight:700;color:#0f172a;margin:4px 0 6px}
+  #token-modal #bk-box{margin-top:10px !important;padding-top:10px !important;border-top:1.5px solid #94a3b8 !important}
+  #token-modal #bk-box > div:last-child{color:#334155 !important;font-size:14px !important}
+  #token-modal .btn-ghost{color:#0f172a;border-color:#64748b}
+  #token-modal #rs-btn{color:#b91c1c !important;border-color:#b91c1c !important;font-weight:700}
+  html[data-theme="dark"] #set-btn{background:#252E3F;color:#E2E8F0;border-color:#94a3b8}
+  html[data-theme="dark"] .nav-status #gh-status-text,html[data-theme="dark"] .nav-status{color:#E2E8F0 !important}
+  html[data-theme="dark"] #token-modal .modal-desc,html[data-theme="dark"] #token-modal .modal-step,html[data-theme="dark"] #token-modal .modal-step b,html[data-theme="dark"] #token-modal .modal-title,html[data-theme="dark"] #token-modal .set-sec,html[data-theme="dark"] #token-modal #token-status,html[data-theme="dark"] #token-modal #bk-box > div:last-child,html[data-theme="dark"] #token-modal .btn-ghost{color:#E2E8F0 !important}
+  @media(max-width:900px){#set-btn{display:none} #token-modal .modal-step{columns:1}}`;
+  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+  document.addEventListener('DOMContentLoaded', () => {
+    const ns = document.querySelector('.nav-status');
+    if (ns && !document.getElementById('set-btn')) {
+      const b = document.createElement('button'); b.id = 'set-btn'; b.type = 'button'; b.title = '설정 (GitHub 연결 · 백업 · 데이터 관리)';
+      b.textContent = '⚙️ 설정'; b.onclick = openTokenModal; const sync = () => { const t = document.getElementById('gh-status-text'); if (t) { b.title = '설정 — GitHub: ' + t.textContent; ns.title = 'GitHub 연결: ' + t.textContent; } }; sync(); setInterval(sync, 2000); ns.parentNode.insertBefore(b, ns);
+    }
+    const t = document.querySelector('#token-modal .modal-title'); if (t) t.textContent = '⚙️ 설정';
+    const d = document.querySelector('#token-modal .modal-desc');
+    if (d && !document.getElementById('set-sec1')) { const h = document.createElement('div'); h.id = 'set-sec1'; h.className = 'set-sec'; h.textContent = '① GitHub 연결'; d.parentNode.insertBefore(h, d); }
+    const bk = document.getElementById('bk-box');
+    if (bk && !document.getElementById('set-sec2')) { const h = document.createElement('div'); h.id = 'set-sec2'; h.className = 'set-sec'; h.textContent = '② 데이터 관리'; bk.insertBefore(h, bk.firstChild); }
+  });
+})();
