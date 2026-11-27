@@ -1,0 +1,29 @@
+name: LMTS 사전경보 메일
+on:
+  schedule:
+    - cron: '*/30 * * * *'      # 30분마다 (GitHub 사정으로 수 분 지연될 수 있음)
+  workflow_dispatch:             # 수동 실행 버튼
+permissions:
+  contents: write                # 경보 발송 기록(data/lmts_alert_state.json) 저장
+concurrency: lmts-alert
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+    env:
+      TZ: ${{ vars.LMTS_TZ || 'Asia/Seoul' }}      # 거점 스캔 시각의 시간대 (저장소 변수 LMTS_TZ로 변경 가능)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-save --no-audit --no-fund nodemailer
+      - name: 경보 계산·메일 발송
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: node tools/notify.mjs
+      - name: 발송 기록 저장
+        run: |
+          git config user.name "lmts-alert"; git config user.email "lmts-alert@users.noreply.github.com"
+          git add data/lmts_alert_state.json || true
+          git diff --cached --quiet || (git commit -m "chore: 경보 발송 기록" && git push)
