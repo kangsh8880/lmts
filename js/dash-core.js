@@ -232,7 +232,7 @@ const DC = (() => {
     });
     stockShort().forEach(x => out.push({
       lv: x.left === 0 ? 0 : 1, t: `재고 부족 · ${x.name}`, fact: `창고 현재고 ${x.left} · Packing 전 오더 필요 ${x.need} → ${x.short} 부족`,
-      cause: '입고 미등록 또는 생산·협력사 입고 지연(가설)', act: '입고Packing > 창고 입고에서 입고 등록, 생산·협력사 입고 일정 확인, 출하 우선순위 조정', go: 'packing.html'
+      cause: '입고 미등록 또는 생산·협력사 입고 지연(가설)', act: '입고/출하Packing > 창고입고에서 입고 등록, 생산·협력사 입고 일정 확인, 출하 우선순위 조정', go: 'packing.html'
     }));
     return out.sort((a, b) => a.lv - b.lv);
   }

@@ -177,7 +177,7 @@ function ordItems(o){ return (o.items && o.items.length) ? o.items : [{product:o
 function ordQty(o){ return ordItems(o).reduce((a,i)=>a+(+i.qty||0),0); }
 function ordText(o){ return ordItems(o).map(i=>`${i.product} ${i.qty}`).join(' / '); }
 
-// ── 자사물류창고 재고: 기초재고(기준정보 수량) + 입고 누계 − Packing 출고 누계 ──
+// ── 자사물류창고 재고: 기초재고(기준정보 수량) + 입고 누계 − 출하Packing 누계 ──
 function stockCalc(code){
   const p=S.products().find(x=>x.code===code); const base=parseInt(p&&p.qty)||0;
   const rc=S.receipts().filter(r=>r.boxNo===code&&r.status!=='취소');
@@ -811,6 +811,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   html[data-theme="dark"] #set-btn{background:#252E3F;color:#E2E8F0;border-color:#94a3b8}
   html[data-theme="dark"] .nav-status #gh-status-text,html[data-theme="dark"] .nav-status{color:#E2E8F0 !important}
   html[data-theme="dark"] #token-modal .modal-desc,html[data-theme="dark"] #token-modal .modal-step,html[data-theme="dark"] #token-modal .modal-step b,html[data-theme="dark"] #token-modal .modal-title,html[data-theme="dark"] #token-modal .set-sec,html[data-theme="dark"] #token-modal #token-status,html[data-theme="dark"] #token-modal #bk-box > div:last-child,html[data-theme="dark"] #token-modal .btn-ghost{color:#E2E8F0 !important}
+  @media(min-width:901px) and (max-width:1440px){.nav-tab{padding:7px 3px !important}.nav-tab .ti{margin-right:-2px}}
+  @media(min-width:901px) and (max-width:1440px){html[lang="en"] .nav-tab .ti,html[lang="vi"] .nav-tab .ti{display:none}html[lang="en"] .nav-tab,html[lang="vi"] .nav-tab{padding:7px 1px !important}}
   @media(max-width:900px){#set-btn{display:none} #token-modal .modal-step{columns:1}}`;
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
   document.addEventListener('DOMContentLoaded', () => {
@@ -839,3 +841,35 @@ window.fmtMin = function (m) {
   if (m < 1440) { const h = Math.floor(m / 60), r = m % 60; return neg + h + '시간' + (r ? ' ' + r + '분' : ''); }
   const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60); return neg + d + '일' + (h ? ' ' + h + '시간' : '');
 };
+
+
+// ── 사유·처리자 입력창 (배차 취소 / Unpacking 공용) — 사유와 처리자는 필수, 이력은 알람으로 보존 ──
+function askReason(opt){
+  let m = document.getElementById('rsn-modal');
+  if (m) m.remove();
+  m = document.createElement('div'); m.id = 'rsn-modal'; m.className = 'modal-bg';
+  const esc = s => String(s == null ? '' : s).replace(/</g, '&lt;');
+  let who = ''; try { who = localStorage.getItem('lmts-handler') || ''; } catch (e) {}
+  m.innerHTML = `<div class="modal" style="max-width:520px;width:94vw;position:relative">
+    <div class="modal-title" style="color:#0f172a">${esc(opt.title)}</div>
+    <div style="background:#f4f6f8;border:1.5px solid #9ca3af;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.6;color:#111;margin-bottom:12px">${opt.info || ''}</div>
+    <label style="font-weight:700;font-size:14px;color:#111">사유 <span style="color:#c0392b">*</span></label>
+    <select id="rsn-sel" style="width:100%;margin:4px 0 8px;padding:8px;border:1.5px solid #9ca3af;border-radius:6px;font-size:14px"><option value="">— 선택 —</option>${(opt.reasons || []).map(r => `<option>${esc(r)}</option>`).join('')}</select>
+    <input id="rsn-txt" placeholder="상세 내용 (선택 — '기타'는 필수)" style="width:100%;padding:8px;border:1.5px solid #9ca3af;border-radius:6px;font-size:14px;margin-bottom:10px">
+    <label style="font-weight:700;font-size:14px;color:#111">처리자 <span style="color:#c0392b">*</span></label>
+    <input id="rsn-by" value="${esc(who)}" placeholder="처리한 사람 이름" style="width:100%;margin-top:4px;padding:8px;border:1.5px solid #9ca3af;border-radius:6px;font-size:14px">
+    <div id="rsn-err" style="color:#c0392b;font-weight:700;font-size:13px;min-height:18px;margin-top:6px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button class="btn btn-ghost" id="rsn-no">닫기</button><button class="btn btn-danger" id="rsn-ok">${esc(opt.okText || '확인')}</button></div></div>`;
+  document.body.appendChild(m);
+  const close = () => m.remove();
+  m.querySelector('#rsn-no').onclick = close;
+  m.querySelector('#rsn-ok').onclick = () => {
+    const sel = m.querySelector('#rsn-sel').value, txt = m.querySelector('#rsn-txt').value.trim(), by = m.querySelector('#rsn-by').value.trim();
+    const err = t => { m.querySelector('#rsn-err').textContent = '⚠ ' + t; };
+    if (!sel) return err('사유를 선택하세요.');
+    if (/기타/.test(sel) && !txt) return err("'기타'는 상세 내용을 입력해야 합니다.");
+    if (!by) return err('처리자를 입력하세요.');
+    try { localStorage.setItem('lmts-handler', by); } catch (e) {}
+    close(); opt.onOk({ reason: sel, detail: txt, by });
+  };
+}

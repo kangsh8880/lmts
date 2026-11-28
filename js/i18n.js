@@ -15,8 +15,8 @@
   const WEEK = { '일': ['Sun', 'CN'], '월': ['Mon', 'T2'], '화': ['Tue', 'T3'], '수': ['Wed', 'T4'], '목': ['Thu', 'T5'], '금': ['Fri', 'T6'], '토': ['Sat', 'T7'] };
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const HAN = /[가-힣]/;
-  const NAV = { en: { 'CEO대시보드': 'CEO', '운영관제': 'Operations', '기준정보': 'Master Data', '출하오더': 'Orders', '박스Packing': 'Packing', '입고Packing': 'In·Pack', '차량배차': 'Dispatch', '거점In/Out': 'Hub In/Out', '위치추적': 'Tracking', '물류분석': 'Analysis' },
-    vi: { 'CEO대시보드': 'CEO', '운영관제': 'Vận hành', '기준정보': 'Dữ liệu gốc', '출하오더': 'Đơn xuất', '박스Packing': 'Packing', '입고Packing': 'Nhập·Pack', '차량배차': 'Điều xe', '거점In/Out': 'IN/OUT điểm', '위치추적': 'Vị trí', '물류분석': 'Phân tích' } };
+  const NAV = { en: { 'CEO대시보드': 'CEO', '운영관제': 'Operations', '기준정보': 'Master Data', '출하오더': 'Orders', '박스Packing': 'Packing', '입고/출하Packing': 'In/Out·Pack', '차량배차': 'Dispatch', '거점In/Out': 'Hub In/Out', '위치추적': 'Tracking', '물류분석': 'Analysis' },
+    vi: { 'CEO대시보드': 'CEO', '운영관제': 'Vận hành', '기준정보': 'Dữ liệu gốc', '출하오더': 'Đơn xuất', '박스Packing': 'Packing', '입고/출하Packing': 'Nhập/Xuất·Pack', '차량배차': 'Điều xe', '거점In/Out': 'IN/OUT điểm', '위치추적': 'Vị trí', '물류분석': 'Phân tích' } };
 
   function tr(s, L) {
     L = L || lang;

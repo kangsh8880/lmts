@@ -290,6 +290,31 @@ function saveLegDispatch() {
   alert(`✅ 구간 ${ldLegIdx+1} 배차 저장 완료\n${leg.fromHub} → ${leg.toHub}\n\n※ 출발(OUT)은 ${leg.fromHub}의 [거점 In/Out] 또는 현장 스캔에서 별도로 등록합니다.`);
 }
 
+
+// ─── 배차 취소 (출발 OUT 전까지) — 사유·처리자 필수, 이력은 알람(DISPATCH_CANCEL)으로 보존 ───
+function cancelLegDispatch(orderNo, legIdx){
+  const d = getLegDispatch(orderNo, legIdx); if (!d) return;
+  const outed = S.events().some(e => e.orderNo === orderNo && e.hub === d.fromHub && e.event === 'OUT');
+  if (outed) return alert(`⛔ 배차를 취소할 수 없습니다.\n\n[${orderNo}] ${d.fromHub} 에서 이미 출발(OUT)이 등록되었습니다.\n출발한 건은 기록을 보존해야 하며, 정정은 별도 절차(반품·재출하)로 처리합니다.`);
+  askReason({
+    title: '🚫 배차 취소',
+    info: `<b>${orderNo}</b> · 구간 ${legIdx+1}: ${d.fromHub} → ${d.toHub}<br>차량 ${d.vehicleNo||'-'} · 기사 ${d.driver||'-'} · 출발예정 ${(d.departPlan||'-').replace('T',' ')}<br><span style="color:#b91c1c">취소해도 기록은 알람(이력)에 남고, 오더 상태는 실적 기준으로 되돌아갑니다.</span>`,
+    reasons: ['출하 취소(고객 요청)','차량·기사 변경','출발 일정 변경','수량·품목 변경(재Packing 필요)','배차 오입력','기타'],
+    okText: '배차 취소 실행',
+    onOk: r => {
+      S.set('dispatches', S.dispatches().filter(x => !(x.orderNo === orderNo && x.legIdx === legIdx)));
+      const al = S.alarms(), o = S.orders().find(x => x.no === orderNo);
+      al.push({ id: 'ALM-DC-' + Date.now(), time: now(), type: 'DISPATCH_CANCEL', orderNo, customer: (o||{}).customer || '',
+        message: `[배차 취소] ${orderNo} 구간 ${legIdx+1}: ${d.fromHub} → ${d.toHub} (차량 ${d.vehicleNo||'-'} · 기사 ${d.driver||'-'}) · 사유: ${r.reason}${r.detail?' / '+r.detail:''} · 처리자 ${r.by}`,
+        reason: r.reason, detail: r.detail, by: r.by, record: d, read: true });
+      S.set('alarms', al);
+      reconcileOrderStatus();
+      renderDispatch(); fillDispatchSelects();
+      alert(`✅ 배차를 취소했습니다(이력 보존).\n오더 상태: ${(S.orders().find(x=>x.no===orderNo)||{}).status}`);
+    }
+  });
+}
+
 function renderDispatch() {
   const STAT_CLS = {배차완료:'s-dispatch', 운송중:'s-moving', 도착완료:'s-done'};
   // legIdx/fromHub/toHub 없는 불완전 레코드 제외
@@ -320,7 +345,7 @@ function renderDispatch() {
       <td style="font-size:13px">${(d.departPlan||'-').replace('T',' ')}</td>
       <td style="font-size:13px">${(d.eta||'-').replace('T',' ')}</td>
       <td><span class="status ${STAT_CLS[d.status]||'s-dispatch'}">${d.status||'배차완료'}</span></td>
-      <td>${ (()=>{ const _l=getOrderLegs(o); const _g=_l&&_l[d.legIdx]; const _p=_g&&isLegPassed(d.orderNo,_g); return _p ? '<button class="btn btn-xs" disabled style="background:#F5F5F5;color:#BDBDBD;border:1px solid #E0E0E0;cursor:not-allowed;" title="통과완료">🔒</button>' : '<button class="btn btn-xs" style="background:#EBF5FF;color:var(--accent);border:1px solid var(--border);" onclick="openLegDispatch(\'' + d.orderNo + '\',' + d.legIdx + ')">✏️</button>'; })() }</td>
+      <td>${ (()=>{ const _l=getOrderLegs(o); const _g=_l&&_l[d.legIdx]; const _p=_g&&isLegPassed(d.orderNo,_g); return _p ? '<button class="btn btn-xs" disabled style="background:#F5F5F5;color:#BDBDBD;border:1px solid #E0E0E0;cursor:not-allowed;" title="통과완료">🔒</button>' : '<button class="btn btn-xs" style="background:#EBF5FF;color:var(--accent);border:1px solid var(--border);" onclick="openLegDispatch(\'' + d.orderNo + '\',' + d.legIdx + ')">✏️</button>' + (S.events().some(e=>e.orderNo===d.orderNo&&e.hub===d.fromHub&&e.event==='OUT') ? '' : ' <button class="btn btn-xs btn-danger" title="배차 취소(사유 필수)" onclick="cancelLegDispatch(\'' + d.orderNo + '\',' + d.legIdx + ')">취소</button>'); })() }</td>
     </tr>`;
   }).join('') || '<tr><td colspan="10" class="empty">배차 이력 없음</td></tr>';
 }

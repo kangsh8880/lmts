@@ -112,7 +112,7 @@ function delItem(key, idx) {
   const O = S.orders(), D = S.dispatches();
   let used = 0, what = '';
   if (key==='customers') { used = O.filter(o=>o.customer===it.name).length; what='오더'; if(!used){ used = S.routes().filter(r=>r.customer===it.name).length; what='Route'; } }
-  if (key==='products')  { used = O.filter(o=>(o.items||[]).some(i=>i.product===it.name||i.product===it.code)||o.product===it.name).length; what='오더'; if(!used){ used = S.receipts().filter(r=>r.boxNo===it.code&&r.status!=='취소').length; what='창고 입고'; } }
+  if (key==='products')  { used = O.filter(o=>(o.items||[]).some(i=>i.product===it.name||i.product===it.code)||o.product===it.name).length; what='오더'; if(!used){ used = S.receipts().filter(r=>r.boxNo===it.code&&r.status!=='취소').length; what='창고입고'; } }
   if (key==='hubs')      { used = O.filter(o=>o.route&&[o.route.origin,o.route.destination,...(o.route.waypoints||[]).map(w=>w.name)].includes(it.name)).length; what='오더 경로'; if(!used){ used = S.routes().filter(r=>[r.origin,r.destination,...(r.waypoints||[]).map(w=>w.name)].includes(it.name)).length; what='Route'; } }
   if (key==='vehicles')  { used = D.filter(d=>d.vehicleNo===it.no||d.vehicle===it.no).length; what='배차'; }
   if (used) return alert('⛔ 삭제할 수 없습니다.\n\n"'+(it.name||it.no||it.code)+'" 은(는) '+used+'건의 '+what+'에서 사용 중입니다.\n사용 중인 기준정보를 지우면 이력이 깨집니다.');
