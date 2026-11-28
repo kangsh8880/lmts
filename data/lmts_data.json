@@ -956,6 +956,15 @@
       "event": "OUT",
       "person": "",
       "note": ""
+    },
+    {
+      "time": "2026-11-28 10:36",
+      "orderNo": "ORD-261119-004",
+      "customer": "K1 VINA",
+      "hub": "VINA VINHYEN",
+      "event": "IN",
+      "person": "",
+      "note": ""
     }
   ],
   "alarms": [
