@@ -224,3 +224,41 @@
 }
 @media (max-width:900px){.d-dir{display:none}}
 .ms-sel{width:100%;padding:11px;border:1.5px solid #9CA3AF;border-radius:10px;font-size:16px;margin:4px 0 6px}
+
+/* ══ 휴대폰: KPI 상세 팝업을 표 대신 카드 목록으로, 이동 중 운송 카드를 세로 배치 ══ */
+@media (max-width:900px){
+  #kpi-pop .modal{width:calc(100vw - 16px) !important;max-width:none !important;max-height:88dvh !important;padding:14px 14px 12px !important;border-radius:16px}
+  #kpi-pop .modal-title{font-size:19px;margin-bottom:6px}
+  #kpi-pop .pop-sub{font-size:14px;line-height:1.55;color:#374151;margin-bottom:8px}
+  #kpi-pop .pop-hint{display:none}
+  #kpi-pop .pop-go{display:flex;margin-top:8px}
+  #kpi-pop .pop-go a{width:100%;text-align:center;min-height:44px;line-height:30px;font-size:15px}
+  #kpi-pop .tbl-wrap,#kpi-pop #kpi-pop-body{overflow:visible !important}
+  #kpi-pop table.dt{display:block;width:100%}
+  #kpi-pop table.dt thead{display:none}
+  #kpi-pop table.dt tbody{display:block}
+  #kpi-pop table.dt tr{display:block;margin:0 0 10px;padding:9px 11px;border:1.5px solid #9CA3AF;border-radius:12px;background:#fff}
+  #kpi-pop table.dt td{display:flex;justify-content:space-between;align-items:center;gap:12px;max-width:none !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;word-break:keep-all;border:0 !important;padding:3px 0 !important;font-size:14.5px;line-height:1.45;text-align:right}
+  #kpi-pop table.dt td::before{content:attr(data-l);flex:0 0 auto;min-width:4.2em;font-size:12.5px;font-weight:700;color:#6B7280;text-align:left}
+  #kpi-pop table.dt td:first-child{display:block;text-align:left;font-size:16px;font-weight:800;padding:0 0 5px !important;margin-bottom:3px;border-bottom:1px dashed #D1D5DB !important}
+  #kpi-pop table.dt td:first-child::before{display:none}
+  #kpi-pop table.dt td:empty{display:none}
+  /* 이동 중 운송 현황 카드 */
+  #moving{overflow-x:hidden !important}
+  .mv{padding:10px 12px !important}
+  .mv-top{flex-direction:column !important;align-items:stretch !important;gap:8px !important}
+  .mv-id{display:block;line-height:1.5}
+  .mv-no{font-size:16px}
+  .mv-cust{display:block;font-size:14px;color:#374151}
+  .mv-act{width:100%;justify-content:space-between}
+  .mv-act .btn{flex:1;text-align:center;min-height:42px;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .mv-act .chip{white-space:nowrap}
+  .mv-act .btn,.mv-act .btn:hover{text-decoration:none !important}
+  .mv-route{font-size:17px !important;margin:8px 0 !important}
+  .mv-meta{display:grid !important;grid-template-columns:1fr 1fr;gap:5px 10px !important;font-size:13.5px !important}
+  .mv-meta .mv-dt{grid-column:1 / -1}
+  #mv-pnl,#mv-pnl #moving{max-height:none !important;overflow:visible !important}
+  .mv-dot{display:none}
+  #kpi-pop table.dt td .v{flex:1;min-width:0;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px 6px;text-align:right}
+  #kpi-pop table.dt td:first-child .v{justify-content:flex-start}
+}
