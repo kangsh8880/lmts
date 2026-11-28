@@ -1155,6 +1155,38 @@
   ],
   "directives": [
     {
+      "id": "DIR-261128-001",
+      "time": "2026-11-28 12:16",
+      "from": "CEO",
+      "status": "지시",
+      "log": [
+        {
+          "time": "2026-11-28 12:16",
+          "who": "CEO",
+          "status": "지시",
+          "memo": "고객에게 연락"
+        }
+      ],
+      "to": "운영관제",
+      "priority": "긴급",
+      "text": "고객에게 연락",
+      "ref": "직접 지시 · ORD-260420-002",
+      "orderNo": "ORD-260420-002",
+      "customer": "LG Display",
+      "ctx": {
+        "alarm": "직접 지시 · ORD-260420-002",
+        "fact": "LG Display → 파주공장 · 오더 상태 운송중 · 📍 안성허브터미널 체류 중",
+        "cause": "",
+        "proposed": "",
+        "level": 2,
+        "where": "📍 안성허브터미널 체류 중",
+        "orderStatus": "운송중",
+        "customer": "LG Display",
+        "dest": "파주공장",
+        "at": "2026-11-28 12:16"
+      }
+    },
+    {
       "id": "DIR-261125-002",
       "time": "2026-11-25 13:24",
       "from": "CEO",
@@ -1214,5 +1246,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-28 10:48"
+  "lastUpdated": "2026-11-28 12:16"
 }
