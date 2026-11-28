@@ -553,6 +553,20 @@
       "forcedDetail": "Test Data임.",
       "forcedBy": "Kang",
       "forcedAt": "2026-11-28 10:20"
+    },
+    {
+      "orderNo": "ORD-260420-001",
+      "customer": "Samsung Electronics",
+      "boxes": 4,
+      "lines": [],
+      "waybill": "",
+      "doneAt": "2026-11-28 10:21",
+      "person": "Kang",
+      "forced": true,
+      "forcedReason": "긴급 출하(시간 부족)",
+      "forcedDetail": "ooo사유로 긴급출하함.",
+      "forcedBy": "Kang",
+      "forcedAt": "2026-11-28 10:21"
     }
   ],
   "dispatches": [
@@ -896,6 +910,15 @@
       "customer": "SK Hynix",
       "message": "[강제 Packing 처리] ORD-260419-001 · 기타 · Test Data임. · 처리자 Kang",
       "read": false
+    },
+    {
+      "id": "ALM-FP-1795836102009",
+      "time": "2026-11-28 10:21",
+      "type": "FORCED_PACK",
+      "orderNo": "ORD-260420-001",
+      "customer": "Samsung Electronics",
+      "message": "[강제 Packing 처리] ORD-260420-001 · 긴급 출하(시간 부족) · ooo사유로 긴급출하함. · 처리자 Kang",
+      "read": false
     }
   ],
   "scans": [],
@@ -1088,5 +1111,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-28 10:20"
+  "lastUpdated": "2026-11-28 10:21"
 }
