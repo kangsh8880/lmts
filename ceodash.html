@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="css/style.css?v=20261127">
   <link rel="stylesheet" href="css/dash.css?v=20261127">
   <link rel="stylesheet" href="css/theme.css?v=20261127">
-  <link rel="stylesheet" href="css/mobile.css?v=20261129">
+  <link rel="stylesheet" href="css/mobile.css?v=20261130">
   <script src="js/i18n-dict.js?v=20261127"></script>
   <script src="js/i18n.js?v=20261127"></script>
   <script src="js/theme.js?v=20261127"></script>
@@ -70,7 +70,7 @@
 <div class="sync-bar hidden" id="sync-bar" style="margin:4px 16px 0"><span id="sync-bar-icon">💾</span><span id="sync-bar-text"></span></div>
 <div class="dash-wrap">
   <div id="m-ceo" class="m-ceo"></div>
-  <div class="d-head"><div class="d-title">CEO 대시보드<small>물류 출하 경영 현황</small></div><div class="d-search"><input id="dash-q" placeholder="오더번호 · 제품코드 · 제품명 · 고객사 검색" onkeydown="if(event.key==='Enter')dashSearch()"><button class="pri" onclick="dashSearch()">조회</button><button onclick="dashSearchClear()">초기화</button></div><div class="d-asof" id="asof"></div></div>
+  <div class="d-head"><div class="d-title">CEO 대시보드<small>물류 출하 경영 현황</small></div><div class="d-search"><input id="dash-q" placeholder="오더번호 · 제품코드 · 제품명 · 고객사 검색" onkeydown="if(event.key==='Enter')dashSearch()"><button class="pri" onclick="dashSearch()">조회</button><button onclick="dashSearchClear()">초기화</button></div><div class="d-dir"><button class="pri" onclick="CM.newDir()">📌 지시 작성</button><button onclick="CM.dirs()">📌 지시 현황</button></div><div class="d-asof" id="asof"></div></div>
   <div class="kpi-grid" id="kpis"></div>
   <div class="d-body g-hub">
     <div class="col">
@@ -92,7 +92,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="js/export.js?v=20261127"></script>
 <script src="js/dash-core.js?v=20261127"></script>
-<script src="js/ceomobile.js?v=20261129"></script>
+<script src="js/ceomobile.js?v=20261130"></script>
   <script src="js/ceodash.js?v=20261127"></script>
 </body>
 </html>
