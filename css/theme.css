@@ -427,3 +427,5 @@ body.one .op-page > #master-route .card-head span{display:none}
 /* 운영관제 KPI 12개도 1366px에서 한 줄 유지 */
 #kpis.kpi-grid{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))!important}
 #kpis .kbox .k-ttl{white-space:nowrap;font-size:14.5px;text-overflow:clip;letter-spacing:-.3px}
+.status.s-cancel{background:#F3F4F6;color:#4B5563;border:1px solid #9CA3AF}
+.lg-cx td{background:#F9FAFB;color:#6B7280}
