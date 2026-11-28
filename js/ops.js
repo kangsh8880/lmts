@@ -29,7 +29,7 @@ function dayCounts(ds) {
   const ords = S.orders();
   return {
     inn: S.events().filter(e => e.time.startsWith(ds) && e.event === 'IN').length,
-    out: ords.filter(o => { const t = originOut(o); return t && t.startsWith(ds); }).length,
+    out: S.events().filter(e => e.time.startsWith(ds) && e.event === 'OUT').length,
     ord: ords.filter(o => (o.date || '') === ds).length
   };
 }
@@ -47,7 +47,7 @@ function renderCal() {
       const c = dayCounts(ds), hol = holidays(d), L = lunar(d), cur = d.getMonth() === calM;
       h += `<div class="day ${i === 0 || i === 6 ? 'we' : ''} ${cur ? '' : 'out'} ${ds === today ? 'today' : ''} ${ds === selD ? 'sel' : ''}" onclick="selDay('${ds}')">
         <div><div class="dn ${i === 0 ? 'sun' : i === 6 ? 'sat' : ''} ${hol.length ? 'hol' : ''}"><b>${d.getDate()}</b><em>${L.leap ? '윤' : ''}${L.m}.${L.d}</em></div><div class="hn">${DC.esc(hol.join(' · '))}</div></div>
-        <div class="cn"><div class="a" title="거점 IN 건수"><span>▲</span><span>${c.inn}</span></div><div class="b" title="출하 실적: 출발 거점에서 OUT된 오더 수(오더당 1회)"><span>▼</span><span>${c.out}</span></div><div class="c" title="출하 목표: 출하예정일이 그날인 오더 수"><span>■</span><span>${c.ord}</span></div></div></div>`;
+        <div class="cn"><div class="a" title="거점 IN 건수"><span>▲</span><span>${c.inn}</span></div><div class="b" title="거점 OUT 건수(모든 거점의 OUT 이벤트)"><span>▼</span><span>${c.out}</span></div><div class="c" title="출하 목표: 출하예정일이 그날인 오더 수"><span>■</span><span>${c.ord}</span></div></div></div>`;
     }
   }
   el('cal').style.gridTemplateRows = `auto repeat(${rows},minmax(0,1fr))`;
@@ -58,7 +58,7 @@ function selDay(ds) {
   if (d.getMonth() !== calM || d.getFullYear() !== calY) { calY = d.getFullYear(); calM = d.getMonth(); }
   renderCal();
   el('day-ttl').textContent = `${ds} 작업 내역`;
-  const os = S.orders().filter(o => (o.date || '') === ds), es = S.events().filter(e => e.time.startsWith(ds)).slice().sort((a, b) => a.time.localeCompare(b.time));
+  const os = S.orders().filter(o => (o.date || '') === ds), es = S.events().filter(e => e.time.startsWith(ds) && (e.event === 'IN' || e.event === 'OUT')).slice().sort((a, b) => a.time.localeCompare(b.time));
   el('day-body').innerHTML = `<div class="pnl-h" style="border-radius:10px;margin-bottom:6px"><span>출하 목표 ${os.length}건 중 출하 ${os.filter(o => originOut(o)).length}건 · 미출하 ${os.filter(o => !originOut(o)).length}건</span><span class="chip">${os.length}건</span></div>` +
     (os.length ? `<table class="dt"><thead><tr><th>오더</th><th>고객사</th><th class="num">수량</th><th>출하</th><th>상태</th></tr></thead><tbody>${os.map(o => `<tr><td>${DC.esc(o.no)}</td><td style="white-space:normal">${DC.esc(o.customer)}</td><td class="num">${ordQty(o)}</td><td>${originOut(o) ? '<span class="chip blue">' + DC.hhmm(originOut(o)) + '</span>' : '<span class="chip red">미출하</span>'}</td><td><span class="chip ${o.status === '지연' ? 'red' : ''}">${DC.esc(o.status)}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty-n">예정 오더 없음</div>') +
     `<div class="pnl-h" style="border-radius:10px;margin:10px 0 6px"><span>거점 IN/OUT 이벤트</span><span class="chip">${es.length}건</span></div>` +
@@ -160,6 +160,6 @@ function openOpsKpi(k) {
     window._dirPop = true; const L = S.directives(), n = dirOpenN();
     openPop('CEO 지시 상세', `대표이사가 보낸 조치 지시 · 미완료 <b>${n}</b>건 / 전체 ${L.length}건 · 접수 → 처리중 → 완료 순서로 처리`, L.length ? dirsHtml(true).replace(/<div class="dir-hd">.*?<\/div>/, '') : '<div class="empty-n">받은 지시가 없습니다</div>', '', '');
   }
-  else if (k === 'ev') { const a = DC.anchorDate(), L = S.events().filter(e => e.time.startsWith(a)).slice().sort((x, y) => x.time.localeCompare(y.time)); openPop('기준일 이벤트 상세', `데이터 기준일 <b>${a}</b>의 거점 IN/OUT 이벤트 <b>${L.length}</b>건`, tb(['시각', '오더', '고객사', '거점', '구분', '처리자'], L.map(e => [DC.hhmm(e.time), `<b>${E(e.orderNo)}</b>`, E(e.customer || ''), E(DC.shortName(e.hub)), `<span class="chip ${e.event === 'IN' ? 'blue' : 'red'}">${E(e.event)}</span>`, E(e.person || '-')])), 'tracking.html', '거점In/Out'); }
+  else if (k === 'ev') { const a = DC.anchorDate(), L = S.events().filter(e => e.time.startsWith(a) && (e.event === 'IN' || e.event === 'OUT')).slice().sort((x, y) => x.time.localeCompare(y.time)); openPop('기준일 이벤트 상세', `데이터 기준일 <b>${a}</b>의 거점 IN/OUT 이벤트 <b>${L.length}</b>건`, tb(['시각', '오더', '고객사', '거점', '구분', '처리자'], L.map(e => [DC.hhmm(e.time), `<b>${E(e.orderNo)}</b>`, E(e.customer || ''), E(DC.shortName(e.hub)), `<span class="chip ${e.event === 'IN' ? 'blue' : 'red'}">${E(e.event)}</span>`, E(e.person || '-')])), 'tracking.html', '거점In/Out'); }
 }
 window.lmtsReady = function () { initNav(); renderOps(); };

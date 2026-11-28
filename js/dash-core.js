@@ -187,7 +187,7 @@ const DC = (() => {
     const end = toDate(anchorDate() + ' 00:00'), labels = [];
     for (let i = days - 1; i >= 0; i--) { const d = new Date(end); d.setDate(d.getDate() - i); labels.push(dstr(d)); }
     const m = {}; labels.forEach(l => m[l] = { a: 0, b: 0 });
-    if (metric === 'ev') S.events().forEach(e => { const k = e.time.slice(0, 10); if (m[k]) (e.event === 'IN' ? m[k].a++ : m[k].b++); });
+    if (metric === 'ev') S.events().forEach(e => { const k = e.time.slice(0, 10); if (m[k]) (e.event === 'IN' ? m[k].a++ : e.event === 'OUT' ? m[k].b++ : 0); });
     if (metric === 'ord') S.orders().forEach(o => { const k = (o.created || o.date || '').slice(0, 10); if (m[k]) m[k].a++; });
     if (metric === 'box') S.packings().forEach(p => { const k = (p.doneAt || '').slice(0, 10); if (m[k]) m[k].a += (+p.boxes || 0); });
     return { labels, a: labels.map(l => m[l].a), b: labels.map(l => m[l].b) };

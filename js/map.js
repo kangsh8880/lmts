@@ -421,7 +421,25 @@ const MP = (() => {
     if (typeof L === 'undefined') { el('mp-map').innerHTML = '<div class="mp-empty">지도 라이브러리를 불러오지 못했습니다.<br>인터넷 연결을 확인한 뒤 새로고침(Ctrl+Shift+R) 하세요.</div>'; }
     else {
       L_ = L; S_.map = L_.map('mp-map', { zoomControl: true, worldCopyJump: false, minZoom: 2, attributionControl: true }).setView([36.5, 127.8], 6);
-      L_.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap contributors' }).addTo(S_.map);
+      // 배경지도 — 첫 서버(OSM)가 막히거나 느리면 자동으로 다음 서버로 바꿈 (회사망·모바일망에서 OSM 타일이 차단되는 경우 대비)
+      const TP = [
+        { u: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', o: { maxZoom: 18, attribution: '© OpenStreetMap contributors' } },
+        { u: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', o: { maxZoom: 18, subdomains: 'abcd', attribution: '© OpenStreetMap © CARTO' } },
+        { u: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', o: { maxZoom: 18, attribution: 'Tiles © Esri' } },
+        { u: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', o: { maxZoom: 18, attribution: '© OpenStreetMap contributors' } }
+      ];
+      let ti = -1, lay = null, bad = 0, good = 0;
+      const useTile = () => {
+        ti++; bad = 0; good = 0;
+        if (lay) S_.map.removeLayer(lay);
+        if (ti >= TP.length) { const w = document.querySelector('.mp-map-wrap'); if (w && !document.getElementById('mp-tilewarn')) w.insertAdjacentHTML('beforeend', '<div id="mp-tilewarn" style="position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:900;background:#fff7e0;border:1px solid #c9a227;border-radius:8px;padding:6px 12px;font-size:13px">🗺️ 배경지도를 불러오지 못했습니다(인터넷·방화벽 확인). 경로와 거점은 그대로 표시됩니다.</div>'); return; }
+        lay = L_.tileLayer(TP[ti].u, TP[ti].o).addTo(S_.map);
+        lay.on('tileload', () => { good++; });
+        const my = lay;
+        lay.on('tileerror', () => { bad++; if (lay === my && !good && bad >= 3) { my.off(); useTile(); } });
+        setTimeout(() => { if (lay === my && !good) { my.off(); useTile(); } }, 6000);   // 6초 안에 한 장도 못 받으면 다음 서버
+      };
+      useTile();
       S_.lg = L_.layerGroup().addTo(S_.map);
     }
     const q = new URLSearchParams(location.search).get('order');
