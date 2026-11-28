@@ -567,6 +567,27 @@
       "forcedDetail": "ooo사유로 긴급출하함.",
       "forcedBy": "Kang",
       "forcedAt": "2026-11-28 10:21"
+    },
+    {
+      "orderNo": "ORD-260420-002",
+      "customer": "LG Display",
+      "boxes": 3,
+      "lines": [],
+      "stockLines": [
+        {
+          "boxNo": "P002",
+          "product": "LCD Panel B타입",
+          "qty": 3
+        }
+      ],
+      "waybill": "",
+      "doneAt": "2026-11-28 10:33",
+      "person": "Kang",
+      "forced": true,
+      "forcedReason": "Packing 기록 누락(사후 등록)",
+      "forcedDetail": "입력기록 누락",
+      "forcedBy": "Kang",
+      "forcedAt": "2026-11-28 10:33"
     }
   ],
   "dispatches": [
@@ -919,6 +940,15 @@
       "customer": "Samsung Electronics",
       "message": "[강제 Packing 처리] ORD-260420-001 · 긴급 출하(시간 부족) · ooo사유로 긴급출하함. · 처리자 Kang",
       "read": false
+    },
+    {
+      "id": "ALM-FP-1795836787989",
+      "time": "2026-11-28 10:33",
+      "type": "FORCED_PACK",
+      "orderNo": "ORD-260420-002",
+      "customer": "LG Display",
+      "message": "[강제 Packing 처리] ORD-260420-002 · Packing 기록 누락(사후 등록) · 입력기록 누락 · 처리자 Kang · 재고 P002×3",
+      "read": false
     }
   ],
   "scans": [],
@@ -1111,5 +1141,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-28 10:21"
+  "lastUpdated": "2026-11-28 10:33"
 }
