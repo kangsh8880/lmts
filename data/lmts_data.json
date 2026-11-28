@@ -410,7 +410,7 @@
       "product": "LCD Panel B타입 / Phone Glass",
       "boxes": 2,
       "note": "",
-      "status": "배차완료",
+      "status": "운송중",
       "created": "2026-11-19 17:00",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -963,6 +963,15 @@
       "customer": "K1 VINA",
       "hub": "VINA VINHYEN",
       "event": "도착완료",
+      "person": "",
+      "note": ""
+    },
+    {
+      "time": "2026-11-28 12:54",
+      "orderNo": "ORD-261119-005",
+      "customer": "K1 VINA",
+      "hub": "자사물류창고 (화성)",
+      "event": "OUT",
       "person": "",
       "note": ""
     }
