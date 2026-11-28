@@ -86,7 +86,7 @@ function doPacking() {
   if(window.EV) setTimeout(()=>EV.ask('Packing 사진 증빙 (선택)',[{orderNo:no,hub:(o.route&&o.route.origin)||'',kind:'PACKING'}],'창고담당'),300);
 }
 function packSummary(p){
-  if (p.forced) return `<span class="chip red">⚠ 강제 처리</span> <b>${(p.forcedReason||'').replace(/</g,'&lt;')}</b><br><span style="color:#555">${(p.forcedDetail||'').replace(/</g,'&lt;')} · 처리자 ${(p.forcedBy||'').replace(/</g,'&lt;')}</span>`;
+  if (p.forced) return `<span class="chip red">⚠ 강제 처리</span> <b>${(p.forcedReason||'').replace(/</g,'&lt;')}</b><br><span style="color:#555">${(p.forcedDetail||'').replace(/</g,'&lt;')} · 처리자 ${(p.forcedBy||'').replace(/</g,'&lt;')}</span>${(p.stockLines&&p.stockLines.length)?'<br><span style="color:#1a4fa0">재고 차감: '+p.stockLines.map(l=>`${l.boxNo}×${l.qty}`).join(', ')+'</span>':'<br><span style="color:#777">재고 차감 없음</span>'}`;
   const g={}; (p.lines||[]).forEach(l=>{ const k=l.packNo||'-'; (g[k]=g[k]||[]).push(`${l.boxNo}×${l.qty}`); });
   return Object.keys(g).map(k=>`<b>상자 ${k}</b>: ${g[k].join(', ')}`).join('<br>')||'-';
 }
@@ -212,33 +212,56 @@ function forcePackOpen(){
     <div class="alert alert-warn" style="margin-bottom:12px;color:#7a1f1f;font-weight:600;line-height:1.6"><div>정상 절차는 Packing 기록 후 출하입니다. 부득이하게 Packing 기록 없이 출하·운송된 경우에만 사용하세요.<br>처리 내용은 <b>감사 기록(삭제 불가)</b>으로 남고 알람이 생성됩니다.</div></div>
     <div class="form-group"><label>① 오더 (Packing 기록이 없는 오더) *</label>
       <select id="fp-order" onchange="forcePackFill()">${grp('진행 오더 — 대시보드 \'패킹 미완료\'와 동일', L.filter(o => o.status !== '도착완료'))}${grp('도착완료 오더 — 사후 기록용(대시보드 패킹 미완료에는 미포함)', L.filter(o => o.status === '도착완료'))}</select></div>
-    <div class="form-group"><label>② 상자 수 * <small style="color:#555">(라벨·현장 스캔 기준 — 기본값은 오더 박스 수)</small></label>
-      <input id="fp-boxes" type="number" min="1" style="width:120px"></div>
-    <div class="form-group"><label>③ 사유 구분 *</label>
+    <div class="form-group"><label>② 상자 수 <small style="color:#555">(오더의 박스 수로 자동 설정 — 수정 불가)</small></label>
+      <input id="fp-boxes" type="number" min="1" readonly tabindex="-1" style="width:120px;background:#eef0f3;color:#111;font-weight:700;cursor:not-allowed" title="강제 처리는 오더 등록 박스 수 그대로 기록됩니다"></div>
+    <div class="form-group"><label>③ 재고 차감 품목 <small style="color:#555">(선택 — 입력한 수량만큼 창고 재고에서 차감, 비우면 차감 없음)</small></label>
+      <div id="fp-stock" style="border:1.5px solid #9ca3af;border-radius:6px;padding:8px;background:#fafafa"></div></div>
+    <div class="form-group"><label>④ 사유 구분 *</label>
       <select id="fp-reason"><option value="">-- 선택 --</option><option>긴급 출하(시간 부족)</option><option>Packing 기록 누락(사후 등록)</option><option>시스템·단말 장애</option><option>현장 사정(고객 요청 등)</option><option>기타</option></select></div>
-    <div class="form-group"><label>④ 상세 사유 * <small style="color:#555">(5자 이상)</small></label>
+    <div class="form-group"><label>⑤ 상세 사유 * <small style="color:#555">(5자 이상)</small></label>
       <textarea id="fp-detail" rows="2" style="width:100%" placeholder="예: 고객 긴급 요청으로 기사 대기 중이라 포장 후 출하, 시스템 등록 누락"></textarea></div>
-    <div class="form-group"><label>⑤ 처리자 *</label><input id="fp-by" type="text" style="width:200px" placeholder="이름"></div>
+    <div class="form-group"><label>⑥ 처리자 *</label><input id="fp-by" type="text" style="width:200px" placeholder="이름"></div>
     <div id="fp-msg" style="min-height:20px;color:#b91c1c;font-weight:700;margin-bottom:6px"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-ghost" onclick="forcePackClose()">취소</button><button type="button" class="btn" style="background:#b91c1c;color:#fff" onclick="forcePackSave()">강제 Packing 처리 실행</button></div></div>`;
   m.classList.remove('hidden'); m.style.display = 'flex'; forcePackFill();
 }
 function forcePackClose(){ const m = document.getElementById('fp-modal'); if (m) { m.style.display = 'none'; m.classList.add('hidden'); } }
-function forcePackFill(){ const o = S.orders().find(x => x.no === document.getElementById('fp-order').value); document.getElementById('fp-boxes').value = o ? (o.boxes || 1) : 1; }
+function forcePackFill(){
+  const o = S.orders().find(x => x.no === document.getElementById('fp-order').value); document.getElementById('fp-boxes').value = o ? (o.boxes || 1) : 1;
+  const box = document.getElementById('fp-stock'); if (!box) return;
+  const rows = o ? ordItems(o).map((i, k) => {
+    const ps = S.products().filter(p => p.name === i.product);
+    if (!ps.length) return `<div style="padding:4px 0;color:#777">${i.product} ${i.qty}개 — 보관 Box 미등록 제품(재고관리 대상 아님)</div>`;
+    return `<div style="display:flex;gap:6px;align-items:center;padding:4px 0;flex-wrap:wrap"><b style="min-width:110px">${i.product}</b><span>주문 ${i.qty}</span>
+      <select id="fps-box-${k}" style="min-width:150px">${ps.map(p => { const c = stockCalc(p.code); return `<option value="${p.code}">${p.code} (현재고 ${c.tracked ? c.left : '제한없음'})</option>`; }).join('')}</select>
+      <input id="fps-qty-${k}" data-prod="${i.product.replace(/"/g, '&quot;')}" type="number" min="0" placeholder="차감 수량" style="width:100px"><button type="button" class="btn btn-ghost btn-xs" onclick="document.getElementById('fps-qty-${k}').value=${+i.qty || 0}">주문수량 전체</button></div>`;
+  }).join('') : '';
+  box.innerHTML = rows || '<span style="color:#777">차감할 품목이 없습니다</span>';
+}
 function forcePackSave(){
   const g = id => (document.getElementById(id).value || '').trim(), msg = t => { document.getElementById('fp-msg').textContent = t; };
-  const no = g('fp-order'), boxes = parseInt(g('fp-boxes')) || 0, reason = g('fp-reason'), detail = g('fp-detail'), by = g('fp-by');
+  const no = g('fp-order'); let boxes = 0; const reason = g('fp-reason'), detail = g('fp-detail'), by = g('fp-by');
   const o = S.orders().find(x => x.no === no); if (!o) return msg('오더를 선택하세요');
   if (S.packings().some(p => p.orderNo === no)) return msg('이미 Packing 기록이 있는 오더입니다');
+  boxes = o.boxes || 1;
   if (boxes < 1) return msg('상자 수를 입력하세요');
   if (!reason) return msg('사유 구분을 선택하세요');
   if (detail.length < 5) return msg('상세 사유를 5자 이상 입력하세요');
   if (!by) return msg('처리자를 입력하세요');
-  if (!confirm(`[${no}] 강제 Packing 처리합니다.\n\n사유: ${reason}\n상세: ${detail}\n처리자: ${by}\n\n이 기록은 삭제할 수 없습니다. 진행할까요?`)) return;
+  const stockLines = [], need = {};
+  for (const inp of document.querySelectorAll('#fp-stock input[id^="fps-qty-"]')) {
+    const q = parseInt(inp.value) || 0; if (q < 1) continue;
+    const code = document.getElementById(inp.id.replace('qty', 'box')).value, c = stockCalc(code);
+    need[code] = (need[code] || 0) + q;
+    if (c.tracked && need[code] > c.left) return msg(`창고 현재고(${c.left})보다 많이 차감할 수 없습니다 (${code}). [📥 창고입고]에서 입고 등록 후 진행하세요`);
+    stockLines.push({ boxNo: code, product: inp.dataset.prod, qty: q });
+  }
+  const stTxt = stockLines.length ? stockLines.map(l => `${l.boxNo}×${l.qty}`).join(', ') : '차감 없음';
+  if (!confirm(`[${no}] 강제 Packing 처리합니다.\n\n사유: ${reason}\n상세: ${detail}\n처리자: ${by}\n재고 차감: ${stTxt}\n\n이 기록은 삭제할 수 없습니다. 진행할까요?`)) return;
   const t = now(), arr = S.packings();
-  arr.push({ orderNo: no, customer: o.customer || '', boxes, lines: [], waybill: '', doneAt: t, person: by, forced: true, forcedReason: reason, forcedDetail: detail, forcedBy: by, forcedAt: t });
+  arr.push({ orderNo: no, customer: o.customer || '', boxes, lines: [], stockLines, waybill: '', doneAt: t, person: by, forced: true, forcedReason: reason, forcedDetail: detail, forcedBy: by, forcedAt: t });
   S.set('packings', arr);
-  const al = S.alarms(); al.push({ id: 'ALM-FP-' + Date.now(), time: t, type: 'FORCED_PACK', orderNo: no, customer: o.customer || '', message: `[강제 Packing 처리] ${no} · ${reason} · ${detail} · 처리자 ${by}`, read: false });
+  const al = S.alarms(); al.push({ id: 'ALM-FP-' + Date.now(), time: t, type: 'FORCED_PACK', orderNo: no, customer: o.customer || '', message: `[강제 Packing 처리] ${no} · ${reason} · ${detail} · 처리자 ${by} · 재고 ${stTxt}`, read: false });
   S.set('alarms', al);
   if (['대기', '', undefined].includes(o.status)) updateOrderStatus(no, '패킹완료'); else reconcileOrderStatus();
   forcePackClose(); fillPackingSelects(); alert(`✅ [${no}] 강제 Packing 처리했습니다.\n감사 기록과 알람이 남았습니다.`);
