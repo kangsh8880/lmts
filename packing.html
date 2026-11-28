@@ -56,7 +56,7 @@
     <a class="nav-tab" href="ops.html" data-page="ops.html"><span class="ti">🧭</span> 운영관제</a>
     <a class="nav-tab" href="master.html" data-page="master.html"><span class="ti">⚙️</span> 기준정보</a>
     <a class="nav-tab" href="order.html" data-page="order.html"><span class="ti">📋</span> 출하오더</a>
-    <a class="nav-tab" href="packing.html" data-page="packing.html"><span class="ti">📦</span> 입고Packing</a>
+    <a class="nav-tab" href="packing.html" data-page="packing.html"><span class="ti">📦</span> 입고/출하Packing</a>
     <a class="nav-tab" href="dispatch.html" data-page="dispatch.html"><span class="ti">🚛</span> 차량배차</a>
     <a class="nav-tab" href="tracking.html" data-page="tracking.html"><span class="ti">📍</span> 거점In/Out</a>
     <a class="nav-tab" href="map.html" data-page="map.html"><span class="ti">🗺️</span> 위치추적</a>
@@ -80,8 +80,8 @@
   <div class="mst-head">
     <div class="sec-title" id="pk-title">입고·Packing 관리</div>
     <div class="mst-tabs" id="pk-tabs">
-      <button class="btn btn-primary btn-sm" onclick="pkView('in',this)">📥 창고 입고</button>
-      <button class="btn btn-ghost btn-sm" onclick="pkView('out',this)">📦 Packing 출고</button>
+      <button class="btn btn-primary btn-sm" onclick="pkView('in',this)">📥 창고입고</button>
+      <button class="btn btn-ghost btn-sm" onclick="pkView('out',this)">📦 출하Packing</button>
     </div>
   </div>
 
@@ -90,11 +90,11 @@
       <div class="fb-step"><b>① 입고 발생</b><span>생산공장·협력사·반품이 자사물류창고에 도착</span></div><div class="fb-ar">▶</div>
       <div class="fb-step"><b>② 검수</b><span>제품·수량·LOT를 서류/라벨과 대조</span></div><div class="fb-ar">▶</div>
       <div class="fb-step"><b>③ 입고 등록·적치</b><span>이 화면에 등록하고 적치 위치를 기록</span></div><div class="fb-ar">▶</div>
-      <div class="fb-step"><b>④ 재고 반영</b><span>현재고 = 기초 + 입고 − Packing 출고</span></div><div class="fb-ar">▶</div>
+      <div class="fb-step"><b>④ 재고 반영</b><span>현재고 = 기초 + 입고 − 출하Packing</span></div><div class="fb-ar">▶</div>
       <div class="fb-step"><b>⑤ 출하오더 → Packing</b><span>재고가 있는 제품만 담기 가능</span></div>
     </div>
     <div class="grid2" style="grid-template-columns:minmax(0,3.5fr) minmax(0,8.5fr)">
-      <div class="card"><div class="card-head">📥 창고 입고 등록</div><div class="card-body" id="rc-form-body">
+      <div class="card"><div class="card-head">📥 창고입고 등록</div><div class="card-body" id="rc-form-body">
         <div class="form-group"><label>입고 일시</label><input id="rc-time" type="datetime-local"></div>
         <div class="form-group"><label>입고 구분</label><select id="rc-type"><option>생산공장</option><option>협력사</option><option>반품</option><option>거점 이동</option><option>기타</option></select></div>
         <div class="form-group"><label>출처 (공장·업체명)</label><input id="rc-src" placeholder="예: UTI VINA 생산라인"></div>
