@@ -160,7 +160,7 @@ const DC = (() => {
       orders: O.length, active: active.length, moving: moving().length,   // 이벤트 기준(거점 OUT 후 다음 거점 IN 전) — 우측 '이동 중 운송 현황'과 동일 기준
       done, delay, off, alarm: delay + off,
       onTime: LI.length ? pct(onTimeN, LI.length) : null, onTimeN, onTimeD: LI.length, onDone: LI.filter(x => x.done && !x.late).length, lateDone: lateList.filter(x => x.done).length, lateAct: lateList.filter(x => !x.done).length, lateList, onTimeList: LI,
-      packRate: pct(packed, O.length), packed,
+      packRate: pct(packed, O.length), packed, packForced: P.filter(p => p.forced).length,
       dispRate: pct(dispatched, O.length), dispatched,
       overRate: measStd.length ? pct(measStd.filter(l => l.over).length, measStd.length) : null, measStd: measStd.length,
       avgLeg: meas.length ? Math.round(meas.reduce((s, l) => s + l.act, 0) / meas.length) : null, measN: meas.length,

@@ -17,7 +17,7 @@ function renderCEO() {
     kbox('c1', '진행 오더', kv(K.active, '건'), `전체 ${K.orders}건 중`, tip.act, 'js:openKpi(\'act\')'),
     kbox('c3', '운송 중', kv(K.moving, '건'), 'OUT 후 다음 거점 IN 전', tip.mv, 'js:openKpi(\'mv\')'),
     kbox('c5', '지연 · 알람', kv(K.alarm, '건', K.alarm > 0 ? 'bad' : ''), `지연 ${K.delay} + 비지정 ${K.off}`, tip.al, 'js:openKpi(\'al\')'),
-    kbox('c4', '패킹 미완료', kv(K.packPend, '건', K.packPend > 0 ? 'bad' : ''), `진행 ${K.active}건 중 패킹 기록 없음`, tip.pk, 'js:openKpi(\'pk\')'),
+    kbox('c4', '패킹 미완료', kv(K.packPend, '건', K.packPend > 0 ? 'bad' : ''), `진행 ${K.active}건 중 패킹 기록 없음${K.packForced ? ' · 강제 완료 ' + K.packForced + '건' : ''}`, tip.pk, 'js:openKpi(\'pk\')'),
     kbox('c1', '배차 필요', kv(K.dispNeed, '건', K.dispNeed > 0 ? 'bad' : ''), `미배차 구간 ${K.dispNeedLegs}개`, tip.dp, 'js:openKpi(\'dp\')'),
     kbox('c4', '재고 부족', kv(K.stockShort, '품목', K.stockShort > 0 ? 'bad' : ''), K.stockShort ? '입고 등록 필요' : '대기 오더 충족', tip.st, 'js:openKpi(\'st\')'),
     kbox('c6', '구간 표준초과율', kv(DC.fmtPct(K.overRate), '%', K.overRate > 0 ? 'bad' : ''), K.measStd ? `측정 ${K.measStd}구간` : '표준시간·실적 부족', tip.ov, 'js:openKpi(\'ov\')')

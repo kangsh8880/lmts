@@ -86,11 +86,13 @@ function doPacking() {
   if(window.EV) setTimeout(()=>EV.ask('Packing 사진 증빙 (선택)',[{orderNo:no,hub:(o.route&&o.route.origin)||'',kind:'PACKING'}],'창고담당'),300);
 }
 function packSummary(p){
+  if (p.forced) return `<span class="chip red">⚠ 강제 처리</span> <b>${(p.forcedReason||'').replace(/</g,'&lt;')}</b><br><span style="color:#555">${(p.forcedDetail||'').replace(/</g,'&lt;')} · 처리자 ${(p.forcedBy||'').replace(/</g,'&lt;')}</span>`;
   const g={}; (p.lines||[]).forEach(l=>{ const k=l.packNo||'-'; (g[k]=g[k]||[]).push(`${l.boxNo}×${l.qty}`); });
   return Object.keys(g).map(k=>`<b>상자 ${k}</b>: ${g[k].join(', ')}`).join('<br>')||'-';
 }
 // 출고(자사물류창고 OUT)·배차가 이루어진 오더의 Packing은 삭제 불가
 function packLockReason(orderNo){
+  if (S.packings().some(p=>p.orderNo===orderNo && p.forced)) return '강제 Packing 처리 기록은 감사 기록이라 삭제할 수 없습니다';
   const o=S.orders().find(x=>x.no===orderNo);
   if (o && !['대기','패킹완료'].includes(o.status)) return `오더 상태가 '${o.status}'입니다`;
   if (S.events().some(e=>e.orderNo===orderNo && e.event==='OUT')) return '거점 OUT(출고)이 이미 등록되었습니다';
@@ -177,3 +179,55 @@ window.lmtsReady = function() {
   let vw='out'; try{ vw=sessionStorage.getItem('lmts_pk_view')||'out'; }catch(e){}
   const bs=document.querySelectorAll('#pk-tabs .btn'); pkView(vw, bs[vw==='in'?0:1]);
 };
+
+
+// ══ 강제 Packing 완료 — 정상 Packing을 못 하고 출하된 경우의 예외 처리. 사유·처리자 필수, 감사 기록(삭제 불가)·알람 자동 생성 ══
+function forcePackOpen(){
+  const have = new Set(S.packings().map(p => p.orderNo));
+  const L = S.orders().filter(o => !have.has(o.no));
+  if (!L.length) return alert('Packing 기록이 없는 오더가 없습니다.');
+  let m = document.getElementById('fp-modal');
+  if (!m) { m = document.createElement('div'); m.id = 'fp-modal'; m.className = 'modal-bg hidden'; document.body.appendChild(m); }
+  const cur = (typeof v === 'function' ? v('pk-order') : '') || '';
+  m.innerHTML = `<div class="modal" style="max-width:640px;width:94vw;position:relative">
+    <button type="button" id="fp-x" style="position:absolute;top:12px;right:14px;width:36px;height:36px;border:1.5px solid #64748b;border-radius:50%;background:#fff;font-size:20px;font-weight:700;cursor:pointer" onclick="forcePackClose()" title="닫기">✕</button>
+    <div class="modal-title" style="padding-right:46px">⚠️ 강제 Packing 완료</div>
+    <div class="alert alert-warn" style="margin-bottom:12px;color:#7a1f1f;font-weight:600;line-height:1.6"><div>정상 절차는 Packing 기록 후 출하입니다. 부득이하게 Packing 기록 없이 출하·운송된 경우에만 사용하세요.<br>처리 내용은 <b>감사 기록(삭제 불가)</b>으로 남고 알람이 생성됩니다.</div></div>
+    <div class="form-group"><label>① 오더 (Packing 기록이 없는 오더) *</label>
+      <select id="fp-order" onchange="forcePackFill()">${L.map(o => `<option value="${o.no}" ${o.no === cur ? 'selected' : ''}>${o.no} · ${o.customer} [${o.status}]</option>`).join('')}</select></div>
+    <div class="form-group"><label>② 상자 수 * <small style="color:#555">(라벨·현장 스캔 기준 — 기본값은 오더 박스 수)</small></label>
+      <input id="fp-boxes" type="number" min="1" style="width:120px"></div>
+    <div class="form-group"><label>③ 사유 구분 *</label>
+      <select id="fp-reason"><option value="">-- 선택 --</option><option>긴급 출하(시간 부족)</option><option>Packing 기록 누락(사후 등록)</option><option>시스템·단말 장애</option><option>현장 사정(고객 요청 등)</option><option>기타</option></select></div>
+    <div class="form-group"><label>④ 상세 사유 * <small style="color:#555">(5자 이상)</small></label>
+      <textarea id="fp-detail" rows="2" style="width:100%" placeholder="예: 고객 긴급 요청으로 기사 대기 중이라 포장 후 출하, 시스템 등록 누락"></textarea></div>
+    <div class="form-group"><label>⑤ 처리자 *</label><input id="fp-by" type="text" style="width:200px" placeholder="이름"></div>
+    <div id="fp-msg" style="min-height:20px;color:#b91c1c;font-weight:700;margin-bottom:6px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-ghost" onclick="forcePackClose()">취소</button><button type="button" class="btn" style="background:#b91c1c;color:#fff" onclick="forcePackSave()">강제 Packing 완료 처리</button></div></div>`;
+  m.classList.remove('hidden'); m.style.display = 'flex'; forcePackFill();
+}
+function forcePackClose(){ const m = document.getElementById('fp-modal'); if (m) { m.style.display = 'none'; m.classList.add('hidden'); } }
+function forcePackFill(){ const o = S.orders().find(x => x.no === document.getElementById('fp-order').value); document.getElementById('fp-boxes').value = o ? (o.boxes || 1) : 1; }
+function forcePackSave(){
+  const g = id => (document.getElementById(id).value || '').trim(), msg = t => { document.getElementById('fp-msg').textContent = t; };
+  const no = g('fp-order'), boxes = parseInt(g('fp-boxes')) || 0, reason = g('fp-reason'), detail = g('fp-detail'), by = g('fp-by');
+  const o = S.orders().find(x => x.no === no); if (!o) return msg('오더를 선택하세요');
+  if (S.packings().some(p => p.orderNo === no)) return msg('이미 Packing 기록이 있는 오더입니다');
+  if (boxes < 1) return msg('상자 수를 입력하세요');
+  if (!reason) return msg('사유 구분을 선택하세요');
+  if (detail.length < 5) return msg('상세 사유를 5자 이상 입력하세요');
+  if (!by) return msg('처리자를 입력하세요');
+  if (!confirm(`[${no}] 강제 Packing 완료 처리합니다.\n\n사유: ${reason}\n상세: ${detail}\n처리자: ${by}\n\n이 기록은 삭제할 수 없습니다. 진행할까요?`)) return;
+  const t = now(), arr = S.packings();
+  arr.push({ orderNo: no, customer: o.customer || '', boxes, lines: [], waybill: '', doneAt: t, person: by, forced: true, forcedReason: reason, forcedDetail: detail, forcedBy: by, forcedAt: t });
+  S.set('packings', arr);
+  const al = S.alarms(); al.push({ id: 'ALM-FP-' + Date.now(), time: t, type: 'FORCED_PACK', orderNo: no, customer: o.customer || '', message: `[강제 Packing 완료] ${no} · ${reason} · ${detail} · 처리자 ${by}`, read: false });
+  S.set('alarms', al);
+  if (['대기', '', undefined].includes(o.status)) updateOrderStatus(no, '패킹완료'); else reconcileOrderStatus();
+  forcePackClose(); fillPackingSelects(); alert(`✅ [${no}] 강제 Packing 완료 처리했습니다.\n감사 기록과 알람이 남았습니다.`);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('pk-order'); if (!sel || document.getElementById('fp-btn')) return;
+  const b = document.createElement('button'); b.id = 'fp-btn'; b.type = 'button'; b.className = 'btn btn-ghost btn-sm'; b.style.cssText = 'margin-top:8px;border-color:#b91c1c;color:#b91c1c;font-weight:700';
+  b.textContent = '⚠️ 강제 Packing 완료 (예외)'; b.onclick = forcePackOpen; sel.parentNode.appendChild(b);
+});

@@ -86,6 +86,9 @@ function saveTracking() {
     if (nx.done) return alert(`⛔ ${orderNo} 는 모든 거점 처리가 완료된 오더입니다.`);
     if ((nx.hub!==hub||nx.event!==eventType) && !confirm(`처리 순서가 다릅니다.\n\n다음 처리 순서: ${nx.hub} ${nx.event}\n선택한 이벤트: ${hub} ${eventType}\n\n그래도 등록할까요?`)) return;
   }
+  // 출발지 OUT은 Packing 기록이 있어야 등록 가능 (예외는 [입고Packing]의 '강제 Packing 완료'로 사유·처리자를 남긴 뒤)
+  if (eventType==='OUT' && o && o.route && hub===o.route.origin && !S.packings().some(p=>p.orderNo===orderNo))
+    return alert(`⛔ Packing 기록이 없어 ${hub} OUT(출고)을 등록할 수 없습니다.\n\n오더: ${orderNo}\n\n[입고Packing]에서 Packing을 완료하세요.\n부득이한 경우 같은 화면의 [⚠️ 강제 Packing 완료]로 사유와 처리자를 남긴 뒤 등록할 수 있습니다.`);
   const last=events.filter(e=>e.orderNo===orderNo).map(e=>e.time).sort().pop();
   if (last && t < last && !confirm(`입력한 시각(${t})이 이 오더의 마지막 이벤트(${last})보다 과거입니다.\n\n시각이 맞습니까?`)) return;
   events.push({time:t, orderNo, customer:o?.customer||'', hub, event:eventType, person:v('tr-person'), note:v('tr-note')});
