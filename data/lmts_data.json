@@ -938,6 +938,15 @@
       "event": "OUT",
       "person": "",
       "note": ""
+    },
+    {
+      "time": "2026-11-28 10:36",
+      "orderNo": "ORD-261119-004",
+      "customer": "K1 VINA",
+      "hub": "하노이 노이바이 공항",
+      "event": "IN",
+      "person": "",
+      "note": ""
     }
   ],
   "alarms": [
