@@ -410,7 +410,7 @@
       "product": "LCD Panel B타입 / Phone Glass",
       "boxes": 2,
       "note": "",
-      "status": "운송중",
+      "status": "배차완료",
       "created": "2026-11-19 17:00",
       "route": {
         "origin": "자사물류창고 (화성)",
@@ -841,15 +841,6 @@
       "note": ""
     },
     {
-      "time": "2026-11-20 13:28",
-      "orderNo": "ORD-261119-005",
-      "customer": "K1 VINA",
-      "hub": "자사물류창고 (화성)",
-      "event": "OUT",
-      "person": "배차담당",
-      "note": "차량 출발"
-    },
-    {
       "time": "2026-11-21 07:58",
       "orderNo": "ORD-260420-002",
       "customer": "LG Display",
@@ -1003,6 +994,29 @@
       "customer": "LG Display",
       "message": "[강제 Packing 처리] ORD-260420-002 · Packing 기록 누락(사후 등록) · 입력기록 누락 · 처리자 Kang · 재고 P002×3",
       "read": false
+    },
+    {
+      "id": "ALM-EC-1795845245456",
+      "time": "2026-11-28 12:54",
+      "type": "EVENT_CANCEL",
+      "orderNo": "ORD-261119-005",
+      "customer": "K1 VINA",
+      "hub": "자사물류창고 (화성)",
+      "event": "OUT",
+      "message": "[이벤트 취소] ORD-261119-005 · 자사물류창고 (화성) OUT (2026-11-20 13:28) · 사유: 거점·이벤트를 잘못 선택 · 처리자 KKK",
+      "reason": "거점·이벤트를 잘못 선택",
+      "detail": "",
+      "by": "KKK",
+      "record": {
+        "time": "2026-11-20 13:28",
+        "orderNo": "ORD-261119-005",
+        "customer": "K1 VINA",
+        "hub": "자사물류창고 (화성)",
+        "event": "OUT",
+        "person": "배차담당",
+        "note": "차량 출발"
+      },
+      "read": true
     }
   ],
   "scans": [],
@@ -1253,5 +1267,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-28 12:18"
+  "lastUpdated": "2026-11-28 12:54"
 }
