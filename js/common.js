@@ -182,7 +182,7 @@ function stockCalc(code){
   const p=S.products().find(x=>x.code===code); const base=parseInt(p&&p.qty)||0;
   const rc=S.receipts().filter(r=>r.boxNo===code&&r.status!=='취소');
   const inn=rc.reduce((a,r)=>a+(+r.qty||0),0);
-  const out=S.packings().reduce((a,pk)=>a+(pk.lines||[]).filter(l=>l.boxNo===code).reduce((s,l)=>s+(+l.qty||0),0),0);
+  const out=S.packings().reduce((a,pk)=>a+(pk.lines||[]).concat(pk.stockLines||[]).filter(l=>l.boxNo===code).reduce((s,l)=>s+(+l.qty||0),0),0);   // stockLines = 강제 Packing 처리 시 선택 입력한 재고 차감 내역(라벨·스캔 상자 수에는 영향 없음)
   const tracked=base>0||rc.length>0;
   return {base,inn,out,left:Math.max(0,base+inn-out),tracked};
 }

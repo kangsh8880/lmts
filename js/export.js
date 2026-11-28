@@ -81,7 +81,7 @@
     if (typeof XLSX === 'undefined') return alert('엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결 확인 후 새로고침하세요.\n(표별 "⬇ 엑셀" 버튼은 CSV로 내려받을 수 있습니다)');
     const wb = XLSX.utils.book_new(), add = (n, aoa) => XLSX.utils.book_append_sheet(wb, sheetOf(aoa.length > 1 ? aoa : [aoa[0] || ['데이터 없음']]), (window.LMTS_I18N ? window.LMTS_I18N.t(n) : n).slice(0, 31));
     add('오더', arrSheet(S.orders(), { drop: ['route', 'items'], extra: { '제품·수량': o => (o.items || []).map(i => `${i.product} ${i.qty}`).join(' / ') || o.product || '', '운송경로': o => routeText(o.route) } }));
-    add('Packing', arrSheet(S.packings(), { drop: ['lines'], extra: { 'Packing내역': p => (p.lines || []).map(l => `상자${l.packNo}:${l.boxNo}×${l.qty}`).join(' / ') } }));
+    add('Packing', arrSheet(S.packings(), { drop: ['lines','stockLines'], extra: { 'Packing내역': p => (p.lines || []).concat(p.stockLines || []).map(l => `상자${l.packNo}:${l.boxNo}×${l.qty}`).join(' / ') } }));
     add('배차', arrSheet(S.dispatches().slice().sort((a, b) => String(a.orderNo).localeCompare(String(b.orderNo), undefined, { numeric: true }) || a.legIdx - b.legIdx)));
     add('거점이벤트', arrSheet(S.events().slice().sort((a, b) => String(a.time).localeCompare(String(b.time)))));
     add('고객사', arrSheet(S.customers())); add('제품', arrSheet(S.products())); add('차량기사', arrSheet(S.vehicles())); add('거점', arrSheet(S.hubs()));
