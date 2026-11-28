@@ -1259,7 +1259,7 @@
       "id": "DIR-261125-001",
       "time": "2026-11-25 13:16",
       "from": "CEO",
-      "status": "처리중",
+      "status": "완료",
       "log": [
         {
           "time": "2026-11-25 13:16",
@@ -1278,6 +1278,12 @@
           "who": "운영관제",
           "status": "처리중",
           "memo": ""
+        },
+        {
+          "time": "2026-11-28 13:40",
+          "who": "운영관제",
+          "status": "완료",
+          "memo": "배차조치 완료"
         }
       ],
       "to": "배차",
@@ -1285,8 +1291,9 @@
       "text": "원인 파악 후 보고",
       "ref": "표준시간 초과 · ORD-260420-001",
       "orderNo": "ORD-260420-001",
-      "customer": "Samsung Electronics"
+      "customer": "Samsung Electronics",
+      "doneTime": "2026-11-28 13:40"
     }
   ],
-  "lastUpdated": "2026-11-28 13:39"
+  "lastUpdated": "2026-11-28 13:40"
 }
