@@ -539,6 +539,20 @@
       "waybill": "SK-202611270001",
       "doneAt": "2026-11-27 16:29",
       "person": "창고담당"
+    },
+    {
+      "orderNo": "ORD-260419-001",
+      "customer": "SK Hynix",
+      "boxes": 8,
+      "lines": [],
+      "waybill": "",
+      "doneAt": "2026-11-28 10:20",
+      "person": "Kang",
+      "forced": true,
+      "forcedReason": "기타",
+      "forcedDetail": "Test Data임.",
+      "forcedBy": "Kang",
+      "forcedAt": "2026-11-28 10:20"
     }
   ],
   "dispatches": [
@@ -873,7 +887,17 @@
       "note": ""
     }
   ],
-  "alarms": [],
+  "alarms": [
+    {
+      "id": "ALM-FP-1795836016222",
+      "time": "2026-11-28 10:20",
+      "type": "FORCED_PACK",
+      "orderNo": "ORD-260419-001",
+      "customer": "SK Hynix",
+      "message": "[강제 Packing 처리] ORD-260419-001 · 기타 · Test Data임. · 처리자 Kang",
+      "read": false
+    }
+  ],
   "scans": [],
   "receipts": [
     {
@@ -1064,5 +1088,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-27 21:33"
+  "lastUpdated": "2026-11-28 10:20"
 }
