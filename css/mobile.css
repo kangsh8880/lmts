@@ -127,6 +127,7 @@
   .mc-ok{padding:14px;text-align:center;font-size:15px;line-height:1.6;border:1px solid #9CA3AF;border-radius:12px;background:#fff;margin-top:8px}
   .mc-dirbtn{width:100%;margin:10px 0 12px;padding:13px 14px;border:2px solid #9CA3AF;border-radius:12px;background:#fff;display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;color:#111827}
   .mc-dirbtn small{font-size:13px;font-weight:600;color:#6B7280;margin-left:4px}
+  .mc-dirbtn.plain{border-style:dashed;margin:10px 0 8px}
   .mc-dirbtn.new{border-color:#111827;background:#EAF2FB}
   .mc-dirbtn i{font-style:normal;font-size:20px;color:#6B7280}
   .mc-newbadge,.ms-dir .mc-newbadge{display:inline-block !important;width:auto !important;vertical-align:middle;padding:3px 9px;border-radius:12px;background:#FBE3E3;border:1.5px solid #B91C1C;color:#B91C1C;font-size:13px;font-weight:800}
@@ -182,3 +183,44 @@
   .ms-act b.hl-b{display:inline-block;margin-top:2px}
 }
 @media (max-width:900px){.mc-bs span:nth-child(2){margin-left:.2em}.mc-bs span:nth-child(3){margin-left:.1em}}
+
+/* PC·태블릿(901px 이상): 지시 작성·현황 창을 가운데 팝업으로 표시 */
+@media (min-width:901px){
+  .mc-newbadge,.ms-dir .mc-newbadge{display:inline-block !important;width:auto !important;vertical-align:middle;padding:3px 9px;border-radius:12px;background:#FBE3E3;border:1.5px solid #B91C1C;color:#B91C1C;font-size:13px;font-weight:800}
+  .ms-ctx{margin:8px 0;padding:9px 11px;border:1.5px solid #9CA3AF;border-radius:10px;background:#FFF8E6;font-size:14px;line-height:1.55;color:#111827}
+  .ms-ctx.old{background:#F3F4F6;color:#4B5563}
+  .ms-ctxt{font-weight:800;margin-bottom:2px}.ms-ctxt small{font-weight:600;color:#6B7280;margin-left:4px}
+  .ms-dtext{margin:6px 0;font-size:15px}
+  #m-sheet{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.4);align-items:flex-end}
+  #m-sheet.on{display:flex}
+  .ms-box{width:100%;max-height:86dvh;overflow:auto;background:#fff;border-radius:18px 18px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom))}
+  .ms-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:16px}
+  .ms-h button{border:1px solid #9CA3AF;border-radius:8px;background:#F3F4F6;padding:6px 10px;font-size:13px;white-space:nowrap}
+  .ms-r{padding:8px 0;border-top:1px solid #E5E7EB;font-size:14.5px;line-height:1.5;color:#111827}
+  .ms-r span{display:block;font-size:12px;font-weight:700;color:#6B7280;margin-bottom:1px}
+  .ms-act{background:#EEF4FB;border-radius:8px;padding:8px 10px;border:1px solid #9CA3AF}
+  .ms-btns{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .ms-btns .btn{min-height:46px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:15px}
+  .ms-form{margin-top:10px;padding:10px;border:1.5px solid #334155;border-radius:12px;background:#F8FAFC}
+  .ms-ft{font-size:15.5px;font-weight:800;margin-bottom:6px}
+  .ms-fl{font-size:12px;font-weight:700;color:#6B7280;margin:8px 0 4px}
+  .ms-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .ms-chip{padding:8px 12px;border:1.5px solid #9CA3AF;border-radius:18px;background:#fff;font-size:14px;font-weight:600;color:#111827;min-height:38px}
+  .ms-chip.on{background:#D6E4F0;border-color:#334155;font-weight:800}
+  .ms-chip.q{border-style:dashed}
+  .ms-send{width:100%;margin-top:8px;min-height:48px;font-size:16px;font-weight:800}
+  .ms-done{padding:8px 10px;margin-bottom:8px;border:1px solid #16A34A;border-radius:8px;background:#DDF3E4;font-size:14px;font-weight:700}
+  .ms-dir{padding:8px 10px;border:1px solid #9CA3AF;border-radius:8px;background:#fff;font-size:13.5px;line-height:1.45;margin-top:4px}
+  .ms-dir.st-처리중{background:#FFFBEA}.ms-dir.st-완료{background:#F0FAF3}.ms-dir.st-접수{background:#F1F7FD}
+  .ms-log{margin-top:4px;padding-top:4px;border-top:1px dashed #D1D5DB;font-size:12.5px;color:#4B5563}
+  .ms-cust .big{font-size:19px}
+  .ms-cause{background:#FFF1F1;border-radius:8px;padding:8px 10px;border:1px solid #E5B4B4;border-top:1px solid #E5B4B4;margin-top:6px}
+  .ms-act b.hl-b{display:inline-block;margin-top:2px}
+  #m-sheet{align-items:center;justify-content:center}
+  .ms-box{width:min(640px,94vw);max-height:88vh;border-radius:16px;padding:18px 22px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+  .d-dir{display:flex;gap:6px;margin-left:10px}
+  .d-dir button{padding:7px 14px;border:1.5px solid #64748b;border-radius:8px;background:#fff;font-weight:700;font-size:14px;cursor:pointer;color:#0f172a}
+  .d-dir button.pri{background:#D6E4F0}
+}
+@media (max-width:900px){.d-dir{display:none}}
+.ms-sel{width:100%;padding:11px;border:1.5px solid #9CA3AF;border-radius:10px;font-size:16px;margin:4px 0 6px}
