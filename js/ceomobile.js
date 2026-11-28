@@ -30,6 +30,13 @@ const CM = (() => {
   const dirOpen = () => S.directives().filter(d => d.status !== '완료');
   const stIc = { 지시: '📌', 접수: '👀', 처리중: '🛠', 완료: '✅' };
   let sel = { to: '', pr: '오늘', text: '' };
+  // ── 내 지시 현황: 새로 완료된 지시 배지 (확인 시각은 이 휴대폰 브라우저에 저장) ──
+  const SEEN_KEY = 'lmts-dir-seen';
+  const seenAt = () => { try { return localStorage.getItem(SEEN_KEY) || ''; } catch (e) { return ''; } };
+  const recentLim = () => { const d = new Date(Date.now() - 7 * 86400000), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} 00:00`; };
+  const isNewDone = d => d.status === '완료' && (d.doneTime || '') > (seenAt() || recentLim());
+  const newDone = () => S.directives().filter(isNewDone);
+  const markSeen = () => { try { localStorage.setItem(SEEN_KEY, now()); } catch (e) {} };
   // ── 핵심 문구 강조: 고객·최종 도착지=파랑 굵게, 원인·지연 수치=빨강 굵게, 조치=굵게 ──
   const E2 = t => DC.esc(t || '');
   const hlFact = t => E2(t).replace(/(\(\+[0-9일시간분 ]+\)|\(표준 대비 \+[^)]*\))/g, '<b class="hl-r">$1</b>').replace(/(실적 )([0-9일시간분 ]+)/g, '$1<b class="hl-r">$2</b>').replace(/(\d+ 부족)/g, '<b class="hl-r">$1</b>').replace(/(지연 상태|지정 경로 외 거점)/g, '<b class="hl-r">$1</b>');
@@ -57,7 +64,10 @@ const CM = (() => {
         `<div class="mc-cf">${hlFact(a.fact)}</div><div class="mc-go">${(() => { const d = dirsOf(a)[0]; return d ? `<span class="mc-dir st-${d.status}">${stIc[d.status]} ${d.status}</span> ` : ''; })()}자세히·조치 ›</div></div>`;
     }).join('');
     const more = list.length > 3 && !showAll ? `<button type="button" class="mc-more" onclick="CM.all()">나머지 ${list.length - 3}건 더 보기</button>` : '';
-    host.innerHTML = `<div class="mc-banner lv${lv}"><div class="mc-bi">${lvIc[lv]}</div><div><div class="mc-bt">${head[0]}</div><div class="mc-bs">${head[1]}</div></div></div>` + chips +
+    const nd = newDone(), dn = dirOpen().length, tot = S.directives().length;
+    const dirBar = tot ? `<button type="button" class="mc-dirbtn${nd.length ? ' new' : ''}" onclick="CM.dirs()"><span>📌 내 지시 현황 <small>미완료 ${dn}건</small></span>${nd.length ? `<b class="mc-newbadge">✅ 새 완료 ${nd.length}건</b>` : '<i>›</i>'}</button>` : '';
+    const doneNote = nd.length ? `<div class="mc-donenote" onclick="CM.dirs()">✅ 지시하신 ${nd.length}건이 완료되었습니다. <b>결과 보기 ›</b></div>` : '';
+    host.innerHTML = doneNote + `<div class="mc-banner lv${lv}"><div class="mc-bi">${lvIc[lv]}</div><div><div class="mc-bt">${head[0]}</div><div class="mc-bs">${head[1]}</div></div></div>` + chips + dirBar +
       (cards ? `<div class="mc-cards">${cards}</div>${more}` : `<div class="mc-ok">진행 ${K.active}건 · 운송 중 ${K.moving}건 · 정시납품율 ${DC.fmtPct(K.onTime) == null ? '-' : DC.fmtPct(K.onTime) + '%'}<br>지금 결정하실 일은 없습니다.</div>`) +
       (cards ? `<div class="mc-sub">진행 <b>${K.active}</b>건 · 운송 중 <b>${K.moving}</b>건 · 정시납품율 <b>${DC.fmtPct(K.onTime) == null ? '-' : DC.fmtPct(K.onTime) + '%'}</b></div>` : '');
   }
@@ -101,10 +111,11 @@ const CM = (() => {
     const b = document.querySelector('#m-sheet .ms-form'); if (b) b.insertAdjacentHTML('afterbegin', '<div class="ms-done">✅ 지시를 보냈습니다. 운영관제 화면에 표시됩니다.</div>'); const dn = document.querySelector('#m-sheet .ms-done'); if (dn) dn.scrollIntoView({ block: 'center' });
   }
   function dirs() {
-    const L = S.directives();
+    const L = S.directives().slice().sort((a, b) => (isNewDone(b) - isNewDone(a)) || (b.time || '').localeCompare(a.time || ''));
+    const fresh = new Set(L.filter(isNewDone).map(d => d.id));
     sheet(`<div class="ms-box"><div class="ms-h"><b>📌 내 지시 현황</b><button type="button" onclick="CM.close()">닫기 ✕</button></div>` +
-      (L.length ? L.slice(0, 30).map(d => `<div class="ms-r"><div class="ms-dir st-${d.status}"><b>${stIc[d.status]} ${d.status}</b> · ${DC.esc(d.to)} · ${DC.esc(d.priority)} · ${DC.esc((d.time || '').slice(5, 16))}<br><b>${DC.esc(d.ref || '')}</b><br>${DC.esc(d.text)}${logHtml(d)}</div></div>`).join('') : '<div class="ms-r">보낸 지시가 없습니다.</div>') + '</div>');
+      (L.length ? L.slice(0, 30).map(d => `<div class="ms-r"><div class="ms-dir st-${d.status}"><b>${stIc[d.status]} ${d.status}</b>${fresh.has(d.id) ? ' <span class="mc-newbadge">NEW</span>' : ''} · ${DC.esc(d.to)} · ${DC.esc(d.priority)} · ${DC.esc((d.time || '').slice(5, 16))}<br><b>${DC.esc(d.ref || '')}</b><br>${DC.esc(d.text)}${logHtml(d)}</div></div>`).join('') : '<div class="ms-r">보낸 지시가 없습니다.</div>') + '</div>');
   }
-  function close() { const sh = document.getElementById('m-sheet'); if (sh) sh.classList.remove('on'); }
+  function close() { markSeen(); render(); const sh = document.getElementById('m-sheet'); if (sh) sh.classList.remove('on'); }
   return { render, open, close, pickTo, pickPr, addQ, send, dirs, all() { showAll = true; render(); } };
 })();

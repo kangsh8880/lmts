@@ -107,7 +107,7 @@ function dirsHtml(all) {
 }
 function opsDir(id, st) {
   let memo = '';
-  if (st === '완료') { memo = prompt('처리 결과를 간단히 적어 주세요 (CEO 휴대폰에 표시됩니다)', '') ; if (memo === null) return; }
+  if (st === '완료') { memo = prompt('처리 결과를 간단히 적어 주세요\n(CEO 휴대폰 [📌 내 지시 현황]에 표시되고, 화면을 열면 "새 완료" 배지가 뜹니다. 푸시·메일 알림은 발송되지 않습니다)', '') ; if (memo === null) return; }
   setDirectiveStatus(id, st, memo, '운영관제'); renderOps();
   if (window._dirPop) openOpsKpi('dir');
 }
