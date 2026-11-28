@@ -123,11 +123,41 @@ function showOrderTrack() {
   const evts=S.events().filter(e=>e.orderNo===no).sort((a,b)=>a.time.localeCompare(b.time));
   const ps=S.products();
   let html=buildTrackerCard(o, ps);
-  html+='<div class="trk-log-t">📋 이벤트 이력 <span class="hp-sub">('+evts.length+'건)</span></div><div class="trk-log-wrap"><table class="trk-log" data-xl="skip" id="trk-hist"><thead><tr><th>일시</th><th>이벤트</th><th>거점</th><th>처리자</th><th>비고</th></tr></thead><tbody>';
-  evts.forEach(e=>{ html+=`<tr><td>${e.time.replace('T',' ')}</td><td><span class="trk-ev ${e.event}">${e.event}</span></td><td>${e.hub}</td><td>${e.person||'-'}</td><td>${e.note||''} ${window.EV?EV.badge(e.orderNo,e.hub,e.event):''}</td></tr>`; });
-  if (!evts.length) html+='<tr><td colspan="5" style="text-align:center;color:var(--gray)">이벤트 없음</td></tr>';
+  html+='<div class="trk-log-t">📋 이벤트 이력 <span class="hp-sub">('+evts.length+'건)</span></div><div class="trk-log-wrap"><table class="trk-log" data-xl="skip" id="trk-hist"><thead><tr><th>일시</th><th>이벤트</th><th>거점</th><th>처리자</th><th>비고</th><th>조치</th></tr></thead><tbody>';
+  const lastE=lastEventOf(no);
+  evts.forEach(e=>{ html+=`<tr><td>${e.time.replace('T',' ')}</td><td><span class="trk-ev ${e.event}">${e.event}</span></td><td>${e.hub}</td><td>${e.person||'-'}</td><td>${e.note||''} ${window.EV?EV.badge(e.orderNo,e.hub,e.event):''}</td><td>${lastE&&evKey(e)===evKey(lastE)?`<button type="button" class="btn btn-danger btn-xs" onclick="cancelLastEvent('${no}')" title="마지막 이벤트 취소(사유·처리자 필수)">취소</button>`:''}</td></tr>`; });
+  if (!evts.length) html+='<tr><td colspan="6" style="text-align:center;color:var(--gray)">이벤트 없음</td></tr>';
   html+='</tbody></table></div>';
   el('order-track-display').innerHTML=html;
+}
+// ── 마지막 이벤트 취소: 오더의 가장 마지막 이벤트 1건만, 사유·처리자 필수. 이벤트는 삭제하되 전체 내용을 알람(EVENT_CANCEL)에 보존 ──
+const evKey=e=>[e.time,e.orderNo,e.hub,e.event].join('|');
+function lastEventOf(no){
+  const L=S.events().map((e,i)=>({e,i})).filter(x=>x.e.orderNo===no).sort((a,b)=>String(a.e.time).localeCompare(String(b.e.time))||a.i-b.i);
+  return L.length?L[L.length-1].e:null;
+}
+function cancelLastEvent(no){
+  const e=lastEventOf(no), o=S.orders().find(x=>x.no===no); if(!e||!o) return alert('취소할 이벤트가 없습니다');
+  const eff=e.event==='도착완료'?'오더 상태가 도착완료 → 운송중으로 돌아갑니다.':e.event==='OUT'?'이 거점의 출발(OUT) 기록이 사라지고 운송 상태가 이전 단계로 돌아갑니다.':'이 거점의 입고(IN) 기록이 사라집니다.';
+  askReason({
+    title:'↩️ 마지막 이벤트 취소',
+    info:`<b>${no}</b> · ${o.customer}<br>취소 대상: <b>${e.hub} ${e.event}</b> (${String(e.time).replace('T',' ')} · 처리자 ${e.person||'-'})<br>${eff}<br><span style="color:#b91c1c">이 오더의 <b>가장 마지막 이벤트 1건</b>만 취소할 수 있고, 취소한 내용은 삭제되지 않고 이력(이벤트 로그의 취소 기록)에 남습니다.</span>`,
+    reasons:['거점·이벤트를 잘못 선택','처리 시각 오입력','다른 오더를 잘못 처리','실제로는 출발·도착하지 않음','기타'],
+    okText:'이벤트 취소 실행',
+    onOk:r=>{
+      const evs=S.events(), k=evKey(e); let idx=-1; for(let i=evs.length-1;i>=0;i--){ if(evKey(evs[i])===k){ idx=i; break; } }
+      if(idx<0) return alert('이미 변경된 이벤트입니다. 화면을 새로고침한 뒤 다시 시도하세요.');
+      evs.splice(idx,1); S.set('events', evs);
+      const al=S.alarms().filter(a=>!(a.type==='OFF_ROUTE'&&a.orderNo===e.orderNo&&a.hub===e.hub&&a.event===e.event&&a.time===e.time));   // 취소된 이벤트로 생긴 비지정 알람은 함께 해소
+      al.push({ id:'ALM-EC-'+Date.now(), time:now(), type:'EVENT_CANCEL', orderNo:no, customer:o.customer||'', hub:e.hub, event:e.event,
+        message:`[이벤트 취소] ${no} · ${e.hub} ${e.event} (${String(e.time).replace('T',' ')}) · 사유: ${r.reason}${r.detail?' / '+r.detail:''} · 처리자 ${r.by}`,
+        reason:r.reason, detail:r.detail, by:r.by, record:e, read:true });
+      S.set('alarms', al);
+      reconcileOrderStatus();
+      trPin=no; fillTrackingSelects(); el('tr-order').value=no; onOrderPick(); renderHubPanel(); renderTrackingLog();
+      alert(`✅ [${no}] ${e.hub} ${e.event} 이벤트를 취소했습니다(이력 보존).\n오더 상태: ${(S.orders().find(x=>x.no===no)||{}).status}`);
+    }
+  });
 }
 function dupEvents(){   // 같은 오더·거점·이벤트 중 가장 이른 것만 남기고 나머지를 중복으로 본다
   const seen=new Map(), dups=[];
@@ -164,9 +194,12 @@ function renderTrackingLog() {
   if(bar) bar.innerHTML = d.length ? `<div class="alert alert-warn" style="margin-bottom:10px;justify-content:space-between;align-items:center"><span>⚠️ 같은 오더·거점·이벤트가 중복 등록된 건이 <b>${d.length}건</b> 있습니다.</span><button class="btn btn-danger btn-sm" onclick="cleanDupEvents()">중복 정리</button></div>` : '';
   const fc=v('lg-cust'), fs=v('lg-st'), fo=v('lg-order'), fh=v('lg-hub'), fe=v('lg-ev'), ff=v('lg-from'), ft=v('lg-to');
   const rows=all.slice().reverse().filter(e=>(!fc||custOf(e)===fc)&&(!fs||(fs==='done')===isDoneOrd(e.orderNo))&&(!fo||e.orderNo===fo)&&(!fh||e.hub===fh)&&(!fe||e.event===fe)&&(!ff||String(e.time).slice(0,10)>=ff)&&(!ft||String(e.time).slice(0,10)<=ft));
-  el('lg-count').textContent=`${rows.length}건 / 전체 ${all.length}건`;
+  const cx=S.alarms().filter(a=>a.type==='EVENT_CANCEL'&&a.record).map(a=>({a,e:a.record})).filter(({e})=>(!fc||custOf(e)===fc)&&(!fs||(fs==='done')===isDoneOrd(e.orderNo))&&(!fo||e.orderNo===fo)&&(!fh||e.hub===fh)&&(!fe||e.event===fe)&&(!ff||String(e.time).slice(0,10)>=ff)&&(!ft||String(e.time).slice(0,10)<=ft));
+  const lastKeys=new Set([...new Set(all.map(e=>e.orderNo))].map(no=>{const l=lastEventOf(no); return l?evKey(l):'';}));
+  el('lg-count').textContent=`${rows.length}건 / 전체 ${all.length}건`+(cx.length?` · 취소 이력 ${cx.length}건`:'');
+  const cxRows=cx.map(({a,e})=>`<tr class="lg-cx"><td><s>${e.time}</s></td><td><s><b>${e.orderNo}</b></s></td><td><s>${custOf(e)}</s></td><td><s>${e.hub}</s></td><td><span class="status s-cancel">취소됨</span> <s>${e.event}</s></td><td>${a.by||'-'}</td><td colspan="2" style="font-size:13px">${(a.time||'').slice(0,16)} · ${a.reason||''}${a.detail?' / '+a.detail:''}</td></tr>`).join('');
   el('tracking-log-body').innerHTML = rows.map(e=>`<tr class="lg-row" data-o="${e.orderNo}"><td>${e.time}</td><td><b>${e.orderNo}</b></td><td>${custOf(e)}</td><td>${e.hub}</td>
-    <td><span class="status ${evCls(e.event)}">${e.event}</span></td><td>${e.person||'-'}</td><td>${e.note||'-'}</td><td>${isDoneOrd(e.orderNo)?`<button type="button" class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openCorrect('${e.orderNo}')">정정 열기</button>`:'<span style="color:#9CA3AF">진행 중</span>'}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">이벤트 없음</td></tr>';
+    <td><span class="status ${evCls(e.event)}">${e.event}</span></td><td>${e.person||'-'}</td><td>${e.note||'-'}</td><td>${isDoneOrd(e.orderNo)?`<button type="button" class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openCorrect('${e.orderNo}')">정정 열기</button> `:'<span style="color:#9CA3AF">진행 중</span> '}${lastKeys.has(evKey(e))?`<button type="button" class="btn btn-danger btn-xs" onclick="event.stopPropagation();cancelLastEvent('${e.orderNo}')">이벤트 취소</button>`:''}</td></tr>`).join('') + cxRows || '<tr><td colspan="8" class="empty">이벤트 없음</td></tr>';
 }
 // 도착완료 오더는 처리 화면 목록에서 빠지므로, 이력·증빙 확인/보완이 필요하면 사유·처리자를 남기고 처리 화면에 불러온다(기록 보존: 이미 등록된 이벤트는 바꾸지 않음)
 function openCorrect(no){
