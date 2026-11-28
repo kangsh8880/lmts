@@ -1158,13 +1158,19 @@
       "id": "DIR-261125-002",
       "time": "2026-11-25 13:24",
       "from": "CEO",
-      "status": "지시",
+      "status": "접수",
       "log": [
         {
           "time": "2026-11-25 13:24",
           "who": "CEO",
           "status": "지시",
           "memo": "원인 파악 후 보고"
+        },
+        {
+          "time": "2026-11-28 10:46",
+          "who": "운영관제",
+          "status": "접수",
+          "memo": ""
         }
       ],
       "to": "배차",
@@ -1195,5 +1201,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-28 10:36"
+  "lastUpdated": "2026-11-28 10:46"
 }
