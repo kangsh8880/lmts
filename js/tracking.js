@@ -2,8 +2,9 @@
 
 // ─── TRACKING ─────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
+let trPin='';   // 방금 처리했거나 '정정 열기'로 연 도착완료 오더 — 다른 오더를 고르기 전까지만 목록에 유지
 function fillTrackingSelects() {
-  const act=['운송중','패킹완료','배차완료'], all=S.orders();
+  const act=['운송중','패킹완료','배차완료'], all=S.orders().filter(o=>o.status!=='도착완료'||o.no===trPin);   // 처리 화면에는 진행 중 오더만 (도착완료는 이벤트 로그에서 조회)
   const rank=o=>act.includes(o.status)?0:1;
   const sorted=all.slice().sort((x,y)=>rank(x)-rank(y)||String(x.no).localeCompare(String(y.no),undefined,{numeric:true}));
   fillSel('tr-order', sorted.map(o=>({v:o.no, l:`${o.no} · ${o.customer} [${o.status}]`})));
@@ -14,7 +15,10 @@ function fillTrackingSelects() {
 }
 // 출하오더 선택 → 거점·다음 처리 자동 세팅 + 오더 추적 현황 자동 연동
 function exportTrackHist(){ const t=el('trk-hist'); if(!t) return alert('오더를 선택하세요'); exportTableXlsx(t,'오더 이벤트 이력 '+v('tr-order')); }
-function onOrderPick(){ loadOrderHubs(); showOrderTrack(); }
+function onOrderPick(){
+  if(trPin && v('tr-order')!==trPin){ trPin=''; const c=v('tr-order'); fillTrackingSelects(); el('tr-order').value=c; }
+  loadOrderHubs(); showOrderTrack();
+}
 function routeNames(o){
   if(!o||!o.route) return [];
   const {origin, waypoints, destination}=o.route;
@@ -110,7 +114,7 @@ function saveTracking() {
     } else { alert(`✅ [${orderNo}] ${hub} ${eventType}`); }
   } else { alert(`✅ [${orderNo}] ${hub} ${eventType}`); }
 
-  fillTrackingSelects(); onOrderPick(); renderHubPanel();
+  trPin=orderNo; fillTrackingSelects(); onOrderPick(); renderHubPanel();
   if(window.EV) setTimeout(()=>EV.ask(hub+' '+eventType+' 사진 증빙 (선택)',[{orderNo,hub,kind:eventType}],v('tr-person')),300);
 }
 function showOrderTrack() {
@@ -137,14 +141,19 @@ function cleanDupEvents(){
   renderTrackingLog(); onOrderPick();
 }
 const evCls=e=>e==='IN'?'s-in':e==='OUT'?'s-out':'s-done';
+const isDoneOrd=no=>{ const o=S.orders().find(x=>x.no===no); return !!o&&o.status==='도착완료'; };
+const custOf=e=>e.customer||(S.orders().find(x=>x.no===e.orderNo)||{}).customer||'';
 function fillLogFilters(){
   const ev=S.events(), keep=id=>el(id).value;
-  const o=keep('lg-order'), h=keep('lg-hub');
+  const c=keep('lg-cust'), st=keep('lg-st'), o=keep('lg-order'), h=keep('lg-hub');
   const uniq=a=>[...new Set(a)].sort((x,y)=>String(x).localeCompare(String(y),undefined,{numeric:true}));
-  el('lg-order').innerHTML='<option value="">전체</option>'+uniq(ev.map(e=>e.orderNo)).map(x=>`<option${x===o?' selected':''}>${x}</option>`).join('');
+  el('lg-cust').innerHTML='<option value="">전체</option>'+uniq(ev.map(custOf).filter(Boolean)).map(x=>`<option${x===c?' selected':''}>${x}</option>`).join('');
+  // 오더 목록: 고객사·진행 상태로 좁히고, 각 오더에 [진행 중]/[도착완료] 표시
+  const ordList=uniq(ev.filter(e=>(!c||custOf(e)===c)&&(!st||(st==='done')===isDoneOrd(e.orderNo))).map(e=>e.orderNo));
+  el('lg-order').innerHTML='<option value="">전체</option>'+ordList.map(x=>`<option value="${x}"${x===o?' selected':''}>${x} [${isDoneOrd(x)?'도착완료':'진행 중'}]</option>`).join('');
   el('lg-hub').innerHTML='<option value="">전체</option>'+uniq(ev.map(e=>e.hub)).map(x=>`<option${x===h?' selected':''}>${x}</option>`).join('');
 }
-function resetLogFilter(){ ['lg-order','lg-hub','lg-ev','lg-from','lg-to'].forEach(i=>el(i).value=''); renderTrackingLog(); }
+function resetLogFilter(){ ['lg-cust','lg-st','lg-order','lg-hub','lg-ev','lg-from','lg-to'].forEach(i=>el(i).value=''); renderTrackingLog(); }
 function renderTrackingLog() {
   const d=dupEvents(), all=S.events();
   // 탭 버튼 배지
@@ -153,11 +162,29 @@ function renderTrackingLog() {
   fillLogFilters();
   const bar=el('tr-dup-bar');
   if(bar) bar.innerHTML = d.length ? `<div class="alert alert-warn" style="margin-bottom:10px;justify-content:space-between;align-items:center"><span>⚠️ 같은 오더·거점·이벤트가 중복 등록된 건이 <b>${d.length}건</b> 있습니다.</span><button class="btn btn-danger btn-sm" onclick="cleanDupEvents()">중복 정리</button></div>` : '';
-  const fo=v('lg-order'), fh=v('lg-hub'), fe=v('lg-ev'), ff=v('lg-from'), ft=v('lg-to');
-  const rows=all.slice().reverse().filter(e=>(!fo||e.orderNo===fo)&&(!fh||e.hub===fh)&&(!fe||e.event===fe)&&(!ff||String(e.time).slice(0,10)>=ff)&&(!ft||String(e.time).slice(0,10)<=ft));
+  const fc=v('lg-cust'), fs=v('lg-st'), fo=v('lg-order'), fh=v('lg-hub'), fe=v('lg-ev'), ff=v('lg-from'), ft=v('lg-to');
+  const rows=all.slice().reverse().filter(e=>(!fc||custOf(e)===fc)&&(!fs||(fs==='done')===isDoneOrd(e.orderNo))&&(!fo||e.orderNo===fo)&&(!fh||e.hub===fh)&&(!fe||e.event===fe)&&(!ff||String(e.time).slice(0,10)>=ff)&&(!ft||String(e.time).slice(0,10)<=ft));
   el('lg-count').textContent=`${rows.length}건 / 전체 ${all.length}건`;
-  el('tracking-log-body').innerHTML = rows.map(e=>`<tr class="lg-row" data-o="${e.orderNo}"><td>${e.time}</td><td><b>${e.orderNo}</b></td><td>${e.customer}</td><td>${e.hub}</td>
-    <td><span class="status ${evCls(e.event)}">${e.event}</span></td><td>${e.person||'-'}</td><td>${e.note||'-'}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">이벤트 없음</td></tr>';
+  el('tracking-log-body').innerHTML = rows.map(e=>`<tr class="lg-row" data-o="${e.orderNo}"><td>${e.time}</td><td><b>${e.orderNo}</b></td><td>${custOf(e)}</td><td>${e.hub}</td>
+    <td><span class="status ${evCls(e.event)}">${e.event}</span></td><td>${e.person||'-'}</td><td>${e.note||'-'}</td><td>${isDoneOrd(e.orderNo)?`<button type="button" class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openCorrect('${e.orderNo}')">정정 열기</button>`:'<span style="color:#9CA3AF">진행 중</span>'}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">이벤트 없음</td></tr>';
+}
+// 도착완료 오더는 처리 화면 목록에서 빠지므로, 이력·증빙 확인/보완이 필요하면 사유·처리자를 남기고 처리 화면에 불러온다(기록 보존: 이미 등록된 이벤트는 바꾸지 않음)
+function openCorrect(no){
+  const o=S.orders().find(x=>x.no===no); if(!o) return;
+  askReason({
+    title:'✏️ 정정 열기',
+    info:`<b>${no}</b> · ${o.customer} — 도착완료 오더입니다.<br>처리 화면에 불러와 이벤트 이력과 사진 증빙을 확인·보완합니다.<br><span style="color:#b91c1c">이미 등록된 이벤트는 기록 보존 원칙에 따라 변경되지 않으며, 열람 사유와 처리자가 이력(알람)에 남습니다.</span>`,
+    reasons:['도착 처리 내용 확인','비고·사진 증빙 보완','고객 문의 대응','이벤트 오입력 확인','기타'],
+    okText:'정정 열기',
+    onOk:r=>{
+      const al=S.alarms();
+      al.push({ id:'ALM-CO-'+Date.now(), time:now(), type:'CORRECT_OPEN', orderNo:no, customer:o.customer||'',
+        message:`[정정 열기] ${no} · 도착완료 오더 처리 화면 열람 · 사유: ${r.reason}${r.detail?' / '+r.detail:''} · 처리자 ${r.by}`, reason:r.reason, detail:r.detail, by:r.by, read:true });
+      S.set('alarms', al);
+      trPin=no; closeLog(); fillTrackingSelects(); el('tr-order').value=no; onOrderPick();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+  });
 }
 function openLog(){ renderTrackingLog(); el('log-modal').classList.remove('hidden'); }
 function closeLog(){ el('log-modal').classList.add('hidden'); }
