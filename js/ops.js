@@ -100,7 +100,7 @@ function dirsHtml(all) {
   const one = d => {
     const open = d.status !== '완료', last = (d.log || []).slice(-1)[0];
     const btns = !open ? `<span class="dir-done">완료 ${E((d.doneTime || '').slice(5, 16))}</span>` : [['접수', d.status === '지시'], ['처리중', d.status !== '처리중'], ['완료', true]].filter(x => x[1]).map(x => `<button class="btn btn-ghost dir-b" onclick="opsDir('${E(d.id)}','${x[0]}')">${x[0]}</button>`).join('');
-    return `<div class="al ${d.priority === '긴급' && open ? '' : open ? 'warn' : 'info'} dir-it"><b>${ic[d.status]} CEO 지시 · ${E(d.priority)} → ${E(d.to)}</b><p>${E(d.ref || '')}${d.customer ? ' · ' + E(d.customer) : ''}<br><em>${E(d.text)}</em><br><small>${E((d.time || '').slice(5, 16))} · 현재 <b>${E(d.status)}</b>${last && last.memo && last.status !== '지시' ? ' · ' + E(last.memo) : ''}</small></p><div class="dir-bt">${btns}</div></div>`;
+    return `<div class="al ${d.priority === '긴급' && open ? '' : open ? 'warn' : 'info'} dir-it"><b>${ic[d.status]} CEO 지시 · ${E(d.priority)} → ${E(d.to)}</b><p>${E(d.ref || '')}${d.customer ? ' · ' + E(d.customer) : ''}${d.ctx ? `<br><small class="dir-ctx">📍 지시 당시(${E((d.ctx.at || '').slice(5, 16))}): ${d.ctx.where ? E(d.ctx.where) + ' · ' : ''}${E(d.ctx.fact || '')}</small>` : ''}<br><em>${E(d.text)}</em><br><small>${E((d.time || '').slice(5, 16))} · 현재 <b>${E(d.status)}</b>${last && last.memo && last.status !== '지시' ? ' · ' + E(last.memo) : ''}</small></p><div class="dir-bt">${btns}</div></div>`;
   };
   const shown = all ? L : L.slice(0, 8);
   return `<div class="dir-hd">📌 CEO 지시 <span class="chip red">미완료 ${dirOpenN()}건</span></div>` + shown.map(one).join('') + (!all && L.length > 8 ? `<div class="empty-n">이전 지시 ${L.length - 8}건은 생략</div>` : '');

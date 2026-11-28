@@ -77,6 +77,12 @@ const CM = (() => {
     sh.innerHTML = html; sh.classList.add('on'); return sh;
   }
   const chips = (arr, cur, fn) => arr.map(v => `<button type="button" class="ms-chip${v === cur ? ' on' : ''}" onclick="${fn}('${v}')">${v}</button>`).join('');
+  const ctxHtml = d => { const c = d.ctx; if (!c) return `<div class="ms-ctx old">📍 지시 당시 상황: <b>${DC.esc(d.ref || '-')}</b> <small>(이전 지시 — 상세 상황 미기록)</small></div>`;
+    return `<div class="ms-ctx"><div class="ms-ctxt">📍 지시 당시 상황 <small>${DC.esc((c.at || d.time || '').slice(5, 16))} 기준</small></div>` +
+      `<div><b>${lvIc[c.level] || ''} ${DC.esc(c.alarm || d.ref || '')}</b></div>` +
+      (c.customer ? `<div>${DC.esc(c.customer)}${c.dest ? ' → ' + DC.esc(c.dest) : ''}${d.orderNo ? ' · ' + DC.esc(d.orderNo) : ''}</div>` : '') +
+      (c.where ? `<div>위치: <b>${DC.esc(c.where)}</b>${c.orderStatus ? ' · 오더 상태 ' + DC.esc(c.orderStatus) : ''}</div>` : '') +
+      (c.fact ? `<div>상황: ${hlFact(c.fact)}</div>` : '') + (c.cause ? `<div>추정 원인: ${DC.esc(c.cause)}</div>` : '') + `</div>`; };
   const logHtml = d => (d.log || []).map(l => `<div class="ms-log">${stIc[l.status] || ''} <b>${DC.esc(l.status)}</b> · ${DC.esc((l.time || '').slice(5, 16))} · ${DC.esc(l.who || '')}${l.memo ? '<br>' + DC.esc(l.memo) : ''}</div>`).join('');
   function open(i) {
     const a = (showAll ? list : list.slice(0, 3))[i]; if (!a) return;
@@ -106,7 +112,9 @@ const CM = (() => {
     keep(); const t = (document.getElementById('cm-text').value || '').trim();
     if (!t) { document.getElementById('cm-text').focus(); document.getElementById('cm-text').placeholder = '지시 내용을 입력하거나 위 문구를 눌러 주세요'; return; }
     const o = ordOf(cur);
-    addDirective({ to: sel.to, priority: sel.pr, text: t, ref: cur.t, orderNo: o ? o.no : '', customer: o ? o.customer : '' });
+    // 지시 당시 상황 스냅샷 — 나중에 "왜 이 지시를 내렸는지" 알 수 있도록 그 시점의 알람·위치·상태를 함께 저장
+    const ctx = { alarm: cur.t, fact: cur.fact || '', cause: cur.cause || '', proposed: cur.act || '', level: cur.lv, where: o ? whereOf(o) : '', orderStatus: o ? o.status : '', customer: o ? o.customer : '', dest: o ? dest(o) : '', at: now() };
+    addDirective({ to: sel.to, priority: sel.pr, text: t, ref: cur.t, orderNo: o ? o.no : '', customer: o ? o.customer : '', ctx });
     render(); drawDetail();
     const b = document.querySelector('#m-sheet .ms-form'); if (b) b.insertAdjacentHTML('afterbegin', '<div class="ms-done">✅ 지시를 보냈습니다. 운영관제 화면에 표시됩니다.</div>'); const dn = document.querySelector('#m-sheet .ms-done'); if (dn) dn.scrollIntoView({ block: 'center' });
   }
@@ -114,7 +122,7 @@ const CM = (() => {
     const L = S.directives().slice().sort((a, b) => (isNewDone(b) - isNewDone(a)) || (b.time || '').localeCompare(a.time || ''));
     const fresh = new Set(L.filter(isNewDone).map(d => d.id));
     sheet(`<div class="ms-box"><div class="ms-h"><b>📌 내 지시 현황</b><button type="button" onclick="CM.close()">닫기 ✕</button></div>` +
-      (L.length ? L.slice(0, 30).map(d => `<div class="ms-r"><div class="ms-dir st-${d.status}"><b>${stIc[d.status]} ${d.status}</b>${fresh.has(d.id) ? ' <span class="mc-newbadge">NEW</span>' : ''} · ${DC.esc(d.to)} · ${DC.esc(d.priority)} · ${DC.esc((d.time || '').slice(5, 16))}<br><b>${DC.esc(d.ref || '')}</b><br>${DC.esc(d.text)}${logHtml(d)}</div></div>`).join('') : '<div class="ms-r">보낸 지시가 없습니다.</div>') + '</div>');
+      (L.length ? L.slice(0, 30).map(d => `<div class="ms-r"><div class="ms-dir st-${d.status}"><b>${stIc[d.status]} ${d.status}</b>${fresh.has(d.id) ? ' <span class="mc-newbadge">NEW</span>' : ''} · ${DC.esc(d.to)} · ${DC.esc(d.priority)} · ${DC.esc((d.time || '').slice(5, 16))}<br>${ctxHtml(d)}<div class="ms-dtext">📌 내 지시: <b>${DC.esc(d.text)}</b></div>${logHtml(d)}</div></div>`).join('') : '<div class="ms-r">보낸 지시가 없습니다.</div>') + '</div>');
   }
   function close() { markSeen(); render(); const sh = document.getElementById('m-sheet'); if (sh) sh.classList.remove('on'); }
   return { render, open, close, pickTo, pickPr, addQ, send, dirs, all() { showAll = true; render(); } };
