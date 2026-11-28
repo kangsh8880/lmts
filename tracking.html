@@ -82,6 +82,8 @@
     <div class="modal-title">📋 이벤트 로그 전체 <button type="button" class="btn btn-ghost btn-sm lg-close" onclick="closeLog()">✕ 닫기</button></div>
     <div id="tr-dup-bar"></div>
     <div class="lg-filter">
+      <div class="form-group"><label>고객사</label><select id="lg-cust" onchange="renderTrackingLog()"></select></div>
+      <div class="form-group"><label>진행 상태</label><select id="lg-st" onchange="renderTrackingLog()"><option value="">전체</option><option value="act">진행 중</option><option value="done">도착완료</option></select></div>
       <div class="form-group"><label>오더</label><select id="lg-order" onchange="renderTrackingLog()"></select></div>
       <div class="form-group"><label>거점</label><select id="lg-hub" onchange="renderTrackingLog()"></select></div>
       <div class="form-group"><label>이벤트</label><select id="lg-ev" onchange="renderTrackingLog()"><option value="">전체</option><option>IN</option><option>OUT</option><option>도착완료</option></select></div>
@@ -91,10 +93,10 @@
     </div>
     <div class="lg-bar"><span id="lg-count"></span><button type="button" class="xl-btn" onclick="exportLog()">⬇ 엑셀</button></div>
     <div class="tbl-wrap"><table id="lg-table" data-xl="skip">
-      <thead><tr><th>처리일시</th><th>오더번호</th><th>고객사</th><th>거점</th><th>이벤트</th><th>처리자</th><th>비고</th></tr></thead>
+      <thead><tr><th>처리일시</th><th>오더번호</th><th>고객사</th><th>거점</th><th>이벤트</th><th>처리자</th><th>비고</th><th>정정</th></tr></thead>
       <tbody id="tracking-log-body"></tbody>
     </table></div>
-    <div class="pop-hint" style="float:none;padding-top:8px">행을 누르면 해당 오더를 선택합니다 · 제목줄을 끌어 이동 · 우측 아래 모서리를 끌어 크기 조절</div>
+    <div class="pop-hint" style="float:none;padding-top:8px">진행 중 오더는 행을 누르면 선택됩니다 · 도착완료 오더는 [정정 열기](사유 필수) · 제목줄을 끌어 이동 · 우측 아래 모서리를 끌어 크기 조절</div>
   </div>
 </div>
 
@@ -165,7 +167,7 @@
 <script src="js/evidence.js?v=20261127"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="js/export.js?v=20261127"></script>
-<script src="js/tracking.js?v=20261127"></script>
+<script src="js/tracking.js?v=20261128"></script>
 <script src="js/label.js?v=20261127"></script>
 <script src="js/hubscan.js?v=20261127"></script>
 </body>
