@@ -135,7 +135,8 @@ const DC = (() => {
     const active = O.filter(o => o.status !== '도착완료');
     const done = O.filter(o => o.status === '도착완료').length;
     const LI = O.map(o => ({ o, ...lateInfo(o) })).filter(x => x.cnt), lateList = LI.filter(x => x.late);
-    const delay = lateList.length, onTimeN = LI.length - delay;
+    const lateTotal = lateList.length, onTimeN = LI.length - lateTotal;
+    const lateActList = lateList.filter(x => !x.done), delay = lateActList.length;   // 지연·알람 = 도착 전 진행 중 지연만(도착완료는 정시납품율에서 이력으로 관리)
     const off = A.filter(a => a.type === 'OFF_ROUTE').length;
     const allLegs = O.flatMap(o => legs(o));
     const meas = allLegs.filter(l => l.act != null);
@@ -158,7 +159,7 @@ const DC = (() => {
       etaWarn: fc.length, etaWarnList: fc, scanMiss: sg.length, scanMissList: sg,
       stockShort: ss.length, stockShortList: ss, packPend: packPend.length, packPendList: packPend, dispNeed: dispNeed.length, dispNeedList: dispNeed, dispNeedLegs: dispNeed.reduce((a, x) => a + x.miss.length, 0),
       orders: O.length, active: active.length, moving: moving().length,   // 이벤트 기준(거점 OUT 후 다음 거점 IN 전) — 우측 '이동 중 운송 현황'과 동일 기준
-      done, delay, off, alarm: delay + off,
+      done, delay, lateTotal, lateActList, off, alarm: delay + off,
       onTime: LI.length ? pct(onTimeN, LI.length) : null, onTimeN, onTimeD: LI.length, onDone: LI.filter(x => x.done && !x.late).length, lateDone: lateList.filter(x => x.done).length, lateAct: lateList.filter(x => !x.done).length, lateList, onTimeList: LI,
       packRate: pct(packed, O.length), packed, packForced: P.filter(p => p.forced).length,
       dispRate: pct(dispatched, O.length), dispatched,
