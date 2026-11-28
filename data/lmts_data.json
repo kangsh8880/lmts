@@ -920,6 +920,15 @@
       "event": "도착완료",
       "person": "",
       "note": ""
+    },
+    {
+      "time": "2026-11-28 10:35",
+      "orderNo": "ORD-261119-004",
+      "customer": "K1 VINA",
+      "hub": "인천국제공항 (ICN)",
+      "event": "IN",
+      "person": "",
+      "note": ""
     }
   ],
   "alarms": [
@@ -1141,5 +1150,5 @@
       "customer": "Samsung Electronics"
     }
   ],
-  "lastUpdated": "2026-11-28 10:33"
+  "lastUpdated": "2026-11-28 10:36"
 }
