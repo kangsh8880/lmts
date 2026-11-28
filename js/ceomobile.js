@@ -1,7 +1,7 @@
 // ══ LMTS ceomobile.js — CEO 휴대폰 첫 화면: 상태 한 줄 + 문제 건 카드(최대 3) + 상세·연락 ══
 // 폭 900px 이하에서만 보임(css/mobile.css). PC 화면에는 영향 없음.
 const CM = (() => {
-  const lvIc = ['🔴', '🟡', '🟢'], cat = a => /재고 부족/.test(a.t) ? 'stock' : /비지정/.test(a.t) ? 'route' : /스캔 누락/.test(a.t) ? 'scan' : 'late';
+  const lvIc = ['🔴', '🟡', '🟢'], cat = a => /^직접 지시/.test(a.t) ? 'free' : /재고 부족/.test(a.t) ? 'stock' : /비지정/.test(a.t) ? 'route' : /스캔 누락/.test(a.t) ? 'scan' : 'late';
   const rank = { late: 0, stock: 1, route: 2, scan: 3 };
   let list = [], showAll = false;
 
@@ -24,7 +24,7 @@ const CM = (() => {
     return out;
   }
   const TO = ['운영관제', '배차', '입고·재고', '고객응대'];
-  const QUICK = { late: ['원인 파악 후 보고', '고객에게 지연 안내', '대체 차량 재배차', '오늘 중 처리'], stock: ['입고 일정 확인', '입고 등록 즉시', '출하 우선순위 조정', '오늘 중 처리'], route: ['이벤트 정정', '경로 변경 확인', '원인 파악 후 보고', '오늘 중 처리'], scan: ['현재 위치 확인', '스캔 보정 등록', '원인 파악 후 보고', '오늘 중 처리'] };
+  const QUICK = { free: ['현황 파악 후 보고', '고객에게 연락', '우선 처리', '오늘 중 처리'], late: ['원인 파악 후 보고', '고객에게 지연 안내', '대체 차량 재배차', '오늘 중 처리'], stock: ['입고 일정 확인', '입고 등록 즉시', '출하 우선순위 조정', '오늘 중 처리'], route: ['이벤트 정정', '경로 변경 확인', '원인 파악 후 보고', '오늘 중 처리'], scan: ['현재 위치 확인', '스캔 보정 등록', '원인 파악 후 보고', '오늘 중 처리'] };
   const defTo = a => cat(a) === 'stock' ? '입고·재고' : cat(a) === 'late' && /표준시간/.test(a.t) ? '배차' : '운영관제';
   const dirsOf = a => S.directives().filter(d => d.ref === a.t);
   const dirOpen = () => S.directives().filter(d => d.status !== '완료');
@@ -61,11 +61,12 @@ const CM = (() => {
       const o = ordOf(a);
       return `<div class="mc-card lv${a.lv}" onclick="CM.open(${i})"><div class="mc-ct">${lvIc[a.lv]} ${DC.esc(a.t)}</div>` +
         (o ? `<div class="mc-cust"><b class="hl-b">${DC.esc(o.customer)}</b>${dest(o) ? ' <span class="hl-g">→ ' + DC.esc(dest(o)) + '</span>' : ''}</div><div class="mc-cs"><b>${DC.esc(whereOf(o))}</b></div>` : '') +
-        `<div class="mc-cf">${hlFact(a.fact)}</div><div class="mc-go">${(() => { const d = dirsOf(a)[0]; return d ? `<span class="mc-dir st-${d.status}">${stIc[d.status]} ${d.status}</span> ` : ''; })()}자세히·조치 ›</div></div>`;
+        `<div class="mc-cf">${hlFact(a.fact)}</div><div class="mc-go">${(() => { const d = dirsOf(a)[0]; return d ? `<span class="mc-dir st-${d.status}">${stIc[d.status]} ${d.status}</span> ` : ''; })()}📌 지시하기 ›</div></div>`;
     }).join('');
     const more = list.length > 3 && !showAll ? `<button type="button" class="mc-more" onclick="CM.all()">나머지 ${list.length - 3}건 더 보기</button>` : '';
     const nd = newDone(), dn = dirOpen().length, tot = S.directives().length;
-    const dirBar = tot ? `<button type="button" class="mc-dirbtn${nd.length ? ' new' : ''}" onclick="CM.dirs()"><span>📌 내 지시 현황 <small>미완료 ${dn}건</small></span>${nd.length ? `<b class="mc-newbadge">✅ 새 완료 ${nd.length}건</b>` : '<i>›</i>'}</button>` : '';
+    const newBtn = `<button type="button" class="mc-dirbtn plain" onclick="CM.newDir()"><span>📌 지시 작성 <small>오더를 골라 직접 지시</small></span><i>›</i></button>`;
+    const dirBar = newBtn + (tot ? `<button type="button" class="mc-dirbtn${nd.length ? ' new' : ''}" onclick="CM.dirs()"><span>📌 내 지시 현황 <small>미완료 ${dn}건</small></span>${nd.length ? `<b class="mc-newbadge">✅ 새 완료 ${nd.length}건</b>` : '<i>›</i>'}</button>` : '');
     const doneNote = nd.length ? `<div class="mc-donenote" onclick="CM.dirs()">✅ 지시하신 ${nd.length}건이 완료되었습니다. <b>결과 보기 ›</b></div>` : '';
     host.innerHTML = doneNote + `<div class="mc-banner lv${lv}"><div class="mc-bi">${lvIc[lv]}</div><div><div class="mc-bt">${head[0]}</div><div class="mc-bs">${head[1]}</div></div></div>` + chips + dirBar +
       (cards ? `<div class="mc-cards">${cards}</div>${more}` : `<div class="mc-ok">진행 ${K.active}건 · 운송 중 ${K.moving}건 · 정시납품율 ${DC.fmtPct(K.onTime) == null ? '-' : DC.fmtPct(K.onTime) + '%'}<br>지금 결정하실 일은 없습니다.</div>`) +
@@ -94,7 +95,7 @@ const CM = (() => {
     const a = cur, o = ordOf(a), ph = phones(o), ds = dirsOf(a);
     sheet(`<div class="ms-box"><div class="ms-h"><b>${lvIc[a.lv]} ${DC.esc(a.t)}</b><button type="button" onclick="CM.close()">닫기 ✕</button></div>` +
       (o ? `<div class="ms-r ms-cust"><span>고객 · 최종 도착</span><b class="hl-b big">${DC.esc(o.customer)}</b>${dest(o) ? ' <span class="hl-g">→ ' + DC.esc(dest(o)) + '</span>' : ''}</div><div class="ms-r"><span>현재 위치</span><b>${DC.esc(whereOf(o))}</b></div>` : '') +
-      `<div class="ms-r"><span>상황</span>${hlFact(a.fact)}</div><div class="ms-r ms-cause"><span>추정 원인</span>${hlCause(a.cause)}</div><div class="ms-r ms-act"><span>권장 조치</span>${hlAct(a.act)}</div>` +
+      `<div class="ms-r"><span>상황</span>${hlFact(a.fact)}</div>${a.cause ? `<div class="ms-r ms-cause"><span>추정 원인</span>${hlCause(a.cause)}</div>` : ''}${a.act ? `<div class="ms-r ms-act"><span>권장 조치</span>${hlAct(a.act)}</div>` : ''}` +
       (ds.length ? `<div class="ms-r"><span>보낸 지시</span>${ds.map(d => `<div class="ms-dir st-${d.status}"><b>${stIc[d.status]} ${d.status}</b> · ${DC.esc(d.to)} · ${DC.esc(d.priority)}<br>${DC.esc(d.text)}${logHtml(d)}</div>`).join('')}</div>` : '') +
       `<div class="ms-form"><div class="ms-ft">📌 조치 지시 보내기</div>` +
       `<div class="ms-fl">누구에게</div><div class="ms-chips" id="cm-to">${chips(TO, sel.to, 'CM.pickTo')}</div>` +
@@ -124,6 +125,19 @@ const CM = (() => {
     sheet(`<div class="ms-box"><div class="ms-h"><b>📌 내 지시 현황</b><button type="button" onclick="CM.close()">닫기 ✕</button></div>` +
       (L.length ? L.slice(0, 30).map(d => `<div class="ms-r"><div class="ms-dir st-${d.status}"><b>${stIc[d.status]} ${d.status}</b>${fresh.has(d.id) ? ' <span class="mc-newbadge">NEW</span>' : ''} · ${DC.esc(d.to)} · ${DC.esc(d.priority)} · ${DC.esc((d.time || '').slice(5, 16))}<br>${ctxHtml(d)}<div class="ms-dtext">📌 내 지시: <b>${DC.esc(d.text)}</b></div>${logHtml(d)}</div></div>`).join('') : '<div class="ms-r">보낸 지시가 없습니다.</div>') + '</div>');
   }
+  // 문제 카드 없이 직접 지시 — 오더를 고르면 그 오더의 현재 상황을 '지시 당시 상황'으로 자동 기록
+  function newDir() {
+    const L = S.orders().filter(o => o.status !== '도착완료');
+    sheet(`<div class="ms-box"><div class="ms-h"><b>📌 지시 작성</b><button type="button" onclick="CM.close()">닫기 ✕</button></div>` +
+      (L.length ? `<div class="ms-fl">지시할 오더 선택</div><select id="cm-ord" class="ms-sel">${L.map(o => `<option value="${DC.esc(o.no)}">${DC.esc(o.no)} · ${DC.esc(o.customer)} [${DC.esc(o.status)}]</option>`).join('')}</select>` +
+        `<button type="button" class="btn btn-primary ms-send" onclick="CM.pickOrd()">다음 ›</button>` : '<div class="ms-r">진행 중인 오더가 없습니다.</div>') + '</div>');
+  }
+  function pickOrd() {
+    const o = S.orders().find(x => x.no === document.getElementById('cm-ord').value); if (!o) return;
+    cur = { lv: 2, t: `직접 지시 · ${o.no}`, fact: `${o.customer}${dest(o) ? ' → ' + dest(o) : ''} · 오더 상태 ${o.status} · ${whereOf(o)}`, cause: '', act: '', go: 'order.html' };
+    sel = { to: '운영관제', pr: '오늘', text: '' };
+    drawDetail();
+  }
   function close() { markSeen(); render(); const sh = document.getElementById('m-sheet'); if (sh) sh.classList.remove('on'); }
-  return { render, open, close, pickTo, pickPr, addQ, send, dirs, all() { showAll = true; render(); } };
+  return { render, open, close, pickTo, pickPr, addQ, send, dirs, newDir, pickOrd, all() { showAll = true; render(); } };
 })();
